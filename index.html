@@ -238,6 +238,8 @@
             <div class="section">
                 <label>Discord Webhook URL:</label>
                 <input type="url" id="discordWebhook" placeholder="https://discord.com/api/webhooks/...">
+                <label>Webhook Code (9918):</label>
+                <input type="password" id="webhookCode" placeholder="Enter code">
                 <div class="button-group">
                     <button onclick="window.QueueHunter.testDiscord()">📬 Test Discord</button>
                 </div>
@@ -293,13 +295,13 @@
             'https://api.codetabs.com/v1/proxy?quest='
         ];
         let blacklisted = new Set();
-        let webhookUrl = '';
         let logEntries = [];
         let retryCount = 0;
         const maxRetries = 3;
         let alarmActive = false;
         let alertAudio = null;
         let vibrateInterval = null;
+        const DISCORD_CODE = "9918";
 
         window.QueueHunter.requestLock = async function() {
             if ('locks' in navigator) {
@@ -440,11 +442,18 @@
         };
 
         window.QueueHunter.sendDiscord = async function(title, desc, color = 0xFFD700) {
-            webhookUrl = document.getElementById('discordWebhook')?.value || '';
+            const webhookUrl = document.getElementById('discordWebhook')?.value || '';
+            const webhookCode = document.getElementById('webhookCode')?.value || '';
+            
             if (!webhookUrl) {
-                window.QueueHunter.updateUI('Discord skipped: No webhook');
+                window.QueueHunter.updateUI('Discord skipped: No webhook URL provided.');
                 return;
             }
+            if (webhookCode !== DISCORD_CODE) {
+                window.QueueHunter.updateUI('Discord skipped: Incorrect webhook code.');
+                return;
+            }
+
             const embed = { title, description: desc, color, footer: { text: 'Queue Hunter' } };
             try {
                 await fetch(webhookUrl, {
