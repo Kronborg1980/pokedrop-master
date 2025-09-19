@@ -195,21 +195,35 @@
     }
 
     // --- EMAIL SENDING LOGIC (BACKEND REQUIRED) ---
-    // This function calls a Firebase Cloud Function to send emails.
-    // You must deploy a function named 'sendEmail' for this to work.
     async function triggerEmail(type, data = {}) {
         if (!currentUser) return alert("Please sign in first.");
-        console.log(`Pretending to call a cloud function for a ${type} email.`);
         
-        // In a real app, you would replace the alert with a fetch call:
-        // const functionUrl = 'YOUR_CLOUD_FUNCTION_URL_HERE';
-        // await fetch(functionUrl, {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify({ type, data, userId: currentUser.uid })
-        // });
+        // ⬇️ *** PASTE YOUR DEPLOYED FUNCTION URL HERE *** ⬇️
+        const functionUrl = 'YOUR_CLOUD_FUNCTION_URL_HERE';
 
-        alert(`Email feature requires backend setup. A '${type}' email would be sent now.`);
+        if (functionUrl === 'YOUR_CLOUD_FUNCTION_URL_HERE') {
+            return alert("Backend not configured. Please deploy the Cloud Function and add its URL to the script.");
+        }
+        
+        try {
+            console.log(`Calling cloud function for '${type}' email...`);
+            const response = await fetch(functionUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ type, data, userId: currentUser.uid })
+            });
+            if (response.ok) {
+                console.log("Email sent successfully!");
+                alert(`'${type}' email sent successfully! Check your inbox.`);
+            } else {
+                const errorText = await response.text();
+                console.error("Failed to send email:", errorText);
+                alert(`Failed to send email: ${errorText}`);
+            }
+        } catch (error) {
+            console.error("Error calling cloud function:", error);
+            alert("An error occurred while trying to send the email.");
+        }
     }
 
     window.testEmail = () => triggerEmail('test');
@@ -221,7 +235,7 @@
     // State Vars
     let intervalId = null, startTime = null, consecFails = 0, failThresh = 2, checkFreq = 5 * 60 * 1000;
     let lastProducts = JSON.parse(localStorage.getItem('last_products') || '[]');
-    let proxies = ['https://corsproxy.io/?', 'https://api.allorigins.win/get?url=']; // Reduced to more reliable ones
+    let proxies = ['https://corsproxy.io/?', 'https://api.allorigins.win/get?url='];
     let blacklisted = new Set();
     let isHunting = false;
 
@@ -235,9 +249,9 @@
       document.getElementById('details').textContent = details;
       
       const statusBox = document.getElementById('status');
-      statusBox.classList.remove('alert-zap'); // Remove class first
+      statusBox.classList.remove('alert-zap');
       if (newProds > 0 || /drop|new|queue/i.test(status)) {
-        setTimeout(() => statusBox.classList.add('alert-zap'), 10); // Add after a tick
+        setTimeout(() => statusBox.classList.add('alert-zap'), 10);
       }
       updateRuntime();
     }
@@ -269,7 +283,7 @@
     // Play Poké Cry
     function playCry() {
       const audio = document.getElementById('pikacry');
-      audio.src = 'https://raw.githubusercontent.com/PokeAPI/audio/master/cries/2021/25.mp3'; // Pikachu cry
+      audio.src = 'https://raw.githubusercontent.com/PokeAPI/audio/master/cries/2021/25.mp3';
       audio.play().catch(e => console.error("Audio play failed. User interaction may be required first.", e));
     }
 
@@ -282,7 +296,6 @@
           const res = await fetch(`${p}${encodeURIComponent(url)}`, { signal: ctrl.signal, headers: { 'X-Requested-With': 'XMLHttpRequest' } });
           if (res.ok) return p;
         } catch {}
-        console.warn(`Proxy ${p} failed, blacklisting for 5 mins.`);
         blacklisted.add(p);
         setTimeout(() => blacklisted.delete(p), 300000);
       }
@@ -302,7 +315,6 @@
     
     function detectNewProducts(currentProds) {
         if (lastProducts.length === 0 && currentProds.length > 0) {
-            // First successful fetch, don't trigger drop
             lastProducts = currentProds;
             localStorage.setItem('last_products', JSON.stringify(lastProducts));
             return { count: 0, new: [] };
@@ -341,9 +353,9 @@
               const queuePos = extractQueue(text, res.url);
               status = `Queue Detected! 🚦`;
               details = `Position: ${queuePos || 'Unknown'}. Attempting to join...`;
-              if (!isConsec) window.location.href = 'https://www.pokemoncenter.com/'; // Auto-redirect
+              if (!isConsec) window.location.href = 'https://www.pokemoncenter.com/';
               foundSomething = true;
-            } else if (text.length > 2000) { // Site is accessible
+            } else if (text.length > 2000) {
                 const currentProducts = extractProducts(text);
                 newProductsResult = detectNewProducts(currentProducts);
                 if (newProductsResult.count > 0) {
@@ -351,10 +363,10 @@
                     details = `${newProductsResult.count} new product(s): ${newProductsResult.new.map(np => np.title).join(', ')}`;
                     playCry();
                 } else {
-                    status = 'Store Running Normal ✅';
+                    status = 'All clear, nothing to hunt';
                     details = 'No new products found on this check.';
                 }
-                foundSomething = true; // Mark as successful check
+                foundSomething = true;
             }
           }
         } catch (e) { console.error(e); }
@@ -365,12 +377,11 @@
         status = 'Check Failed 🚫';
         details = 'Could not access the site. Might be down or blocked.';
       } else {
-        consecFails = 0; // Reset fails on any successful check
+        consecFails = 0;
       }
       
       updateUI(status, details, newProductsResult.count);
 
-      // Alert if drop or queue
       if (status.includes('DROP') || status.includes('Queue')) {
         sendDiscord('🚨 PokeDrop Alert!', details);
         window.sendDropAlertEmail(details);
@@ -384,10 +395,10 @@
       startTime = Date.now();
       document.getElementById('startBtn').classList.add('hidden');
       document.getElementById('stopBtn').classList.remove('hidden');
-      document.getElementById('mainControls').disabled = true; // Lock controls while running
+      document.getElementById('mainControls').disabled = true;
 
-      await checkSite(); // Initial check
-      intervalId = setInterval(checkSite, checkFreq + Math.random() * 20000 - 10000); // Randomize timing slightly
+      await checkSite();
+      intervalId = setInterval(checkSite, checkFreq + Math.random() * 20000 - 10000);
       updateUI('Hunting... 🕵️');
     }
 
@@ -398,7 +409,7 @@
       isHunting = false;
       document.getElementById('startBtn').classList.remove('hidden');
       document.getElementById('stopBtn').classList.add('hidden');
-      document.getElementById('mainControls').disabled = false; // Unlock controls
+      document.getElementById('mainControls').disabled = false;
       updateUI('Hunt Paused 🛑', 'Monitoring has been stopped.');
     }
 
