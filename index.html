@@ -134,6 +134,11 @@
             overflow: hidden;
             flex-grow: 1;
         }
+        
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
 
         button:hover {
             transform: translateY(-2px);
@@ -530,6 +535,10 @@
                 window.QueueHunter.updateUI('Discord skipped: Incorrect webhook code.');
                 return;
             }
+            const testBtn = document.getElementById('testDiscordBtn');
+            const originalText = testBtn.textContent;
+            testBtn.textContent = 'Ping Sent!';
+            setTimeout(() => testBtn.textContent = originalText, 2000);
 
             const embed = { title, description: desc, color, footer: { text: 'Queue Hunter' } };
             try {
