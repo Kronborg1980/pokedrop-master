@@ -41,7 +41,7 @@
     }
     @keyframes evolveIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     .status-pokedex { background: linear-gradient(145deg, #FF9A56, #FF6B6B); color: white; padding: 1rem; border-radius: 15px; margin: 1rem 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
-    button { background: linear-gradient(145deg, #4ECDC4, #44A08D); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 50px; font-weight: bold; cursor: pointer; transition: all 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+    button { background: linear-gradient(145deg, #4ECDC4, #44A08D); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 50px; font-weight: bold; cursor: pointer; transition: all 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.2); margin: 0.5rem 0; }
     button:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
     button:disabled { background: #CCC; transform: none; }
     input, select { border: 2px solid #4ECDC4; border-radius: 10px; padding: 0.5rem; width: 100%; margin: 0.5rem 0; }
@@ -66,16 +66,19 @@
     <h1 style="text-align: center; color: #FF6B6B; font-size: 1.8rem; margin-bottom: 1rem;">🌀 PokeDrop Master</h1>
     <p style="text-align: center; color: #666; margin-bottom: 1rem;">Hunt drops like a pro trainer! Monitors new releases, queues, & auto-joins lines.</p>
 
+    <!-- Firebase Sign-In & Email Section -->
+    <button id="signInBtn" onclick="signInAnonymously()" style="background: #4CAF50;">Sign In Anonymously</button>
+    <div id="emailSection" class="hidden">
+      <label>Your Email for Alerts:</label>
+      <input type="email" id="emailInput" placeholder="user@example.com">
+      <button onclick="subscribeEmail(document.getElementById('emailInput').value)">Subscribe</button>
+      <button onclick="testEmail()">Test Email</button>
+    </div>
+
     <!-- Discord Setup -->
     <label>Discord Webhook URL (for alerts):</label>
-    <input type="url" id="discordWebhook" placeholder="https://discord.com/api/webhooks/..." value="">
+    <input type="url" id="discordWebhook" placeholder="https://discord.com/api/webhooks/...">
     <button onclick="testDiscord()">Test Discord Ping</button>
-
-    <!-- Emails (Fallback, Local Only) -->
-    <label>Emails (mailto fallback):</label>
-    <input type="email" id="emailInput" placeholder="your@email.com">
-    <button onclick="addEmail()">Add Email</button>
-    <div id="emailsList"></div>
 
     <!-- Options -->
     <label>Check every: <span id="freqVal">5</span> mins</label>
@@ -101,26 +104,131 @@
 
   <!-- Audio for Cries -->
   <audio id="pikacry" preload="auto">
-    <source src="https://pokeapi.co/api/v2/pokemon/25" type="audio/mpeg"> <!-- Fallback to beep if API fails -->
+    <source src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" type="audio/mpeg"> <!-- Fallback -->
   </audio>
+
+  <!-- Firebase SDKs -->
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js';
+    import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js';
+    import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js';
+    import { getFirestore, collection, doc, setDoc, getDocs, query } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js';
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCAXDkAaED4PqSW3lgpXwPMbOHnoq-5ybo",
+      authDomain: "pokemoncentermail.firebaseapp.com",
+      projectId: "pokemoncentermail",
+      storageBucket: "pokemoncentermail.firebasestorage.app",
+      messagingSenderId: "823572131347",
+      appId: "1:823572131347:web:13db2feafe741d5e5459e6",
+      measurementId: "G-M55TXWL2YQ"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Global vars for app
+    let currentUser = null;
+
+    // Sign-in function
+    window.signInAnonymously = async () => {
+      try {
+        const result = await signInAnonymously(auth);
+        currentUser = result.user;
+        console.log('Signed in as:', currentUser.uid);
+        alert('Signed in! Add your email to subscribe.');
+        // Update UI: Show email input, hide sign-in button
+        document.getElementById('signInBtn').classList.add('hidden');
+        document.getElementById('emailSection').classList.remove('hidden');
+      } catch (error) {
+        console.error('Sign-in error:', error);
+      }
+    };
+
+    // Listen for auth changes
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user;
+      if (user) {
+        // User signed in—load their subscription
+        loadSubscription();
+      } else {
+        // Show sign-in prompt
+        document.getElementById('signInBtn').classList.remove('hidden');
+        document.getElementById('emailSection').classList.add('hidden');
+      }
+    });
+
+    // Add/update email subscription
+    window.subscribeEmail = async (email) => {
+      if (!currentUser) return alert('Sign in first!');
+      if (!email || !/\S+@\S+\.\S+/.test(email)) return alert('Enter a valid email!');
+      try {
+        await setDoc(doc(db, 'subscribers', currentUser.uid), {
+          email: email,
+          subscribed: true,
+          timestamp: new Date()
+        });
+        alert('Subscribed! You\'ll get alerts on drops.');
+      } catch (error) {
+        console.error('Subscription error:', error);
+      }
+    };
+
+    // Load user's subscription
+    async function loadSubscription() {
+      try {
+        const docSnap = await getDoc(doc(db, 'subscribers', currentUser.uid));
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          document.getElementById('emailInput').value = data.email;
+        }
+      } catch (error) {
+        console.error('Load error:', error);
+      }
+    }
+
+    // Fetch all subscribers for notifications (call this on drop detect)
+    window.getAllSubscribers = async () => {
+      if (!currentUser) return [];
+      try {
+        const q = query(collection(db, 'subscribers'));
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map(d => d.data().email).filter(email => email);
+      } catch (error) {
+        console.error('Query error:', error);
+        return [];
+      }
+    };
+  </script>
 
   <script>
     // State Vars (Cleaned - No Bloat)
     let intervalId = null, startTime = null, consecFails = 0, failThresh = 2, checkFreq = 5 * 60 * 1000;
-    let emails = JSON.parse(localStorage.getItem('pokedrop_emails') || '[]');
     let lastProducts = JSON.parse(localStorage.getItem('last_products') || '[]'); // For drop detection
     let proxies = ['https://corsproxy.io/?', 'https://api.allorigins.win/get?url=', 'https://thingproxy.freeboard.io/fetch/', 'https://cors-anywhere.herokuapp.com/', 'https://api.codetabs.com/v1/proxy?quest=']; // Rotated list
     let blacklisted = new Set();
     let webhookUrl = '';
+    let isHunting = false;
 
     // UI Helpers
     function updateUI(status, details = '', newProds = 0) {
-      document.getElementById('statusText').textContent = status;
+      const statusTextEl = document.getElementById('statusText');
+      statusTextEl.textContent = status;
+      if (isHunting && newProds === 0 && success) {
+        statusTextEl.textContent = 'Store Running Normal - Nothing to Hunt';
+      }
       document.getElementById('lastCheck').textContent = new Date().toLocaleTimeString();
       document.getElementById('consec').textContent = consecFails;
       document.getElementById('newCount').textContent = newProds;
       document.getElementById('details').textContent = details;
-      if (newProds > 0 || /drop|new|accessible/i.test(status)) document.getElementById('status').classList.add('alert-zap');
+      if (newProds > 0 || /drop|new|accessible/i.test(status)) {
+        document.getElementById('status').classList.add('alert-zap');
+      }
       updateRuntime();
     }
     function updateRuntime() {
@@ -128,21 +236,16 @@
     }
     setInterval(updateRuntime, 1000);
 
-    // Email Management
-    function addEmail() {
-      const email = document.getElementById('emailInput').value.trim();
-      if (email && /\S+@\S+\.\S+/.test(email)) {
-        emails.push(email);
-        localStorage.setItem('pokedrop_emails', JSON.stringify(emails));
-        renderEmails();
-        document.getElementById('emailInput').value = '';
-      }
+    // Test Email (Fetches subscribers and sends test via mailto)
+    async function testEmail() {
+      const allEmails = await getAllSubscribers();
+      if (allEmails.length === 0) return alert('No subscribers yet! Add an email first.');
+      const testMsg = '🧪 Test Alert from PokeDrop Master! Everything is wired up.';
+      allEmails.forEach(email => {
+        window.location.href = `mailto:${email}?subject=Test Alert&body=${encodeURIComponent(testMsg)}`;
+      });
+      alert(`Test sent to ${allEmails.length} email(s)! Check your inboxes.`);
     }
-    function renderEmails() {
-      document.getElementById('emailsList').innerHTML = emails.map(e => `<div>${e} <button onclick="removeEmail('${e}')">Remove</button></div>`).join('') || '<p>No emails added.</p>';
-    }
-    function removeEmail(email) { emails = emails.filter(e => e !== email); localStorage.setItem('pokedrop_emails', JSON.stringify(emails)); renderEmails(); }
-    renderEmails(); // Load on start
 
     // Discord Test/Send
     async function sendDiscord(title, desc, color = 0xFFD700) {
@@ -160,7 +263,11 @@
 
     // Fallback Email (mailto)
     function sendMailto(subject, body) {
-      emails.forEach(email => window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+      getAllSubscribers().then(allEmails => {
+        allEmails.forEach(email => {
+          window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        });
+      });
     }
 
     // Play Poké Cry (Pikachu on alert)
@@ -205,11 +312,13 @@
       return { count, new: newOnes };
     }
 
+    let success = false; // Global for status update
+
     // Main Check Function (Upgraded for Drops)
     async function checkSite(isConsec = false) {
       const specific = document.getElementById('specificUrl').value || '';
       const urls = specific ? [specific] : ['https://www.pokemoncenter.com/', 'https://www.pokemoncenter.com/category/new-releases', 'https://www.pokemoncenter.com/category/trading-card-game'];
-      let success = false, queuePos = null, products = [], details = '';
+      let queuePos = null, products = [], details = '';
 
       for (let url of urls) {
         const proxy = await getHealthyProxy(url);
@@ -227,8 +336,8 @@
               break;
             } else if (/pokemoncenter\.com/i.test(finalUrl) && text.length > 2000) { // Accessible + content
               products = extractProducts(text);
-              const { count, new: newProds } = detectNewProducts(products);
-              details = count > 0 ? `DROP DETECTED! ${count} new product(s): ${newProds.map(np => np.title).join(', ')}` : 'Shop open, no new drops.';
+              const { count } = detectNewProducts(products);
+              details = count > 0 ? `DROP DETECTED! ${count} new product(s): ${detectNewProducts(products).new.map(np => np.title).join(', ')}` : 'Store running normal, no new drops.';
               success = true;
               if (count > 0) playCry();
               break;
@@ -238,7 +347,7 @@
       }
 
       if (!success && !queuePos) details = 'Check failed (proxies down?).';
-      updateUI(success ? (products.length > 0 ? 'Drop Alert! 🏆' : 'Shop Open 🔓') : 'Queued/Closed 🚫', details, detectNewProducts(products).count);
+      updateUI(success ? (products.length > 0 ? 'Drop Alert! 🏆' : 'Store Running Normal - Nothing to Hunt') : 'Queued/Closed 🚫', details, detectNewProducts(products).count);
       logCheck(success ? 'Success' : 'Fail', details, queuePos);
 
       // Alert if drop or queue
@@ -262,7 +371,8 @@
 
     // Start/Stop
     async function startMonitoring() {
-      if (emails.length === 0 && !document.getElementById('discordWebhook').value) return alert('Add a Discord webhook or email first!');
+      if (!currentUser) return alert('Sign in anonymously first to enable notifications!');
+      isHunting = true;
       consecFails = 0;
       startTime = Date.now();
       await checkSite();
@@ -279,21 +389,24 @@
       intervalId = null;
       startTime = null;
       consecFails = 0;
+      isHunting = false;
       document.getElementById('startBtn').classList.remove('hidden');
       document.getElementById('stopBtn').classList.add('hidden');
       updateUI('Hunt Paused 🛑');
     }
 
     // Sliders
-    document.getElementById('freqSlider').oninput = e => { checkFreq = e.target.value * 60 * 1000; document.getElementById('freqVal').textContent = e.target.value; };
-    document.getElementById('threshSlider').oninput = e => { failThresh = e.target.value; document.getElementById('threshVal').textContent = e.target.value; };
+    document.getElementById('freqSlider').oninput = e => { checkFreq = e.target.value * 60 * 1000; document.getElementById('freqVal').textContent = e.target.value; localStorage.setItem('freq', e.target.value); };
+    document.getElementById('threshSlider').oninput = e => { failThresh = e.target.value; document.getElementById('threshVal').textContent = e.target.value; localStorage.setItem('thresh', e.target.value); };
 
     // Logging (Simple Console for Now)
     function logCheck(status, details, queue) { console.log(`${new Date().toISOString()}: ${status} - ${details} (Queue: ${queue})`); }
 
     // Load Saved
     document.getElementById('freqSlider').value = localStorage.getItem('freq') || 5;
+    document.getElementById('freqVal').textContent = document.getElementById('freqSlider').value;
     document.getElementById('threshSlider').value = localStorage.getItem('thresh') || 2;
+    document.getElementById('threshVal').textContent = document.getElementById('threshSlider').value;
   </script>
 </body>
 </html>
