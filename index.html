@@ -8,7 +8,7 @@
   <style>
     body {
       font-family: 'Roboto', sans-serif;
-      background: url('https://images4.alphacoders.com/133/1332057.png') no-repeat center center fixed;
+      background: url('https://images4.alphacoders.com/133/1332057.png') no-repeat center center fixed, linear-gradient(135deg, #ff5e62, #6b7280);
       background-size: cover;
       margin: 0;
       min-height: 100vh;
@@ -24,7 +24,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2));
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.1));
       z-index: -1;
     }
     .floating-poke {
@@ -32,6 +32,7 @@
       opacity: 0.9;
       filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
       z-index: 5;
+      visibility: visible;
     }
     .pinsir { width: 100px; animation: snap 4s ease-in-out infinite; }
     .magikarp { width: 90px; animation: splash 3s ease-in-out infinite; }
@@ -309,25 +310,46 @@
     // Floating Pokémon Movement (Below Dashboard)
     const pokemons = document.querySelectorAll('.floating-poke');
     function movePokemon() {
-      const pokedex = document.querySelector('.pokedex').getBoundingClientRect();
+      const pokedex = document.querySelector('.pokedex')?.getBoundingClientRect() || { bottom: 0, left: 0, right: window.innerWidth };
       const margin = 20;
       const minY = pokedex.bottom + margin;
+      const maxY = window.innerHeight - 20;
       pokemons.forEach(poke => {
-        let x = parseFloat(poke.dataset.x || (Math.random() * (window.innerWidth - poke.offsetWidth)));
-        let y = parseFloat(poke.dataset.y || (minY + Math.random() * (window.innerHeight - minY - poke.offsetHeight)));
+        let x = parseFloat(poke.dataset.x);
+        let y = parseFloat(poke.dataset.y);
         let angle = parseFloat(poke.dataset.angle || (Math.random() * 2 * Math.PI));
         const speed = 0.005 + Math.random() * 0.005;
+
+        // Initialize position if not set or invalid
+        if (isNaN(x) || isNaN(y) || x < 0 || x > window.innerWidth - poke.offsetWidth || y < minY || y > maxY) {
+          x = Math.random() * (window.innerWidth - poke.offsetWidth);
+          y = minY + Math.random() * (maxY - minY - poke.offsetHeight);
+          angle = Math.random() * 2 * Math.PI;
+          poke.dataset.x = x;
+          poke.dataset.y = y;
+          poke.dataset.angle = angle;
+          poke.dataset.lastChange = Date.now();
+          poke.style.visibility = 'visible';
+        }
+
+        // Change direction periodically
         if (!poke.dataset.lastChange || Date.now() - parseFloat(poke.dataset.lastChange) > (5000 + Math.random() * 5000)) {
           angle = Math.random() * 2 * Math.PI;
           poke.dataset.angle = angle;
           poke.dataset.lastChange = Date.now();
         }
+
+        // Update position
         x += Math.cos(angle) * speed * 100;
         y += Math.sin(angle) * speed * 100;
+
+        // Keep within bounds
         if (x < 0) x = window.innerWidth - poke.offsetWidth;
         if (x > window.innerWidth - poke.offsetWidth) x = 0;
         if (y < minY) y = minY;
-        if (y > window.innerHeight - poke.offsetHeight) y = minY;
+        if (y > maxY - poke.offsetHeight) y = minY;
+
+        // Apply position
         poke.style.left = `${x}px`;
         poke.style.top = `${y}px`;
         poke.dataset.x = x;
