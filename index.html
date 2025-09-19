@@ -6,7 +6,6 @@
   <title>PokeDrop Master - Ultimate Pokémon Center Drop Hunter</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    /* Wild Pokémon Theme: Sky gradients, floating elements, evolutions */
     body {
       font-family: 'Nunito', sans-serif;
       background: linear-gradient(135deg, #87CEEB 0%, #98D8E8 25%, #90EE90 50%, #ADD8E6 75%, #FFB6C1 100%);
@@ -42,17 +41,13 @@
     @keyframes evolveIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     .status-pokedex { background: linear-gradient(145deg, #FF9A56, #FF6B6B); color: white; padding: 1rem; border-radius: 15px; margin: 1rem 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
     button { background: linear-gradient(145deg, #4ECDC4, #44A08D); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 50px; font-weight: bold; cursor: pointer; transition: all 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.2); margin: 0.5rem 0; }
-    button:hover:not(:disabled) { transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
-    button:disabled { background: #CCC; transform: none; box-shadow: none; cursor: not-allowed; }
-    input, select { border: 2px solid #4ECDC4; border-radius: 10px; padding: 0.5rem; width: calc(100% - 1rem); margin: 0.5rem 0; }
-    input:disabled, button:disabled { opacity: 0.6; }
+    button:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+    button:disabled { background: #CCC; transform: none; cursor: not-allowed; }
+    input, select { border: 2px solid #4ECDC4; border-radius: 10px; padding: 0.5rem; width: 100%; margin: 0.5rem 0; }
     input[type="range"]::-webkit-slider-thumb { background: #FF6B6B; border-radius: 50%; }
     .alert-zap { animation: zap 0.5s ease; }
     @keyframes zap { 0%, 100% { border-color: #FFD700; box-shadow: 0 0 20px #FFD700; } 50% { border-color: #FF6B6B; box-shadow: 0 0 30px #FF6B6B; } }
     .hidden { display: none; }
-    fieldset { border: none; padding: 0; margin: 0; }
-    fieldset:disabled { opacity: 0.5; }
-    /* Responsive */
     @media (max-width: 480px) { .main-card { margin: 1rem; padding: 1rem; } .floating-poke { width: 50px; } }
   </style>
 </head>
@@ -69,7 +64,8 @@
     <h1 style="text-align: center; color: #FF6B6B; font-size: 1.8rem; margin-bottom: 1rem;">🌀 PokeDrop Master</h1>
     <p style="text-align: center; color: #666; margin-bottom: 1rem;">Hunt drops like a pro trainer! Monitors new releases, queues, & auto-joins lines.</p>
 
-    <button id="signInBtn" onclick="signInAnonymously()" style="background: #4CAF50; width: 100%;">Sign In Anonymously to Start</button>
+    <!-- Firebase Sign-In & Email Section -->
+    <button id="signInBtn" onclick="signInAnonymously()" style="background: #4CAF50;">Sign In Anonymously</button>
     <div id="emailSection" class="hidden">
       <label>Your Email for Alerts:</label>
       <input type="email" id="emailInput" placeholder="user@example.com">
@@ -77,42 +73,52 @@
       <button onclick="testEmail()">Test Email</button>
     </div>
 
-    <fieldset id="mainControls" disabled>
-      <label>Discord Webhook URL (for alerts):</label>
-      <input type="url" id="discordWebhook" placeholder="https://discord.com/api/webhooks/...">
-      <button onclick="testDiscord()">Test Discord Ping</button>
+    <!-- SendGrid API Key -->
+    <label>SendGrid API Key (for auto-emails):</label>
+    <input type="password" id="sendgridApiKey" placeholder="Paste your SendGrid API key">
+    <button onclick="saveApiKey()">Save API Key</button>
 
-      <label>Check every: <span id="freqVal">5</span> mins</label>
-      <input type="range" id="freqSlider" min="1" max="30" value="5">
-      <label>Alert after: <span id="threshVal">2</span> fails</label>
-      <input type="range" id="threshSlider" min="1" max="5" value="2">
-      <label>Specific Product URL (optional):</label>
-      <input type="url" id="specificUrl" placeholder="https://www.pokemoncenter.com/product/...">
-    </fieldset>
+    <!-- Discord Setup -->
+    <label>Discord Webhook URL (for alerts):</label>
+    <input type="url" id="discordWebhook" placeholder="https://discord.com/api/webhooks/...">
+    <button onclick="testDiscord()">Test Discord Ping</button>
 
+    <!-- Options -->
+    <label>Check every: <span id="freqVal">5</span> mins</label>
+    <input type="range" id="freqSlider" min="1" max="30" value="5">
+    <label>Alert after: <span id="threshVal">2</span> fails</label>
+    <input type="range" id="threshSlider" min="1" max="5" value="2">
+    <label>Specific Product URL (optional):</label>
+    <input type="url" id="specificUrl" placeholder="https://www.pokemoncenter.com/product/...">
+
+    <!-- Status Pokédex -->
     <div id="status" class="status-pokedex">
       <p><strong>Status:</strong> <span id="statusText">Ready to evolve!</span></p>
       <p>Last Check: <span id="lastCheck">Never</span></p>
       <p>Runtime: <span id="runtime">0m 0s</span></p>
       <p>Consec Fails: <span id="consec">0</span></p>
       <p>New Products: <span id="newCount">0</span></p>
-      <p>Details: <span id="details">Sign in to begin...</span></p>
+      <p>Details: <span id="details">Waiting for your command...</span></p>
     </div>
 
-    <button id="startBtn" onclick="startMonitoring()" disabled>🚀 Start Hunt</button>
+    <button id="startBtn" onclick="startMonitoring()">🚀 Start Hunt</button>
     <button id="stopBtn" class="hidden" onclick="stopMonitoring()">⏹️ Stop Hunt</button>
   </div>
 
-  <audio id="pikacry" preload="auto"></audio>
+  <!-- Audio for Cries -->
+  <audio id="pikacry" preload="auto">
+    <source src="https://raw.githubusercontent.com/PokeAPI/audio/master/cries/2021/25.mp3" type="audio/mpeg">
+  </audio>
 
+  <!-- Firebase SDKs -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js';
+    import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js';
     import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js';
-    import { getFirestore, collection, doc, setDoc, getDoc, query } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js';
+    import { getFirestore, collection, doc, setDoc, getDocs, getDoc, query } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js';
 
-    // IMPORTANT: Replace with your web app's Firebase configuration
     const firebaseConfig = {
-      apiKey: "AIzaSyCAXDkAaED4PqSW3lgpXwPMbOHnoq-5ybo", // This is safe to expose
+      apiKey: "AIzaSyCAXDkAaED4PqSW3lgpXwPMbOHnoq-5ybo",
       authDomain: "pokemoncentermail.firebaseapp.com",
       projectId: "pokemoncentermail",
       storageBucket: "pokemoncentermail.firebasestorage.app",
@@ -121,50 +127,39 @@
       measurementId: "G-M55TXWL2YQ"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Global var for app
     let currentUser = null;
 
-    // Sign-in function
     window.signInAnonymously = async () => {
       try {
         const result = await signInAnonymously(auth);
-        console.log('Signed in as:', result.user.uid);
-        alert('Signed in! You can now start the hunt.');
+        currentUser = result.user;
+        console.log('Signed in as:', currentUser.uid);
+        alert('Signed in! Add your email to subscribe.');
+        document.getElementById('signInBtn').classList.add('hidden');
+        document.getElementById('emailSection').classList.remove('hidden');
       } catch (error) {
         console.error('Sign-in error:', error);
-        alert(`Sign-in failed: ${error.message}`);
+        alert('Sign-in failed: ' + error.message);
       }
     };
 
-    // Listen for auth changes to update UI
     onAuthStateChanged(auth, (user) => {
       currentUser = user;
-      const mainControls = document.getElementById('mainControls');
-      const startBtn = document.getElementById('startBtn');
-
       if (user) {
-        // User is signed in
-        document.getElementById('signInBtn').classList.add('hidden');
-        document.getElementById('emailSection').classList.remove('hidden');
-        mainControls.disabled = false;
-        startBtn.disabled = false;
-        document.getElementById('details').textContent = 'Ready for your command...';
+        console.log('User state changed: Signed in');
         loadSubscription();
       } else {
-        // User is signed out
+        console.log('User state changed: Signed out');
         document.getElementById('signInBtn').classList.remove('hidden');
         document.getElementById('emailSection').classList.add('hidden');
-        mainControls.disabled = true;
-        startBtn.disabled = true;
       }
     });
 
-    // Add/update email subscription
     window.subscribeEmail = async (email) => {
       if (!currentUser) return alert('Sign in first!');
       if (!email || !/\S+@\S+\.\S+/.test(email)) return alert('Enter a valid email!');
@@ -174,135 +169,183 @@
           subscribed: true,
           timestamp: new Date()
         });
-        alert('Subscribed! You will now receive email alerts.');
+        localStorage.setItem('pokedrop_emails', JSON.stringify([email]));
+        alert('Subscribed! You\'ll get alerts on drops.');
+        console.log('Subscribed:', email);
       } catch (error) {
         console.error('Subscription error:', error);
+        alert('Subscription failed: ' + error.message);
       }
     };
-    
-    // Load user's subscription
+
     async function loadSubscription() {
-      if (!currentUser) return;
       try {
         const docSnap = await getDoc(doc(db, 'subscribers', currentUser.uid));
         if (docSnap.exists()) {
           const data = docSnap.data();
           document.getElementById('emailInput').value = data.email;
+          console.log('Loaded subscription:', data.email);
         }
       } catch (error) {
         console.error('Load error:', error);
       }
     }
 
-    // --- EMAIL SENDING LOGIC (BACKEND REQUIRED) ---
-    async function triggerEmail(type, data = {}) {
-        if (!currentUser) return alert("Please sign in first.");
-        
-        // ⬇️ *** PASTE YOUR DEPLOYED FUNCTION URL HERE *** ⬇️
-        const functionUrl = 'YOUR_CLOUD_FUNCTION_URL_HERE';
-
-        if (functionUrl === 'YOUR_CLOUD_FUNCTION_URL_HERE') {
-            return alert("Backend not configured. Please deploy the Cloud Function and add its URL to the script.");
-        }
-        
-        try {
-            console.log(`Calling cloud function for '${type}' email...`);
-            const response = await fetch(functionUrl, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ type, data, userId: currentUser.uid })
-            });
-            if (response.ok) {
-                console.log("Email sent successfully!");
-                alert(`'${type}' email sent successfully! Check your inbox.`);
-            } else {
-                const errorText = await response.text();
-                console.error("Failed to send email:", errorText);
-                alert(`Failed to send email: ${errorText}`);
-            }
-        } catch (error) {
-            console.error("Error calling cloud function:", error);
-            alert("An error occurred while trying to send the email.");
-        }
-    }
-
-    window.testEmail = () => triggerEmail('test');
-    window.sendDropAlertEmail = (message) => triggerEmail('alert', { message });
-
+    window.getAllSubscribers = async () => {
+      try {
+        const q = query(collection(db, 'subscribers'));
+        const querySnapshot = await getDocs(q);
+        const emails = querySnapshot.docs.map(d => d.data().email).filter(email => email);
+        console.log('Fetched subscribers:', emails);
+        return emails;
+      } catch (error) {
+        console.error('Query error:', error);
+        alert('Failed to fetch subscribers: ' + error.message);
+        return [];
+      }
+    };
   </script>
 
   <script>
-    // State Vars
     let intervalId = null, startTime = null, consecFails = 0, failThresh = 2, checkFreq = 5 * 60 * 1000;
     let lastProducts = JSON.parse(localStorage.getItem('last_products') || '[]');
-    let proxies = ['https://corsproxy.io/?', 'https://api.allorigins.win/get?url='];
+    let proxies = ['https://corsproxy.io/?', 'https://api.allorigins.win/get?url=', 'https://thingproxy.freeboard.io/fetch/', 'https://cors-anywhere.herokuapp.com/', 'https://api.codetabs.com/v1/proxy?quest='];
     let blacklisted = new Set();
+    let webhookUrl = '';
     let isHunting = false;
+    let localEmails = JSON.parse(localStorage.getItem('pokedrop_emails') || '[]');
 
-    // UI Helpers
-    function updateUI(status, details = '', newProds = 0) {
+    function saveApiKey() {
+      const apiKey = document.getElementById('sendgridApiKey').value;
+      if (apiKey) {
+        localStorage.setItem('sendgrid_api_key', apiKey);
+        alert('SendGrid API key saved!');
+        document.getElementById('sendgridApiKey').value = '';
+      } else {
+        alert('Please enter a valid SendGrid API key.');
+      }
+    }
+
+    async function sendEmailViaSendGrid(toEmails, subject, body) {
+      const apiKey = localStorage.getItem('sendgrid_api_key');
+      if (!apiKey) {
+        console.warn('No SendGrid API key found, falling back to mailto');
+        sendMailto(subject, body);
+        return;
+      }
+      try {
+        const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            personalizations: [{ to: toEmails.map(email => ({ email })) }],
+            from: { email: 'your_verified_email@example.com' }, // Replace with your verified sender email
+            subject: subject,
+            content: [{ type: 'text/plain', value: body }]
+          })
+        });
+        if (response.ok) {
+          console.log('Emails sent via SendGrid:', toEmails);
+        } else {
+          throw new Error('SendGrid API error: ' + response.statusText);
+        }
+      } catch (error) {
+        console.error('SendGrid error:', error);
+        alert('SendGrid failed, using mailto fallback: ' + error.message);
+        sendMailto(subject, body);
+      }
+    }
+
+    async function testEmail() {
+      try {
+        let allEmails = await getAllSubscribers();
+        if (allEmails.length === 0) allEmails = localEmails;
+        if (allEmails.length === 0) return alert('No subscribers yet! Add an email first.');
+        const testMsg = '🧪 Test Alert from PokeDrop Master! Everything is wired up.';
+        await sendEmailViaSendGrid(allEmails, 'Test Alert', testMsg);
+        alert(`Test email sent to ${allEmails.length} recipient(s)! Check inboxes.`);
+      } catch (error) {
+        console.error('Test email error:', error);
+        alert('Test failed: ' + error.message);
+      }
+    }
+
+    function updateUI(status, details = '', newProds = 0, success = false) {
       const statusTextEl = document.getElementById('statusText');
-      statusTextEl.textContent = status;
+      let displayStatus = status;
+      if (isHunting && newProds === 0 && success) {
+        displayStatus = 'Store Running Normal - Nothing to Hunt';
+      }
+      statusTextEl.textContent = displayStatus;
       document.getElementById('lastCheck').textContent = new Date().toLocaleTimeString();
       document.getElementById('consec').textContent = consecFails;
       document.getElementById('newCount').textContent = newProds;
       document.getElementById('details').textContent = details;
-      
-      const statusBox = document.getElementById('status');
-      statusBox.classList.remove('alert-zap');
-      if (newProds > 0 || /drop|new|queue/i.test(status)) {
-        setTimeout(() => statusBox.classList.add('alert-zap'), 10);
+      if (newProds > 0 || /drop|new|accessible/i.test(status)) {
+        document.getElementById('status').classList.add('alert-zap');
       }
       updateRuntime();
     }
+
     function updateRuntime() {
-      if (startTime) {
-        const elapsed = Date.now() - startTime;
-        const minutes = Math.floor(elapsed / 60000);
-        const seconds = Math.floor((elapsed % 60000) / 1000);
-        document.getElementById('runtime').textContent = `${minutes}m ${seconds}s`;
-      }
+      if (startTime) document.getElementById('runtime').textContent = `${Math.floor((Date.now() - startTime) / 60000)}m ${Math.floor(((Date.now() - startTime) % 60000) / 1000)}s`;
     }
     setInterval(updateRuntime, 1000);
 
-    // Discord Test/Send
     async function sendDiscord(title, desc, color = 0xFFD700) {
-      const webhookUrl = document.getElementById('discordWebhook').value;
+      webhookUrl = document.getElementById('discordWebhook').value;
       if (!webhookUrl) return;
       const embed = { title, description: desc, color, footer: { text: `PokeDrop Master | ${new Date().toLocaleString()}` } };
       try {
         await fetch(webhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ embeds: [embed] }) });
       } catch (e) { console.error('Discord fail:', e); }
     }
+
     async function testDiscord() {
-      if (!document.getElementById('discordWebhook').value) return alert('Please enter a Discord Webhook URL first.');
-      await sendDiscord('🧪 Test Ping', 'Your webhook is live! Ready for drops. ⚡');
-      alert('Test sent! Check your Discord.');
+      try {
+        await sendDiscord('🧪 Test Ping', 'Your webhook is live! Ready for drops. ⚡');
+        alert('Test sent! Check your Discord.');
+      } catch (e) {
+        console.error('Discord test error:', e);
+        alert('Discord test failed: ' + e.message);
+      }
     }
 
-    // Play Poké Cry
+    function sendMailto(subject, body) {
+      getAllSubscribers().then(allEmails => {
+        if (allEmails.length === 0) allEmails = localEmails;
+        if (allEmails.length === 0) return;
+        const bcc = allEmails.join(',');
+        window.location.href = `mailto:?bcc=${encodeURIComponent(bcc)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      }).catch(error => {
+        console.error('Send mailto error:', error);
+        alert('Notification failed: ' + error.message);
+      });
+    }
+
     function playCry() {
       const audio = document.getElementById('pikacry');
-      audio.src = 'https://raw.githubusercontent.com/PokeAPI/audio/master/cries/2021/25.mp3';
-      audio.play().catch(e => console.error("Audio play failed. User interaction may be required first.", e));
+      audio.play().catch(() => new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+Dyvmwh').play());
     }
 
-    // Proxy Test/Rotate
     async function getHealthyProxy(url) {
       for (let p of proxies.filter(pr => !blacklisted.has(pr))) {
         try {
           const ctrl = new AbortController();
-          setTimeout(() => ctrl.abort(), 8000);
-          const res = await fetch(`${p}${encodeURIComponent(url)}`, { signal: ctrl.signal, headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+          setTimeout(() => ctrl.abort(), 5000);
+          const res = await fetch(`${p}${encodeURIComponent(url)}`, { signal: ctrl.signal });
           if (res.ok) return p;
-        } catch {}
+        } catch (e) { console.error('Proxy failed:', p, e); }
         blacklisted.add(p);
         setTimeout(() => blacklisted.delete(p), 300000);
       }
+      console.warn('No healthy proxies found');
       return null;
     }
 
-    // Data Extraction
     function extractQueue(text, url) {
       const posMatch = text.match(/pos["']?\s*[:=]\s*["']?(\d+)["']?/i) || url.match(/pos=(\d+)/i);
       return posMatch ? posMatch[1] : null;
@@ -312,131 +355,130 @@
       const productMatches = [...text.matchAll(/<a[^>]*href=["']([^"']*product[^"']*)["'][^>]*>([^<]+)<\/a>/gi)];
       return productMatches.map(m => ({ url: m[1], title: m[2].trim() })).slice(0, 20);
     }
-    
+
     function detectNewProducts(currentProds) {
-        if (lastProducts.length === 0 && currentProds.length > 0) {
-            lastProducts = currentProds;
-            localStorage.setItem('last_products', JSON.stringify(lastProducts));
-            return { count: 0, new: [] };
-        }
-        const newOnes = currentProds.filter(p => !lastProducts.some(lp => lp.title === p.title));
-        if (newOnes.length > 0) {
-            lastProducts = currentProds;
-            localStorage.setItem('last_products', JSON.stringify(lastProducts));
-        }
-        return { count: newOnes.length, new: newOnes };
+      const newOnes = currentProds.filter(p => !lastProducts.some(lp => lp.title === p.title && lp.url === p.url));
+      const count = newOnes.length;
+      if (count > 0) {
+        lastProducts = currentProds;
+        localStorage.setItem('last_products', JSON.stringify(lastProducts));
+      }
+      return { count, new: newOnes };
     }
 
-
-    // Main Check Function
     async function checkSite(isConsec = false) {
       const specific = document.getElementById('specificUrl').value || '';
-      const urls = specific ? [specific] : ['https://www.pokemoncenter.com/category/new-releases', 'https://www.pokemoncenter.com/'];
-      let details = 'Checking URLs...';
-      let status = 'Hunting... 🕵️';
-      let newProductsResult = { count: 0, new: [] };
-      let foundSomething = false;
+      const urls = specific ? [specific] : ['https://www.pokemoncenter.com/', 'https://www.pokemoncenter.com/category/new-releases', 'https://www.pokemoncenter.com/category/trading-card-game'];
+      let success = false, queuePos = null, products = [], details = '';
 
       for (let url of urls) {
-        if (foundSomething) break;
         const proxy = await getHealthyProxy(url);
-        if (!proxy) {
-          details = 'All CORS proxies seem to be down. Cannot check site.';
-          continue;
-        }
+        if (!proxy) continue;
         try {
-          const res = await fetch(`${proxy}${encodeURIComponent(url)}`);
+          let res = await fetch(`${proxy}${encodeURIComponent(url)}`, { headers: { 'User-Agent': 'Mozilla/5.0' } });
           if (res.ok) {
-            const text = proxy.includes('allorigins') ? (await res.json()).contents : await res.text();
-            
-            if (/queue-it\.net/i.test(res.url) || /waiting room/i.test(text)) {
-              const queuePos = extractQueue(text, res.url);
-              status = `Queue Detected! 🚦`;
-              details = `Position: ${queuePos || 'Unknown'}. Attempting to join...`;
+            let text = proxy.includes('allorigins') ? (await res.json()).contents : await res.text();
+            const finalUrl = decodeURIComponent(res.url.replace(proxy, ''));
+            queuePos = extractQueue(text, finalUrl);
+            if (queuePos || /queue-it\.net/i.test(finalUrl) || /waiting room/i.test(text)) {
+              details = `Queue detected! Pos: ${queuePos || 'Unknown'}. Joining line...`;
               if (!isConsec) window.location.href = 'https://www.pokemoncenter.com/';
-              foundSomething = true;
-            } else if (text.length > 2000) {
-                const currentProducts = extractProducts(text);
-                newProductsResult = detectNewProducts(currentProducts);
-                if (newProductsResult.count > 0) {
-                    status = 'DROP DETECTED! 🏆';
-                    details = `${newProductsResult.count} new product(s): ${newProductsResult.new.map(np => np.title).join(', ')}`;
-                    playCry();
-                } else {
-                    status = 'All clear, nothing to hunt';
-                    details = 'No new products found on this check.';
-                }
-                foundSomething = true;
+              success = false;
+              break;
+            } else if (/pokemoncenter\.com/i.test(finalUrl) && text.length > 2000) {
+              products = extractProducts(text);
+              const { count, new: newProds } = detectNewProducts(products);
+              details = count > 0 ? `DROP DETECTED! ${count} new product(s): ${newProds.map(np => np.title).join(', ')}` : 'Store running normal, no new drops.';
+              success = true;
+              if (count > 0) playCry();
+              break;
             }
           }
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error('Check error:', e); }
       }
 
-      if (!foundSomething) {
-        consecFails++;
-        status = 'Check Failed 🚫';
-        details = 'Could not access the site. Might be down or blocked.';
-      } else {
-        consecFails = 0;
-      }
-      
-      updateUI(status, details, newProductsResult.count);
+      if (!success && !queuePos) details = 'Check failed (proxies down?).';
+      updateUI(success ? (products.length > 0 ? 'Drop Alert! 🏆' : 'Store Running Normal - Nothing to Hunt') : 'Queued/Closed 🚫', details, detectNewProducts(products).count, success);
+      logCheck(success ? 'Success' : 'Fail', details, queuePos);
 
-      if (status.includes('DROP') || status.includes('Queue')) {
-        sendDiscord('🚨 PokeDrop Alert!', details);
-        window.sendDropAlertEmail(details);
+      if (success && detectNewProducts(products).count > 0 || queuePos) {
+        const alertMsg = details;
+        sendDiscord('🚨 PokeDrop Alert!', alertMsg);
+        sendEmailViaSendGrid(await getAllSubscribers(), 'PokeDrop Alert!', alertMsg);
+      }
+
+      return { success, queuePos, isFail: !success };
+    }
+
+    async function verifyConsec(count = 1) {
+      if (count >= failThresh) {
+        const result = await checkSite(true);
+        if (!result.isFail) consecFails = 0;
+        else {
+          await new Promise(r => setTimeout(r, 5000));
+          await verifyConsec(count + 1);
+        }
       }
     }
 
-    // Start/Stop
     async function startMonitoring() {
-      isHunting = true;
-      consecFails = 0;
-      startTime = Date.now();
-      document.getElementById('startBtn').classList.add('hidden');
-      document.getElementById('stopBtn').classList.remove('hidden');
-      document.getElementById('mainControls').disabled = true;
-
-      await checkSite();
-      intervalId = setInterval(checkSite, checkFreq + Math.random() * 20000 - 10000);
-      updateUI('Hunting... 🕵️');
+      try {
+        document.getElementById('startBtn').disabled = true;
+        let hasNotifs = localEmails.length > 0 || (await getAllSubscribers()).length > 0 || document.getElementById('discordWebhook').value;
+        if (!hasNotifs) {
+          alert('Add a Discord webhook or email to enable notifications!');
+          document.getElementById('startBtn').disabled = false;
+          return;
+        }
+        isHunting = true;
+        consecFails = 0;
+        startTime = Date.now();
+        await checkSite();
+        intervalId = setInterval(async () => {
+          await checkSite();
+          if (consecFails++ >= failThresh) await verifyConsec();
+        }, checkFreq + Math.random() * 60000 - 30000);
+        document.getElementById('startBtn').classList.add('hidden');
+        document.getElementById('stopBtn').classList.remove('hidden');
+        updateUI('Hunting... 🕵️');
+      } catch (error) {
+        console.error('Start monitoring error:', error);
+        alert('Failed to start: ' + error.message);
+        document.getElementById('startBtn').disabled = false;
+      }
     }
 
     function stopMonitoring() {
       clearInterval(intervalId);
       intervalId = null;
       startTime = null;
+      consecFails = 0;
       isHunting = false;
       document.getElementById('startBtn').classList.remove('hidden');
+      document.getElementById('startBtn').disabled = false;
       document.getElementById('stopBtn').classList.add('hidden');
-      document.getElementById('mainControls').disabled = false;
-      updateUI('Hunt Paused 🛑', 'Monitoring has been stopped.');
+      updateUI('Hunt Paused 🛑');
     }
 
-    // Sliders & Load Saved State
-    document.addEventListener('DOMContentLoaded', () => {
-        const freqSlider = document.getElementById('freqSlider');
-        const threshSlider = document.getElementById('threshSlider');
-        freqSlider.value = localStorage.getItem('freq') || 5;
-        threshSlider.value = localStorage.getItem('thresh') || 2;
-        
-        document.getElementById('freqVal').textContent = freqSlider.value;
-        document.getElementById('threshVal').textContent = threshSlider.value;
-        
-        checkFreq = freqSlider.value * 60 * 1000;
-        failThresh = threshSlider.value;
+    document.getElementById('freqSlider').oninput = e => {
+      checkFreq = e.target.value * 60 * 1000;
+      document.getElementById('freqVal').textContent = e.target.value;
+      localStorage.setItem('freq', e.target.value);
+    };
+    document.getElementById('threshSlider').oninput = e => {
+      failThresh = e.target.value;
+      document.getElementById('threshVal').textContent = e.target.value;
+      localStorage.setItem('thresh', e.target.value);
+    };
 
-        freqSlider.oninput = e => { 
-            checkFreq = e.target.value * 60 * 1000; 
-            document.getElementById('freqVal').textContent = e.target.value; 
-            localStorage.setItem('freq', e.target.value); 
-        };
-        threshSlider.oninput = e => { 
-            failThresh = e.target.value; 
-            document.getElementById('threshVal').textContent = e.target.value; 
-            localStorage.setItem('thresh', e.target.value); 
-        };
-    });
+    function logCheck(status, details, queue) {
+      console.log(`${new Date().toISOString()}: ${status} - ${details} (Queue: ${queue})`);
+    }
+
+    document.getElementById('freqSlider').value = localStorage.getItem('freq') || 5;
+    document.getElementById('freqVal').textContent = document.getElementById('freqSlider').value;
+    document.getElementById('threshSlider').value = localStorage.getItem('thresh') || 2;
+    document.getElementById('threshVal').textContent = document.getElementById('threshSlider').value;
   </script>
 </body>
 </html>
