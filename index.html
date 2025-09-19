@@ -242,14 +242,6 @@
       </div>
     </div>
     <div class="section">
-      <label>Queue Alert Sound:</label>
-      <div class="button-group">
-        <button id="unlockAudioBtn" onclick="unlockAudio()">🔊 Unlock Audio</button>
-        <button id="alarmBtn" onclick="toggleAlarm()">⚡ Activate Alert</button>
-        <button onclick="testAlarm()">🔊 Test Alert</button>
-      </div>
-    </div>
-    <div class="section">
       <label>Check Frequency: <span id="freqVal">5</span> mins</label>
       <input type="range" id="freqSlider" min="1" max="30" value="5">
       <label>Alert After: <span id="threshVal">2</span> fails</label>
@@ -264,7 +256,7 @@
       </div>
     </div>
     <div class="status-pokedex" id="status-pokedex">
-      <p><strong>Status:</strong> <span class="status-text" id="statusText">Click 'Unlock Audio' to enable sounds!</span></p>
+      <p><strong>Status:</strong> <span class="status-text" id="statusText">Ready to investigate!</span></p>
       <p>Last Check: <span id="lastCheck">Never</span></p>
       <p>Runtime: <span id="runtime">0m 0s</span></p>
       <p>Consecutive Fails: <span id="consec">0</span></p>
@@ -272,40 +264,15 @@
       <div class="log-container" id="details"></div>
     </div>
   </div>
-  <!-- Audio for Alert -->
-  <audio id="alertTone" preload="auto" loop>
-    <source src="https://cdn.freesound.org/previews/316/316847_4939433-lq.mp3" type="audio/mpeg">
-    <source src="https://cdn.jsdelivr.net/npm/@freesound/audio@316/316847_4939433-lq.mp3" type="audio/mpeg">
-  </audio>
   <script>
     // State Vars
     let intervalId = null, startTime = null, consecFails = 0, failThresh = 2, checkFreq = 5 * 60 * 1000;
     let proxies = ['https://corsproxy.io/?', 'https://api.allorigins.win/get?url=', 'https://thingproxy.freeboard.io/fetch/', 'https://cors-anywhere.herokuapp.com/', 'https://api.codetabs.com/v1/proxy?quest='];
     let blacklisted = new Set();
     let webhookUrl = '';
-    let alarmActive = false;
     let logEntries = [];
-    let alertAudio = null;
     let retryCount = 0;
     const maxRetries = 3;
-    let audioUnlocked = false;
-
-    // Unlock Audio
-    function unlockAudio() {
-      if (!audioUnlocked) {
-        const alertTone = document.getElementById('alertTone');
-        alertTone.play().then(() => {
-          alertTone.pause();
-          alertTone.currentTime = 0;
-          audioUnlocked = true;
-          document.getElementById('unlockAudioBtn').classList.add('hidden');
-          updateUI('Ready to investigate!', 'Audio unlocked for reliable playback');
-        }).catch(e => {
-          console.error('Audio unlock failed:', e.name);
-          updateUI('Click "Unlock Audio" to enable sounds!', `Audio unlock error: ${e.name}`);
-        });
-      }
-    }
 
     // Floating Pokémon Movement (Below Dashboard)
     const pokemons = document.querySelectorAll('.floating-poke');
@@ -320,8 +287,8 @@
         let angle = parseFloat(poke.dataset.angle || (Math.random() * 2 * Math.PI));
         const speed = 0.005 + Math.random() * 0.005;
 
-        // Initialize position if not set or invalid
-        if (isNaN(x) || isNaN(y) || x < 0 || x > window.innerWidth - poke.offsetWidth || y < minY || y > maxY) {
+        // Initialize or reset invalid positions
+        if (isNaN(x) || isNaN(y) || x < 0 || x > window.innerWidth - poke.offsetWidth || y < minY || y > maxY - poke.offsetHeight) {
           x = Math.random() * (window.innerWidth - poke.offsetWidth);
           y = minY + Math.random() * (maxY - minY - poke.offsetHeight);
           angle = Math.random() * 2 * Math.PI;
@@ -330,6 +297,7 @@
           poke.dataset.angle = angle;
           poke.dataset.lastChange = Date.now();
           poke.style.visibility = 'visible';
+          console.log(`[${new Date().toISOString()}] Repositioned ${poke.alt} to x:${x.toFixed(2)}, y:${y.toFixed(2)}`);
         }
 
         // Change direction periodically
@@ -383,47 +351,6 @@
     }
     setInterval(updateRuntime, 1000);
 
-    // Alarm Toggle and Test
-    function toggleAlarm() {
-      if (!audioUnlocked) {
-        updateUI('Click "Unlock Audio" to enable sounds!', 'Please unlock audio first!');
-        return;
-      }
-      alarmActive = !alarmActive;
-      const alertTone = document.getElementById('alertTone');
-      if (alertTone) {
-        alertTone.pause();
-        alertTone.currentTime = 0;
-      }
-      alertAudio = null;
-      if (document.getElementById('alarmBtn')) {
-        document.getElementById('alarmBtn').textContent = alarmActive ? '⚡ Deactivate Alert' : '⚡ Activate Alert';
-      }
-      updateUI('Ready to investigate!', `Alert ${alarmActive ? 'activated' : 'deactivated'}`);
-    }
-    function testAlarm() {
-      if (!audioUnlocked) {
-        updateUI('Click "Unlock Audio" to enable sounds!', 'Please unlock audio first!');
-        return;
-      }
-      try {
-        const audio = document.getElementById('alertTone');
-        audio.play().then(() => {
-          setTimeout(() => {
-            audio.pause();
-            audio.currentTime = 0;
-          }, 5000);
-          updateUI('Ready to investigate!', 'Tested alert tone for 5 seconds');
-        }).catch(e => {
-          console.error('Alert tone test failed:', e.name);
-          updateUI('Ready to investigate!', `Alert tone test error: ${e.name}`);
-        });
-      } catch (e) {
-        console.error('Test alarm error:', e.name);
-        updateUI('Ready to investigate!', `Test alarm error: ${e.name}`);
-      }
-    }
-
     // Discord Test/Send
     async function sendDiscord(title, desc, color = 0xFFD700) {
       webhookUrl = document.getElementById('discordWebhook')?.value || '';
@@ -431,7 +358,7 @@
         updateUI('Ready to investigate!', 'Discord notification skipped: No webhook URL');
         return;
       }
-      const embed = { title, description: desc, color, footer: { text: `Detective Pikachu's Ultra Queue Hunt` } };
+      const embed = { title, description: desc, color, footer: { text: 'Detective Pikachu\'s Ultra Queue Hunt' } };
       try {
         await fetch(webhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ embeds: [embed] }) });
         updateUI('Ready to investigate!', `Sent Discord notification: ${title}`);
@@ -442,35 +369,6 @@
     }
     async function testDiscord() {
       await sendDiscord('📬 Detective Pikachu Test Ping', 'Webhook online! Ready to catch queue alerts! ⚡');
-    }
-
-    // Play Alert
-    function playAlert() {
-      if (!audioUnlocked) {
-        updateUI('Click "Unlock Audio" to enable sounds!', 'Audio locked: Please unlock audio first!');
-        return;
-      }
-      try {
-        if (alarmActive && !alertAudio) {
-          alertAudio = document.getElementById('alertTone');
-          alertAudio.play().then(() => {
-            updateUI('Queue Detected 🚨', 'Alert tone playing for queue detection');
-          }).catch(e => {
-            console.error('Alert tone failed:', e.name);
-            updateUI('Ready to investigate!', `Alert tone error: ${e.name}`);
-          });
-        }
-      } catch (e) {
-        console.error('Play alert error:', e.name);
-        updateUI('Ready to investigate!', `Alert sound error: ${e.name}`);
-      }
-    }
-    function stopAlert() {
-      if (alertAudio) {
-        alertAudio.pause();
-        alertAudio.currentTime = 0;
-        alertAudio = null;
-      }
     }
 
     // Proxy Test/Rotate
@@ -529,7 +427,7 @@
         try {
           const ctrl = new AbortController();
           setTimeout(() => ctrl.abort(), 8000);
-          let res = await fetch(`${proxy}${encodeURIComponent(url)}`, { signal: ctrl.signal });
+          let res = await fetch(`${p}${encodeURIComponent(url)}`, { signal: ctrl.signal });
           if (res.ok) {
             let text = proxy.includes('allorigins') ? (await res.json()).contents : await res.text();
             const finalUrl = decodeURIComponent(res.url.replace(proxy, ''));
@@ -539,7 +437,6 @@
               details = `Queue detected! Pos: ${queuePos}. Joining the chase...`;
               if (!isConsec) window.location.href = 'https://www.pokemoncenter.com/';
               success = false;
-              playAlert();
               updateUI('Queue Detected 🚨', details);
               sendDiscord('🚨 Queue Alert!', details);
               logCheck('Queue', details, queuePos);
@@ -608,7 +505,6 @@
       retryCount = 0;
       startTime = Date.now();
       logEntries = [];
-      stopAlert();
       await checkSite();
       intervalId = setInterval(async () => {
         const result = await checkSite();
@@ -625,7 +521,6 @@
       startTime = null;
       consecFails = 0;
       retryCount = 0;
-      stopAlert();
       document.getElementById('startBtn')?.classList.remove('hidden');
       document.getElementById('stopBtn')?.classList.add('hidden');
       updateUI('Hunt Paused 🛑', 'Investigation stopped');
