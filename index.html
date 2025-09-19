@@ -137,6 +137,28 @@
             cursor: not-allowed;
             box-shadow: none;
         }
+        
+        /* New styling for the status banner to match the sections */
+        .status-banner {
+            margin-bottom: 1.2rem;
+            padding: 1rem;
+            width: 100%;
+            box-sizing: border-box;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #FFD700;
+            border-radius: 10px;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 0 0 8px #FFD700, 0 0 16px #FFD700;
+            transition: all 0.3s;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 20;
+        }
+        /* End of new styling */
+
 
         .status-pokedex {
             background: linear-gradient(145deg, #3F51B5, #1A237E);
@@ -156,25 +178,6 @@
             font-size: 0.8rem;
         }
         
-        .status-banner {
-            width: calc(100% - 2rem); /* Account for the pokedex padding */
-            max-width: 100%;
-            padding: 1rem;
-            margin-bottom: 1.2rem; /* Adjusted margin to match section spacing */
-            background: rgba(0, 0, 0, 0.7);
-            border: 2px solid #FFD700;
-            border-radius: 10px;
-            text-align: center;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-shadow: 0 0 8px #FFD700, 0 0 16px #FFD700;
-            transition: all 0.3s;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
-            z-index: 20;
-            box-sizing: border-box; /* Include padding and border in the element's total width */
-        }
 
         .status-banner.green { color: #00FF00; border-color: #00FF00; text-shadow: 0 0 8px #00FF00; }
         .status-banner.red { color: #FF0000; border-color: #FF0000; text-shadow: 0 0 8px #FF0000; animation: zap 0.3s ease infinite; }
