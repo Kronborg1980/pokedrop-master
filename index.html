@@ -1,597 +1,368 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Detective Pikachu's Ultra Queue Hunt - Pokémon Center Monitor</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Roboto', sans-serif;
-      background: url('https://images4.alphacoders.com/133/1332057.png') no-repeat center center fixed, linear-gradient(135deg, #ff5e62, #6b7280);
-      background-size: cover;
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-      overflow-x: hidden;
-    }
-    .pokedex {
-      background: linear-gradient(145deg, rgba(255, 75, 75, 0.9), rgba(200, 0, 0, 0.9));
-      border: 4px solid #1A1A1A;
-      border-radius: 20px;
-      padding: 2rem;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.3);
-      backdrop-filter: blur(10px);
-      width: 100%;
-      max-width: 420px;
-      margin: 1rem;
-      position: relative;
-      z-index: 10;
-      animation: pokedexGlow 1.2s ease-out;
-    }
-    @keyframes pokedexGlow { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-    .header {
-      text-align: center;
-      margin-bottom: 1.5rem;
-      position: relative;
-    }
-    .header img {
-      width: 140px;
-      filter: drop-shadow(0 0 15px #FFCA28);
-      margin-bottom: 0.5rem;
-    }
-    .header h1 {
-      font-family: 'Orbitron', sans-serif;
-      color: #FFCA28;
-      font-size: 1.5rem;
-      text-shadow: 2px 2px 4px #000;
-      margin: 0;
-    }
-    .header p {
-      color: #FFF;
-      font-size: 0.9rem;
-      text-shadow: 1px 1px 2px #000;
-      margin: 0.5rem 0 0;
-    }
-    .section {
-      margin-bottom: 1.2rem;
-      padding: 1rem;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      border: 2px solid #FFCA28;
-      backdrop-filter: blur(5px);
-    }
-    .section label {
-      display: block;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.8rem;
-      color: #FFF;
-      margin-bottom: 0.5rem;
-      text-shadow: 1px 1px 2px #000;
-    }
-    input, select {
-      border: 2px solid #FFCA28;
-      border-radius: 10px;
-      padding: 0.6rem;
-      width: 100%;
-      box-sizing: border-box;
-      font-size: 0.8rem;
-      background: rgba(255, 255, 255, 0.2);
-      color: #FFF;
-      font-family: 'Roboto', sans-serif;
-      transition: all 0.3s;
-    }
-    input:focus, select:focus {
-      border-color: #FFD700;
-      box-shadow: 0 0 10px #FFD700;
-    }
-    input[type="range"]::-webkit-slider-thumb {
-      background: #FFCA28;
-      border: 2px solid #1A1A1A;
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      cursor: pointer;
-    }
-    .button-group {
-      display: flex;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    button {
-      background: linear-gradient(145deg, #FFCA28, #FFB300);
-      color: #1A1A1A;
-      border: 2px solid #1A1A1A;
-      padding: 0.8rem 1.5rem;
-      border-radius: 25px;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-      position: relative;
-      overflow: hidden;
-    }
-    button:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-      background: linear-gradient(145deg, #FFD700, #FFCA28);
-    }
-    button:disabled {
-      background: #666;
-      color: #999;
-      transform: none;
-      cursor: not-allowed;
-    }
-    button::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 25px;
-      height: 25px;
-      background: radial-gradient(circle, rgba(255, 215, 0, 0.3), transparent);
-      transform: translate(-50%, -50%);
-      animation: spark 2s ease-in-out infinite;
-    }
-    @keyframes spark { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.5; } }
-    .status-pokedex {
-      background: linear-gradient(145deg, #3F51B5, #1A237E);
-      color: #FFF;
-      padding: 1.2rem;
-      border-radius: 12px;
-      margin-top: 1.2rem;
-      text-shadow: 1px 1px 2px #000;
-      text-align: center;
-      border: 2px solid #FFCA28;
-      backdrop-filter: blur(5px);
-    }
-    .status-pokedex p {
-      margin: 0.4rem 0;
-      font-size: 0.8rem;
-    }
-    .status-podex .status-text {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 1rem;
-      font-weight: bold;
-    }
-    .log-container {
-      max-height: 140px;
-      overflow-y: auto;
-      font-size: 0.7rem;
-      text-align: left;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 0.6rem;
-      border-radius: 10px;
-      margin-top: 0.6rem;
-      border: 1px solid #FFCA28;
-      color: #FFF;
-    }
-    .alert-zap {
-      animation: zap 0.3s ease infinite;
-    }
-    @keyframes zap { 0%, 100% { border-color: #FFCA28; box-shadow: 0 0 25px #FFCA28; } 50% { border-color: #FFD700; box-shadow: 0 0 35px #FFD700; } }
-    .hidden { display: none; }
-    @media (max-width: 480px) {
-      .pokedex { padding: 1.2rem; margin: 0.6rem; max-width: 340px; }
-      .header h1 { font-size: 1.2rem; }
-      .header img { width: 100px; }
-      .button-group { flex-direction: column; }
-      button { padding: 0.7rem 1.2rem; font-size: 0.7rem; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Queue Hunter – Pokémon Center Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+<style>
+/* --- Queue Hunter Ultra Styles --- */
+body {
+  font-family: 'Roboto', sans-serif;
+  background: linear-gradient(135deg,#1e1e2f,#0d0d15);
+  color: #fff;
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: hidden;
+}
+.pokedex {
+  background: linear-gradient(145deg, rgba(30,30,50,0.9), rgba(0,0,20,0.9));
+  border: 4px solid #FFD700;
+  border-radius: 20px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.5), inset 0 0 15px rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 10;
+}
+.header{
+  text-align:center;
+  margin-bottom:1.5rem;
+}
+.header img{
+  width:120px;
+  filter:drop-shadow(0 0 15px #FFD700);
+  margin-bottom:0.5rem;
+}
+.header h1{
+  font-family:'Orbitron',sans-serif;
+  color:#FFD700;
+  font-size:1.5rem;
+  text-shadow:2px 2px 4px #000;
+  margin:0;
+}
+.header p{
+  color:#fff;
+  font-size:0.9rem;
+  text-shadow:1px 1px 2px #000;
+  margin:0.5rem 0 0;
+}
+.section{
+  margin-bottom:1.2rem;
+  padding:1rem;
+  background:rgba(255,255,255,0.05);
+  border-radius:12px;
+  border:2px solid #FFD700;
+  backdrop-filter:blur(5px);
+}
+.section label{
+  display:block;
+  font-family:'Orbitron',sans-serif;
+  font-size:0.8rem;
+  color:#fff;
+  margin-bottom:0.5rem;
+}
+input, select{
+  border:2px solid #FFD700;
+  border-radius:10px;
+  padding:0.6rem;
+  width:100%;
+  box-sizing:border-box;
+  font-size:0.8rem;
+  background:rgba(255,255,255,0.1);
+  color:#fff;
+  font-family:'Roboto',sans-serif;
+  transition:all 0.3s;
+}
+input:focus, select:focus{
+  border-color:#FFB300;
+  box-shadow:0 0 10px #FFD700;
+}
+.button-group{display:flex;gap:0.6rem;flex-wrap:wrap;justify-content:center;}
+button{
+  background:linear-gradient(145deg,#FFD700,#FFB300);
+  color:#1A1A1A;
+  border:2px solid #1A1A1A;
+  padding:0.8rem 1.5rem;
+  border-radius:25px;
+  font-family:'Orbitron',sans-serif;
+  font-size:0.8rem;
+  cursor:pointer;
+  transition:all 0.3s;
+  box-shadow:0 5px 15px rgba(0,0,0,0.3);
+  position:relative;
+  overflow:hidden;
+}
+button:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,0.4);}
+button:disabled{background:#666;color:#999;transform:none;cursor:not-allowed;}
+.status-pokedex{
+  background:linear-gradient(145deg,#3F51B5,#1A237E);
+  color:#FFF;
+  padding:1.2rem;
+  border-radius:12px;
+  margin-top:1.2rem;
+  text-shadow:1px 1px 2px #000;
+  text-align:left;
+  border:2px solid #FFD700;
+  backdrop-filter:blur(5px);
+  max-height:300px;
+  overflow-y:auto;
+}
+.status-pokedex p{margin:0.4rem 0;font-size:0.8rem;}
+.status-pokedex .status-text{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:bold;}
+.log-container{
+  max-height:140px;
+  overflow-y:auto;
+  font-size:0.7rem;
+  text-align:left;
+  background:rgba(255,255,255,0.05);
+  padding:0.6rem;
+  border-radius:10px;
+  margin-top:0.6rem;
+  border:1px solid #FFD700;
+  color:#FFF;
+  font-family:'Roboto',sans-serif;
+}
+.alert-zap{animation:zap 0.3s ease infinite;}
+@keyframes zap{
+  0%,100%{border-color:#FFD700;box-shadow:0 0 25px #FFD700;}
+  50%{border-color:#FFB300;box-shadow:0 0 35px #FFB300;}
+}
+.hidden{display:none;}
+@media(max-width:480px){
+  .pokedex{padding:1.2rem;margin:0.6rem;max-width:340px;}
+  .header h1{font-size:1.2rem;}
+  .header img{width:100px;}
+  .button-group{flex-direction:column;}
+  button{padding:0.7rem 1.2rem;font-size:0.7rem;}
+}
+</style>
 </head>
 <body>
-  <div class="pokedex">
-    <div class="header">
-      <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png" alt="Detective Pikachu">
-      <h1>Detective Pikachu's Ultra Queue Hunt</h1>
-      <p>Tracking Pokémon Center Queues with Precision! ⚡</p>
-    </div>
-    <div class="section">
-      <label>Discord Webhook URL:</label>
-      <input type="url" id="discordWebhook" placeholder="https://discord.com/api/webhooks/...">
-      <div class="button-group">
-        <button onclick="testDiscord()">📬 Test Discord</button>
-      </div>
-    </div>
-    <div class="section">
-      <label>Queue Alert Sound & Vibration:</label>
-      <div class="button-group">
-        <button id="alarmBtn" onclick="toggleAlarm()">⚡ Activate Alarm</button>
-        <button onclick="testAlarm()">🔊 Test Alarm</button>
-      </div>
-    </div>
-    <div class="section">
-      <label>Check Frequency: <span id="freqVal">5</span> mins</label>
-      <input type="range" id="freqSlider" min="1" max="30" value="5">
-      <label>Alert After: <span id="threshVal">2</span> fails</label>
-      <input type="range" id="threshSlider" min="1" max="5" value="2">
-      <label>Specific URL (optional):</label>
-      <input type="url" id="specificUrl" placeholder="https://www.pokemoncenter.com/product/...">
-    </div>
-    <div class="section">
-      <div class="button-group">
-        <button id="startBtn" onclick="startMonitoring()">🔎 Start Queue Hunt</button>
-        <button id="stopBtn" class="hidden" onclick="stopMonitoring()">⏹️ Stop Hunt</button>
-      </div>
-    </div>
-    <div class="status-pokedex" id="status-pokedex">
-      <p><strong>Status:</strong> <span class="status-text" id="statusText">Ready to investigate! On mobile, keep browser open for background checks.</span></p>
-      <p>Last Check: <span id="lastCheck">Never</span></p>
-      <p>Runtime: <span id="runtime">0m 0s</span></p>
-      <p>Consecutive Fails: <span id="consec">0</span></p>
-      <p>Case Log:</p>
-      <div class="log-container" id="details"></div>
+<div class="pokedex">
+  <div class="header">
+    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/129.png" alt="Magikarp">
+    <h1>Queue Hunter</h1>
+    <p>Magikarp & Cubone tracking queues like a boss! ⚡</p>
+  </div>
+
+  <div class="section">
+    <label>Discord Webhook URL:</label>
+    <input type="url" id="discordWebhook" placeholder="https://discord.com/api/webhooks/...">
+    <div class="button-group">
+      <button onclick="testDiscord()">📬 Test Discord</button>
     </div>
   </div>
-  <!-- Audio for Alert -->
-  <audio id="alertTone" preload="auto" loop>
-    <source src="https://cdn.freesound.org/previews/316/316847_4939433-lq.mp3" type="audio/mpeg">
-    <source src="https://cdn.jsdelivr.net/npm/@freesound/audio@316/316847_4939433-lq.mp3" type="audio/mpeg">
-  </audio>
-  <script>
-    // State Vars
-    let intervalId = null, startTime = null, consecFails = 0, failThresh = 2, checkFreq = 5 * 60 * 1000;
-    let proxies = ['https://corsproxy.io/?', 'https://api.allorigins.win/get?url=', 'https://thingproxy.freeboard.io/fetch/', 'https://cors-anywhere.herokuapp.com/', 'https://api.codetabs.com/v1/proxy?quest='];
-    let blacklisted = new Set();
-    let webhookUrl = '';
-    let logEntries = [];
-    let retryCount = 0;
-    const maxRetries = 3;
-    let alarmActive = false;
-    let alertAudio = null;
-    let vibrateInterval = null;
 
-    // Request Web Lock for Background Operation
-    async function requestLock() {
-      if ('locks' in navigator) {
-        try {
-          await navigator.locks.request('queue_hunt_lock', { mode: 'shared' }, async (lock) => {
-            console.log(`[${new Date().toISOString()}] Acquired web lock for background operation`);
-            updateUI('Ready to investigate!', 'Background operation enabled (keep browser open)');
-          });
-        } catch (e) {
-          console.error('Web lock error:', e.message);
-          updateUI('Ready to investigate!', `Background operation may pause: ${e.message}`);
+  <div class="section">
+    <label>Queue Alert Sound / Vibration:</label>
+    <div class="button-group">
+      <button id="alarmBtn" onclick="toggleAlarm()">⚡ Activate Alarm</button>
+      <button onclick="testAlarm()">🔊 Test Alarm</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>Check Frequency: <span id="freqVal">5</span> mins</label>
+    <input type="range" id="freqSlider" min="1" max="30" value="5">
+    <label>Alert After: <span id="threshVal">2</span> fails</label>
+    <input type="range" id="threshSlider" min="1" max="5" value="2">
+    <label>Specific URL (optional):</label>
+    <input type="url" id="specificUrl" placeholder="https://www.pokemoncenter.com/product/...">
+  </div>
+
+  <div class="section">
+    <div class="button-group">
+      <button id="startBtn" onclick="startMonitoring()">🔎 Start Queue Hunt</button>
+      <button id="stopBtn" class="hidden" onclick="stopMonitoring()">⏹️ Stop Hunt</button>
+    </div>
+  </div>
+
+  <div class="status-pokedex" id="status-pokedex">
+    <p><strong>Status:</strong> <span class="status-text" id="statusText">Ready to hunt!</span></p>
+    <p>Last Check: <span id="lastCheck">Never</span></p>
+    <p>Runtime: <span id="runtime">0m 0s</span></p>
+    <p>Consecutive Fails: <span id="consec">0</span></p>
+    <p>Log / Details:</p>
+    <div class="log-container" id="details"></div>
+  </div>
+</div>
+
+<audio id="alertTone" preload="auto" loop>
+  <source src="https://cdn.freesound.org/previews/316/316847_4939433-lq.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+// --- State & Settings ---
+let intervalId = null, startTime = null, consecFails = 0, failThresh = 2, checkFreq = 5*60*1000;
+let proxies = ['https://corsproxy.io/?','https://api.allorigins.win/get?url=','https://thingproxy.freeboard.io/fetch/','https://cors-anywhere.herokuapp.com/','https://api.codetabs.com/v1/proxy?quest='];
+let blacklisted = new Set(), webhookUrl = '', logEntries = [], retryCount = 0, maxRetries = 3, alarmActive=false, alertAudio=null;
+
+// --- UI Update ---
+function updateUI(status, logMessage){
+  document.getElementById('statusText').textContent=status;
+  document.getElementById('lastCheck').textContent=new Date().toLocaleTimeString();
+  document.getElementById('consec').textContent=consecFails;
+  logEntries.unshift(`[${new Date().toLocaleTimeString()}] ${logMessage}`);
+  if(logEntries.length>15) logEntries.pop();
+  const logEl=document.getElementById('details');
+  logEl.innerHTML=logEntries.join('<br>');
+  logEl.scrollTop = 0; // scroll to top latest log
+  const sp=document.getElementById('status-pokedex');
+  if(/queue/i.test(status)) sp.classList.add('alert-zap'); else sp.classList.remove('alert-zap');
+  updateRuntime();
+}
+function updateRuntime(){
+  if(startTime) document.getElementById('runtime').textContent=`${Math.floor((Date.now()-startTime)/60000)}m ${Math.floor(((Date.now()-startTime)%60000)/1000)}s`;
+}
+setInterval(updateRuntime,1000);
+
+// --- Alarm & Vibration ---
+function toggleAlarm(){
+  alarmActive=!alarmActive;stopAlert();
+  document.getElementById('alarmBtn').textContent=alarmActive?'⚡ Deactivate Alarm':'⚡ Activate Alarm';
+  updateUI('Ready to hunt!',`Alarm ${alarmActive?'activated':'deactivated'}`);
+}
+function testAlarm(){
+  try{
+    const a=document.getElementById('alertTone');
+    a.play().then(()=>setTimeout(()=>{a.pause();a.currentTime=0;},5000));
+    if(navigator.vibrate) navigator.vibrate([200,100,200]);
+    updateUI('Ready to hunt!','Tested alert tone and vibration for 5 seconds');
+  }catch(e){updateUI('Ready to hunt!',`Test alarm error: ${e.message}`);}
+}
+function playAlert(){
+  if(alarmActive&&!alertAudio){
+    alertAudio=document.getElementById('alertTone');
+    alertAudio.play().catch(()=>{});
+    if(navigator.vibrate) navigator.vibrate([300,200,300]);
+    updateUI('Queue Detected 🚨','Alert tone & vibration activated!');
+  }
+}
+function stopAlert(){
+  if(alertAudio){alertAudio.pause();alertAudio.currentTime=0;alertAudio=null;}
+}
+
+// --- Discord ---
+async function sendDiscord(title,desc,color=0xFFD700){
+  webhookUrl=document.getElementById('discordWebhook')?.value||'';
+  if(!webhookUrl){updateUI('Ready to hunt!','Discord skipped: No webhook');return;}
+  const embed={title,description:desc,color,footer:{text:"Queue Hunter"}};
+  try{await fetch(webhookUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({embeds:[embed]})});
+  updateUI('Ready to hunt!',`Sent Discord: ${title}`);}catch(e){updateUI('Ready to hunt!',`Discord error: ${e.message}`);}
+}
+async function testDiscord(){await sendDiscord('📬 Test Ping','Webhook online! Ready to catch queue alerts! ⚡');}
+
+// --- Proxy ---
+async function getHealthyProxy(url){
+  for(let p of proxies.filter(pr=>!blacklisted.has(pr))){
+    updateUI('Checking proxies...',`Trying proxy: ${p}`);
+    try{
+      const ctrl=new AbortController();setTimeout(()=>ctrl.abort(),8000);
+      const res=await fetch(`${p}${encodeURIComponent(url)}`,{signal:ctrl.signal});
+      if(res.ok){updateUI('Proxy OK',`Using proxy: ${p}`);return p;}
+    }catch(e){
+      blacklisted.add(p);setTimeout(()=>blacklisted.delete(p),300000);
+      updateUI('Proxy failed',`Proxy ${p} error: ${e.message}`);
+    }
+  }
+  return null;
+}
+
+// --- Queue Detection ---
+function extractQueue(text,url,headers){
+  const posMatch=text.match(/pos["']?\s*[:=]\s*["']?(\d+)/i)||url.match(/pos=(\d+)/i);
+  const queueItScript=/queueit\.js/i.test(text);
+  const queueItHeader=headers.get('x-queueit')||headers.get('x-queueit-redirect');
+  const queueItUrl=/queue-it\.net/i.test(url);
+  const waitingRoom=/waiting room|queueit/i.test(text);
+  if(posMatch) return posMatch[1];
+  if(queueItScript||queueItHeader||queueItUrl||waitingRoom) return 'Unknown';
+  return null;
+}
+
+// --- Check Site ---
+async function checkSite(isConsec=false){
+  const specific=document.getElementById('specificUrl')?.value||'';
+  const urls=specific?[specific]:['https://www.pokemoncenter.com/','https://www.pokemoncenter.com/category/new-releases','https://www.pokemoncenter.com/category/trading-card-game'];
+  let success=false,queuePos=null,details='';
+  updateUI('Checking... 🕵️',`Investigating ${specific||'Pokémon Center'}...`);
+  for(let url of urls){
+    updateUI('Checking URL...',`Sleuthing URL: ${url}`);
+    const proxy=await getHealthyProxy(url);
+    if(!proxy){details='Investigation failed: No healthy proxies.';consecFails++;updateUI('Fail',details);continue;}
+    try{
+      const ctrl=new AbortController();setTimeout(()=>ctrl.abort(),8000);
+      const res=await fetch(`${proxy}${encodeURIComponent(url)}`,{signal:ctrl.signal});
+      if(res.ok){
+        const text=proxy.includes('allorigins')?(await res.json()).contents:await res.text();
+        const finalUrl=decodeURIComponent(res.url.replace(proxy,''));
+        queuePos=extractQueue(text,finalUrl,res.headers);
+        if(queuePos){
+          details=`Queue detected! Position: ${queuePos}`;
+          playAlert();
+          updateUI('Queue Detected 🚨',details);
+          sendDiscord('🚨 Queue Alert!',details);
+          return {success:false,queuePos,isFail:true};
+        }else{
+          details=`No queue detected. Proxy: ${proxy}, URL: ${finalUrl}, Analysis: No pos found, no queue headers, scripts or waiting room indicators.`;
+          success=true;consecFails=0;stopAlert();updateUI('Hunting... 🕵️',details);
+          break;
         }
-      } else {
-        console.warn('Web Locks API not supported');
-        updateUI('Ready to investigate!', 'Background operation limited; keep browser open');
+      }else{
+        details=`HTTP error: ${res.status} at ${url}`;consecFails++;updateUI('Fail',details);
       }
-    }
+    }catch(e){details=`Error on ${url}: ${e.message}`;consecFails++;updateUI('Fail',details);}
+  }
+  return {success,queuePos,isFail:!success};
+}
 
-    // Register Service Worker for Background Checks
-    async function registerServiceWorker() {
-      if ('serviceWorker' in navigator) {
-        try {
-          const registration = await navigator.serviceWorker.register('/service-worker.js');
-          console.log(`[${new Date().toISOString()}] Service worker registered:`, registration.scope);
-          navigator.serviceWorker.controller?.postMessage({ type: 'SET_INTERVAL', checkFreq });
-        } catch (e) {
-          console.error('Service worker registration failed:', e.message);
-          updateUI('Ready to investigate!', `Background checks may pause: ${e.message}`);
-        }
-      } else {
-        console.warn('Service Worker not supported');
-        updateUI('Ready to investigate!', 'Background checks limited; keep browser open');
-      }
-    }
+// --- Consecutive Verification ---
+async function verifyConsec(count=1){
+  if(count>=failThresh){
+    updateUI('Verifying...',`Confirming failure ${count} of ${failThresh}...`);
+    const result=await checkSite(true);
+    if(!result.isFail){consecFails=0;stopAlert();}
+    else{await new Promise(r=>setTimeout(r,5000));await verifyConsec(count+1);}
+  }
+}
 
-    // UI Helpers
-    function updateUI(status, logMessage) {
-      const statusText = document.getElementById('statusText');
-      const statusPokedex = document.getElementById('status-pokedex');
-      if (statusText) statusText.textContent = status + (navigator.userAgent.match(/mobile/i) ? ' On mobile, keep browser open for background checks.' : '');
-      if (document.getElementById('lastCheck')) document.getElementById('lastCheck').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      if (document.getElementById('consec')) document.getElementById('consec').textContent = consecFails;
-      const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      logEntries.unshift(`[${timestamp}] ${logMessage}`);
-      if (logEntries.length > 5) logEntries.pop();
-      if (document.getElementById('details')) document.getElementById('details').innerHTML = logEntries.join('<br>');
-      if (statusPokedex) {
-        if (/queue/i.test(status)) statusPokedex.classList.add('alert-zap');
-        else statusPokedex.classList.remove('alert-zap');
-      }
-      updateRuntime();
-    }
-    function updateRuntime() {
-      if (startTime && document.getElementById('runtime')) {
-        document.getElementById('runtime').textContent = `${Math.floor((Date.now() - startTime) / 60000)}m ${Math.floor(((Date.now() - startTime) % 60000) / 1000)}s`;
-      }
-    }
-    setInterval(updateRuntime, 1000);
+// --- Start / Stop ---
+async function startMonitoring(){
+  consecFails=0;retryCount=0;startTime=Date.now();logEntries=[];stopAlert();
+  await checkSite();
+  intervalId=setInterval(async()=>{
+    const result=await checkSite();
+    if(result.isFail) consecFails++;
+    if(consecFails>=failThresh) await verifyConsec();
+  },checkFreq+Math.random()*60000-30000);
+  document.getElementById('startBtn')?.classList.add('hidden');
+  document.getElementById('stopBtn')?.classList.remove('hidden');
+  updateUI('Checking... 🕵️','Started queue investigation');
+}
+function stopMonitoring(){
+  clearInterval(intervalId);intervalId=null;startTime=null;consecFails=0;retryCount=0;stopAlert();
+  document.getElementById('startBtn')?.classList.remove('hidden');
+  document.getElementById('stopBtn')?.classList.add('hidden');
+  updateUI('Hunt Paused 🛑','Investigation stopped');
+}
 
-    // Alarm Toggle and Test
-    function toggleAlarm() {
-      alarmActive = !alarmActive;
-      const alertTone = document.getElementById('alertTone');
-      if (alertTone) {
-        alertTone.pause();
-        alertTone.currentTime = 0;
-      }
-      alertAudio = null;
-      if (vibrateInterval) {
-        clearInterval(vibrateInterval);
-        vibrateInterval = null;
-        navigator.vibrate(0);
-      }
-      if (document.getElementById('alarmBtn')) {
-        document.getElementById('alarmBtn').textContent = alarmActive ? '⚡ Deactivate Alarm' : '⚡ Activate Alarm';
-      }
-      updateUI('Ready to investigate!', `Alarm ${alarmActive ? 'activated' : 'deactivated'}`);
-    }
-    function testAlarm() {
-      try {
-        const audio = document.getElementById('alertTone');
-        audio.play().then(() => {
-          if ('vibrate' in navigator) {
-            navigator.vibrate([1000, 500, 1000]);
-          } else {
-            console.warn('Vibration API not supported');
-          }
-          setTimeout(() => {
-            audio.pause();
-            audio.currentTime = 0;
-            navigator.vibrate(0);
-          }, 5000);
-          updateUI('Ready to investigate!', 'Tested alert tone and vibration for 5 seconds');
-        }).catch(e => {
-          console.error('Alert tone test failed:', e.message);
-          updateUI('Ready to investigate!', `Alert tone test error: ${e.message}`);
-        });
-      } catch (e) {
-        console.error('Test alarm error:', e.message);
-        updateUI('Ready to investigate!', `Test alarm error: ${e.message}`);
-      }
-    }
-
-    // Play/Stop Alert
-    function playAlert() {
-      if (alarmActive && !alertAudio) {
-        try {
-          alertAudio = document.getElementById('alertTone');
-          alertAudio.play().then(() => {
-            updateUI('Queue Detected 🚨', 'Alert tone playing for queue detection');
-          }).catch(e => {
-            console.error('Alert tone failed:', e.message);
-            updateUI('Queue Detected 🚨', `Alert tone error: ${e.message}`);
-          });
-          if ('vibrate' in navigator) {
-            vibrateInterval = setInterval(() => navigator.vibrate([1000, 500, 1000]), 2500);
-            console.log(`[${new Date().toISOString()}] Started vibration for queue detection`);
-          } else {
-            console.warn('Vibration API not supported');
-            updateUI('Queue Detected 🚨', 'Vibration not supported on this device');
-          }
-        } catch (e) {
-          console.error('Play alert error:', e.message);
-          updateUI('Queue Detected 🚨', `Alert sound error: ${e.message}`);
-        }
-      }
-    }
-    function stopAlert() {
-      if (alertAudio) {
-        alertAudio.pause();
-        alertAudio.currentTime = 0;
-        alertAudio = null;
-      }
-      if (vibrateInterval) {
-        clearInterval(vibrateInterval);
-        vibrateInterval = null;
-        navigator.vibrate(0);
-      }
-    }
-
-    // Discord Test/Send
-    async function sendDiscord(title, desc, color = 0xFFD700) {
-      webhookUrl = document.getElementById('discordWebhook')?.value || '';
-      if (!webhookUrl) {
-        updateUI('Ready to investigate!', 'Discord notification skipped: No webhook URL');
-        return;
-      }
-      const embed = { title, description: desc, color, footer: { text: 'Detective Pikachu\'s Ultra Queue Hunt' } };
-      try {
-        await fetch(webhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ embeds: [embed] }) });
-        updateUI('Ready to investigate!', `Sent Discord notification: ${title}`);
-      } catch (e) {
-        console.error('Discord fail:', e.message);
-        updateUI('Ready to investigate!', `Discord notification error: ${e.message}`);
-      }
-    }
-    async function testDiscord() {
-      await sendDiscord('📬 Detective Pikachu Test Ping', 'Webhook online! Ready to catch queue alerts! ⚡');
-    }
-
-    // Proxy Test/Rotate
-    async function getHealthyProxy(url) {
-      for (let proxy of proxies.filter(pr => !blacklisted.has(pr))) {
-        updateUI('Ready to investigate!', `Trying proxy: ${proxy}`);
-        try {
-          const ctrl = new AbortController();
-          setTimeout(() => ctrl.abort(), 8000);
-          const res = await fetch(`${proxy}${encodeURIComponent(url)}`, { signal: ctrl.signal });
-          if (res.ok) {
-            updateUI('Ready to investigate!', `Using proxy: ${proxy}`);
-            return proxy;
-          }
-        } catch (e) {
-          console.error('Proxy error:', e.message);
-          blacklisted.add(proxy);
-          setTimeout(() => blacklisted.delete(proxy), 300000);
-          updateUI('Ready to investigate!', `Proxy error for ${proxy}: ${e.message}`);
-        }
-      }
-      return null;
-    }
-
-    // Queue Extract
-    function extractQueue(text, url, headers) {
-      const posMatch = text.match(/pos["']?\s*[:=]\s*["']?(\d+)["']?/i) || url.match(/pos=(\d+)/i);
-      const queueItScript = /queueit\.js/i.test(text);
-      const queueItHeader = headers.get('x-queueit') || headers.get('x-queueit-redirect');
-      const queueItUrl = /queue-it\.net/i.test(url);
-      const waitingRoom = /waiting room|queueit/i.test(text);
-      return posMatch ? posMatch[1] : (queueItScript || queueItHeader || queueItUrl || waitingRoom) ? 'Unknown' : null;
-    }
-
-    // Main Check Function
-    async function checkSite(isConsec = false, retries = 0) {
-      const specific = document.getElementById('specificUrl')?.value || '';
-      const urls = specific ? [specific] : ['https://www.pokemoncenter.com/', 'https://www.pokemoncenter.com/category/new-releases', 'https://www.pokemoncenter.com/category/trading-card-game'];
-      let success = false, queuePos = null, details = '';
-      updateUI('Checking... 🕵️', `Investigating ${specific || 'Pokémon Center'}...`);
-      for (let url of urls) {
-        updateUI('Checking... 🕵️', `Sleuthing URL: ${url}`);
-        const proxy = await getHealthyProxy(url);
-        if (!proxy) {
-          details = 'Investigation failed: No healthy proxies available.';
-          if (retries < maxRetries) {
-            updateUI('Checking... 🕵️', `Retrying... (${retries + 1}/${maxRetries})`);
-            await new Promise(r => setTimeout(r, 3000));
-            return checkSite(isConsec, retries + 1);
-          }
-          updateUI('Check Failed 🚫', details);
-          consecFails++;
-          logCheck('Fail', details, queuePos);
-          continue;
-        }
-        try {
-          const ctrl = new AbortController();
-          setTimeout(() => ctrl.abort(), 8000);
-          console.log(`[${new Date().toISOString()}] Fetching ${proxy}${encodeURIComponent(url)}`);
-          let res = await fetch(`${proxy}${encodeURIComponent(url)}`, { signal: ctrl.signal });
-          if (res.ok) {
-            let text = proxy.includes('allorigins') ? (await res.json()).contents : await res.text();
-            const finalUrl = decodeURIComponent(res.url.replace(proxy, ''));
-            updateUI('Checking... 🕵️', `Received clues from ${url} (Final: ${finalUrl}, Size: ${text.length} chars)`);
-            queuePos = extractQueue(text, finalUrl, res.headers);
-            if (queuePos) {
-              details = `Queue detected! Pos: ${queuePos}. Joining the chase...`;
-              if (!isConsec) window.location.href = 'https://www.pokemoncenter.com/';
-              success = false;
-              playAlert();
-              updateUI('Queue Detected 🚨', details);
-              sendDiscord('🚨 Queue Alert!', details);
-              logCheck('Queue', details, queuePos);
-              return { success, queuePos, isFail: !success };
-            } else if (/pokemoncenter\.com/i.test(finalUrl) && text.length > 1000) {
-              details = `No queue detected. Proxy: ${proxy}, Final URL: ${finalUrl}, Response size: ${text.length} chars, No pos/queue-it.net/queueit.js/waiting room found.`;
-              success = true;
-              stopAlert();
-              updateUI('Hunting... 🕵️', details);
-              consecFails = 0;
-              logCheck('Success', details, queuePos);
-              break;
-            } else {
-              details = `Unexpected clues from ${url}. Final URL: ${finalUrl}, Size: ${text.length} chars.`;
-              if (retries < maxRetries) {
-                updateUI('Checking... 🕵️', `Retrying... (${retries + 1}/${maxRetries})`);
-                await new Promise(r => setTimeout(r, 3000));
-                return checkSite(isConsec, retries + 1);
-              }
-              updateUI('Check Failed 🚫', details);
-              consecFails++;
-              logCheck('Fail', details, queuePos);
-            }
-          } else {
-            details = `HTTP error: ${res.status} on ${url}.`;
-            if (retries < maxRetries) {
-              updateUI('Checking... 🕵️', `Retrying... (${retries + 1}/${maxRetries})`);
-              await new Promise(r => setTimeout(r, 3000));
-              return checkSite(isConsec, retries + 1);
-            }
-            updateUI('Check Failed 🚫', details);
-            consecFails++;
-            logCheck('Fail', details, queuePos);
-          }
-        } catch (e) {
-          console.error('Check site error:', e.message);
-          details = `Investigation error on ${url}: ${e.message}`;
-          if (retries < maxRetries) {
-            updateUI('Checking... 🕵️', `Retrying... (${retries + 1}/${maxRetries})`);
-            await new Promise(r => setTimeout(r, 3000));
-            return checkSite(isConsec, retries + 1);
-          }
-          updateUI('Check Failed 🚫', details);
-          consecFails++;
-          logCheck('Fail', details, queuePos);
-        }
-      }
-      return { success, queuePos, isFail: !success };
-    }
-
-    // Consecutive Verification
-    async function verifyConsec(count = 1) {
-      if (count >= failThresh) {
-        updateUI('Checking... 🕵️', `Verifying failure ${count}...`);
-        const result = await checkSite(true);
-        if (!result.isFail) {
-          consecFails = 0;
-          stopAlert();
-        } else {
-          await new Promise(r => setTimeout(r, 5000));
-          await verifyConsec(count + 1);
-        }
-      }
-    }
-
-    // Start/Stop
-    async function startMonitoring() {
-      consecFails = 0;
-      retryCount = 0;
-      startTime = Date.now();
-      logEntries = [];
-      stopAlert();
-      await requestLock();
-      await registerServiceWorker();
-      await checkSite();
-      intervalId = setInterval(async () => {
-        const result = await checkSite();
-        if (result.isFail) consecFails++;
-        if (consecFails >= failThresh) await verifyConsec();
-      }, checkFreq + Math.random() * 60000 - 30000);
-      document.getElementById('startBtn')?.classList.add('hidden');
-      document.getElementById('stopBtn')?.classList.remove('hidden');
-      updateUI('Checking... 🕵️', 'Started queue investigation');
-    }
-    function stopMonitoring() {
-      clearInterval(intervalId);
-      intervalId = null;
-      startTime = null;
-      consecFails = 0;
-      retryCount = 0;
-      stopAlert();
-      document.getElementById('startBtn')?.classList.remove('hidden');
-      document.getElementById('stopBtn')?.classList.add('hidden');
-      updateUI('Hunt Paused 🛑', 'Investigation stopped');
-    }
-
-    // Sliders
-    document.getElementById('freqSlider')?.addEventListener('input', e => {
-      checkFreq = e.target.value * 60 * 1000;
-      document.getElementById('freqVal').textContent = e.target.value;
-      navigator.serviceWorker.controller?.postMessage({ type: 'SET_INTERVAL', checkFreq });
-      updateUI('Ready to investigate!', `Updated check frequency to ${e.target.value} mins`);
-    });
-    document.getElementById('threshSlider')?.addEventListener('input', e => {
-      failThresh = e.target.value;
-      document.getElementById('threshVal').textContent = e.target.value;
-      updateUI('Ready to investigate!', `Updated alert threshold to ${e.target.value} fails`);
-    });
-
-    // Logging
-    function logCheck(status, details, queue) {
-      console.log(`[${new Date().toISOString()}] ${status} - ${details} (Queue: ${queue || 'None'})`);
-    }
-
-    // Load Saved
-    if (document.getElementById('freqSlider')) document.getElementById('freqSlider').value = localStorage.getItem('freq') || 5;
-    if (document.getElementById('threshSlider')) document.getElementById('threshSlider').value = localStorage.getItem('thresh') || 2;
-  </script>
+// --- Sliders ---
+document.getElementById('freqSlider')?.addEventListener('input',e=>{
+  checkFreq=e.target.value*60*1000;
+  document.getElementById('freqVal').textContent=e.target.value;
+  updateUI('Ready to hunt!',`Check frequency set to ${e.target.value} mins`);
+});
+document.getElementById('threshSlider')?.addEventListener('input',e=>{
+  failThresh=e.target.value;
+  document.getElementById('threshVal').textContent=e.target.value;
+  updateUI('Ready to hunt!',`Alert threshold set to ${e.target.value} fails`);
+});
+</script>
 </body>
 </html>
