@@ -73,11 +73,6 @@
       <button onclick="testEmail()">Test Email</button>
     </div>
 
-    <!-- SendGrid API Key -->
-    <label>SendGrid API Key (for auto-emails):</label>
-    <input type="password" id="sendgridApiKey" placeholder="Paste your SendGrid API key">
-    <button onclick="saveApiKey()">Save API Key</button>
-
     <!-- Discord Setup -->
     <label>Discord Webhook URL (for alerts):</label>
     <input type="url" id="discordWebhook" placeholder="https://discord.com/api/webhooks/...">
@@ -143,7 +138,7 @@
         document.getElementById('signInBtn').classList.add('hidden');
         document.getElementById('emailSection').classList.remove('hidden');
       } catch (error) {
-        console.error('Sign-in error:', error);
+        console.error('Sign-in error:', error.message, error.code);
         alert('Sign-in failed: ' + error.message);
       }
     };
@@ -164,16 +159,26 @@
       if (!currentUser) return alert('Sign in first!');
       if (!email || !/\S+@\S+\.\S+/.test(email)) return alert('Enter a valid email!');
       try {
+        // Check if email already exists in Firestore
+        const q = query(collection(db, 'subscribers'));
+        const querySnapshot = await getDocs(q);
+        const existingEmails = querySnapshot.docs.map(d => d.data().email);
+        if (existingEmails.includes(email)) {
+          alert('Email already subscribed!');
+          return;
+        }
         await setDoc(doc(db, 'subscribers', currentUser.uid), {
           email: email,
           subscribed: true,
           timestamp: new Date()
         });
-        localStorage.setItem('pokedrop_emails', JSON.stringify([email]));
+        let localEmails = JSON.parse(localStorage.getItem('pokedrop_emails') || '[]');
+        if (!localEmails.includes(email)) localEmails.push(email);
+        localStorage.setItem('pokedrop_emails', JSON.stringify([...new Set(localEmails)]));
         alert('Subscribed! You\'ll get alerts on drops.');
         console.log('Subscribed:', email);
       } catch (error) {
-        console.error('Subscription error:', error);
+        console.error('Subscription error:', error.message, error.code);
         alert('Subscription failed: ' + error.message);
       }
     };
@@ -187,7 +192,7 @@
           console.log('Loaded subscription:', data.email);
         }
       } catch (error) {
-        console.error('Load error:', error);
+        console.error('Load subscription error:', error.message, error.code);
       }
     }
 
@@ -195,13 +200,13 @@
       try {
         const q = query(collection(db, 'subscribers'));
         const querySnapshot = await getDocs(q);
-        const emails = querySnapshot.docs.map(d => d.data().email).filter(email => email);
+        const emails = [...new Set(querySnapshot.docs.map(d => d.data().email).filter(email => email))];
         console.log('Fetched subscribers:', emails);
         return emails;
       } catch (error) {
-        console.error('Query error:', error);
-        alert('Failed to fetch subscribers: ' + error.message);
-        return [];
+        console.error('Query error:', error.message, error.code);
+        alert('Failed to fetch subscribers: ' + error.message + ' (Using local emails as fallback)');
+        return [...new Set(JSON.parse(localStorage.getItem('pokedrop_emails') || '[]'))];
       }
     };
   </script>
@@ -215,47 +220,36 @@
     let isHunting = false;
     let localEmails = JSON.parse(localStorage.getItem('pokedrop_emails') || '[]');
 
-    function saveApiKey() {
-      const apiKey = document.getElementById('sendgridApiKey').value;
-      if (apiKey) {
-        localStorage.setItem('sendgrid_api_key', apiKey);
-        alert('SendGrid API key saved!');
-        document.getElementById('sendgridApiKey').value = '';
-      } else {
-        alert('Please enter a valid SendGrid API key.');
-      }
-    }
-
     async function sendEmailViaSendGrid(toEmails, subject, body) {
-      const apiKey = localStorage.getItem('sendgrid_api_key');
-      if (!apiKey) {
-        console.warn('No SendGrid API key found, falling back to mailto');
-        sendMailto(subject, body);
-        return;
-      }
+      const apiKey = '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';
+      const sendGridUrl = 'https://api.sendgrid.com/v3/mail/send';
+      // Deduplicate emails
+      const uniqueEmails = [...new Set(toEmails)];
       try {
-        const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+        const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(sendGridUrl)}`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${apiKey}`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            personalizations: [{ to: toEmails.map(email => ({ email })) }],
-            from: { email: 'your_verified_email@example.com' }, // Replace with your verified sender email
+            personalizations: [{ to: uniqueEmails.map(email => ({ email })) }],
+            from: { email: 'kronborgnielsen@gmail.com' },
             subject: subject,
             content: [{ type: 'text/plain', value: body }]
           })
         });
         if (response.ok) {
-          console.log('Emails sent via SendGrid:', toEmails);
+          console.log('Emails sent via SendGrid:', uniqueEmails);
         } else {
-          throw new Error('SendGrid API error: ' + response.statusText);
+          const errorText = await response.text();
+          throw new Error(`SendGrid API error: ${response.status} - ${errorText}`);
         }
       } catch (error) {
-        console.error('SendGrid error:', error);
+        console.error('SendGrid error:', error.message);
         alert('SendGrid failed, using mailto fallback: ' + error.message);
-        sendMailto(subject, body);
+        const bcc = uniqueEmails.join(',');
+        window.location.href = `mailto:?bcc=${encodeURIComponent(bcc)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       }
     }
 
@@ -268,32 +262,10 @@
         await sendEmailViaSendGrid(allEmails, 'Test Alert', testMsg);
         alert(`Test email sent to ${allEmails.length} recipient(s)! Check inboxes.`);
       } catch (error) {
-        console.error('Test email error:', error);
+        console.error('Test email error:', error.message);
         alert('Test failed: ' + error.message);
       }
     }
-
-    function updateUI(status, details = '', newProds = 0, success = false) {
-      const statusTextEl = document.getElementById('statusText');
-      let displayStatus = status;
-      if (isHunting && newProds === 0 && success) {
-        displayStatus = 'Store Running Normal - Nothing to Hunt';
-      }
-      statusTextEl.textContent = displayStatus;
-      document.getElementById('lastCheck').textContent = new Date().toLocaleTimeString();
-      document.getElementById('consec').textContent = consecFails;
-      document.getElementById('newCount').textContent = newProds;
-      document.getElementById('details').textContent = details;
-      if (newProds > 0 || /drop|new|accessible/i.test(status)) {
-        document.getElementById('status').classList.add('alert-zap');
-      }
-      updateRuntime();
-    }
-
-    function updateRuntime() {
-      if (startTime) document.getElementById('runtime').textContent = `${Math.floor((Date.now() - startTime) / 60000)}m ${Math.floor(((Date.now() - startTime) % 60000) / 1000)}s`;
-    }
-    setInterval(updateRuntime, 1000);
 
     async function sendDiscord(title, desc, color = 0xFFD700) {
       webhookUrl = document.getElementById('discordWebhook').value;
@@ -301,7 +273,7 @@
       const embed = { title, description: desc, color, footer: { text: `PokeDrop Master | ${new Date().toLocaleString()}` } };
       try {
         await fetch(webhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ embeds: [embed] }) });
-      } catch (e) { console.error('Discord fail:', e); }
+      } catch (e) { console.error('Discord fail:', e.message); }
     }
 
     async function testDiscord() {
@@ -309,21 +281,9 @@
         await sendDiscord('🧪 Test Ping', 'Your webhook is live! Ready for drops. ⚡');
         alert('Test sent! Check your Discord.');
       } catch (e) {
-        console.error('Discord test error:', e);
+        console.error('Discord test error:', e.message);
         alert('Discord test failed: ' + e.message);
       }
-    }
-
-    function sendMailto(subject, body) {
-      getAllSubscribers().then(allEmails => {
-        if (allEmails.length === 0) allEmails = localEmails;
-        if (allEmails.length === 0) return;
-        const bcc = allEmails.join(',');
-        window.location.href = `mailto:?bcc=${encodeURIComponent(bcc)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      }).catch(error => {
-        console.error('Send mailto error:', error);
-        alert('Notification failed: ' + error.message);
-      });
     }
 
     function playCry() {
@@ -338,7 +298,7 @@
           setTimeout(() => ctrl.abort(), 5000);
           const res = await fetch(`${p}${encodeURIComponent(url)}`, { signal: ctrl.signal });
           if (res.ok) return p;
-        } catch (e) { console.error('Proxy failed:', p, e); }
+        } catch (e) { console.error('Proxy failed:', p, e.message); }
         blacklisted.add(p);
         setTimeout(() => blacklisted.delete(p), 300000);
       }
@@ -385,7 +345,7 @@
               if (!isConsec) window.location.href = 'https://www.pokemoncenter.com/';
               success = false;
               break;
-            } else if (/pokemoncenter\.com/i.test(finalUrl) && text.length > 2000) {
+            } else if (/pokemoncenter.com/i.test(finalUrl) && text.length > 2000) {
               products = extractProducts(text);
               const { count, new: newProds } = detectNewProducts(products);
               details = count > 0 ? `DROP DETECTED! ${count} new product(s): ${newProds.map(np => np.title).join(', ')}` : 'Store running normal, no new drops.';
@@ -394,7 +354,7 @@
               break;
             }
           }
-        } catch (e) { console.error('Check error:', e); }
+        } catch (e) { console.error('Check error:', e.message); }
       }
 
       if (!success && !queuePos) details = 'Check failed (proxies down?).';
@@ -442,7 +402,7 @@
         document.getElementById('stopBtn').classList.remove('hidden');
         updateUI('Hunting... 🕵️');
       } catch (error) {
-        console.error('Start monitoring error:', error);
+        console.error('Start monitoring error:', error.message);
         alert('Failed to start: ' + error.message);
         document.getElementById('startBtn').disabled = false;
       }
