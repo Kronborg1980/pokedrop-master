@@ -108,6 +108,16 @@
             justify-content: center;
             margin-top: 0.75rem;
         }
+        
+        .input-with-button {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .input-with-button input {
+            flex-grow: 1;
+        }
 
         button {
             background: linear-gradient(145deg, #FFD700, #FFB300);
@@ -207,6 +217,8 @@
         }
 
         .hidden { display: none; }
+        .grayed-out { background: #666 !important; color: #999 !important; border-color: #555 !important; cursor: not-allowed; }
+
 
         @media (max-width: 480px) {
             .container { padding: 0.5rem; }
@@ -245,7 +257,10 @@
                 </div>
                 <div class="section">
                     <label>Discord Webhook URL:</label>
-                    <input type="url" id="discordWebhook" placeholder="https://discord.com/api/webhooks/...">
+                    <div class="input-with-button">
+                        <input type="url" id="discordWebhook" placeholder="https://discord.com/api/webhooks/...">
+                        <button id="submitWebhookBtn" onclick="window.QueueHunter.submitWebhook()">Submit</button>
+                    </div>
                     <input type="hidden" id="webhookCode" value="9918">
                     <div class="button-group">
                         <button id="testDiscordBtn" onclick="window.QueueHunter.testDiscord()">📬 Test Discord</button>
@@ -305,13 +320,37 @@
             }
         }
         
-        // New functionality to update button status
-        document.getElementById('discordWebhook').addEventListener('input', function() {
-            const testBtn = document.getElementById('testDiscordBtn');
-            testBtn.disabled = this.value.length > 0;
-        });
-
         window.QueueHunter = window.QueueHunter || {};
+        window.QueueHunter.isWebhookSubmitted = false;
+        
+        document.getElementById('discordWebhook').addEventListener('input', function() {
+            const submitBtn = document.getElementById('submitWebhookBtn');
+            const testBtn = document.getElementById('testDiscordBtn');
+            submitBtn.disabled = !this.value;
+            if (this.value) {
+                this.classList.remove('grayed-out');
+                testBtn.disabled = true;
+            } else {
+                window.QueueHunter.isWebhookSubmitted = false;
+                testBtn.disabled = true;
+            }
+        });
+        
+        window.QueueHunter.submitWebhook = function() {
+            const webhookUrlInput = document.getElementById('discordWebhook');
+            const testBtn = document.getElementById('testDiscordBtn');
+            const submitBtn = document.getElementById('submitWebhookBtn');
+
+            if (webhookUrlInput.value) {
+                window.QueueHunter.isWebhookSubmitted = true;
+                webhookUrlInput.classList.add('grayed-out');
+                submitBtn.disabled = true;
+                testBtn.disabled = false;
+                window.QueueHunter.updateUI('Discord webhook URL submitted.');
+            } else {
+                window.QueueHunter.updateUI('Please enter a valid webhook URL.');
+            }
+        };
 
         let intervalId = null;
         let startTime = null;
@@ -333,6 +372,13 @@
         let alertAudio = null;
         let vibrateInterval = null;
         const DISCORD_CODE = document.getElementById('webhookCode').value;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const testBtn = document.getElementById('testDiscordBtn');
+            const submitBtn = document.getElementById('submitWebhookBtn');
+            testBtn.disabled = true;
+            submitBtn.disabled = true;
+        });
 
         window.QueueHunter.requestLock = async function() {
             if ('locks' in navigator) {
@@ -476,8 +522,8 @@
             const webhookUrl = document.getElementById('discordWebhook')?.value || '';
             const webhookCode = document.getElementById('webhookCode')?.value || '';
             
-            if (!webhookUrl) {
-                window.QueueHunter.updateUI('Discord skipped: No webhook URL provided.');
+            if (!webhookUrl || !window.QueueHunter.isWebhookSubmitted) {
+                window.QueueHunter.updateUI('Discord skipped: Webhook not submitted.');
                 return;
             }
             if (webhookCode !== '9918') {
