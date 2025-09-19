@@ -138,7 +138,6 @@
             box-shadow: none;
         }
         
-        /* New styling for the status banner to match the sections */
         .status-banner {
             margin-bottom: 1.2rem;
             padding: 1rem;
@@ -157,8 +156,6 @@
             backdrop-filter: blur(5px);
             z-index: 20;
         }
-        /* End of new styling */
-
 
         .status-pokedex {
             background: linear-gradient(145deg, #3F51B5, #1A237E);
@@ -228,58 +225,92 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="pokedex">
-            <div class="header">
-                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/129.png" alt="Magikarp">
-                <h1>Queue Hunter</h1>
-                <p>Magikarp & Cubone tracking queues like a boss! ⚡</p>
-            </div>
-            <div class="section">
-                <label>Discord Webhook URL:</label>
-                <input type="url" id="discordWebhook" placeholder="https://discord.com/api/webhooks/...">
-                <label>Webhook Code (9918):</label>
-                <input type="password" id="webhookCode" placeholder="Enter code">
-                <div class="button-group">
-                    <button onclick="window.QueueHunter.testDiscord()">📬 Test Discord</button>
+    <div id="password-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e1e2f; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100;">
+        <div class="pokedex" style="text-align: center; padding: 2rem;">
+            <h1>Enter Code</h1>
+            <p>You must enter the correct code to continue.</p>
+            <input type="password" id="accessCode" placeholder="Enter code" style="width: 80%; max-width: 300px; margin-top: 1rem;">
+            <button onclick="checkAccessCode()" style="margin-top: 1rem;">Unlock</button>
+            <p id="error-message" style="color: #FF0000; margin-top: 1rem; display: none;">Incorrect code. Please try again.</p>
+        </div>
+    </div>
+
+    <div id="content" class="hidden">
+        <div class="container">
+            <div class="pokedex">
+                <div class="header">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/129.png" alt="Magikarp">
+                    <h1>Queue Hunter</h1>
+                    <p>Magikarp & Cubone tracking queues like a boss! ⚡</p>
                 </div>
-            </div>
-            <div class="section">
-                <label>Queue Alert Sound / Vibration:</label>
-                <div class="button-group">
-                    <button id="alarmBtn" onclick="window.QueueHunter.toggleAlarm()">⚡ Activate Alarm</button>
-                    <button onclick="window.QueueHunter.testAlarm()">🔊 Test Alarm</button>
+                <div class="section">
+                    <label>Discord Webhook URL:</label>
+                    <input type="url" id="discordWebhook" placeholder="https://discord.com/api/webhooks/...">
+                    <input type="hidden" id="webhookCode" value="9918">
+                    <div class="button-group">
+                        <button id="testDiscordBtn" onclick="window.QueueHunter.testDiscord()">📬 Test Discord</button>
+                    </div>
                 </div>
-            </div>
-            <div class="section">
-                <label>Check Frequency: <span id="freqVal">5</span> mins</label>
-                <input type="range" id="freqSlider" min="1" max="30" value="5">
-                <label>Alert After: <span id="threshVal">2</span> fails</label>
-                <input type="range" id="threshSlider" min="1" max="5" value="2">
-                <label>Specific URL (optional):</label>
-                <input type="url" id="specificUrl" placeholder="https://www.pokemoncenter.com/product/...">
-            </div>
-            <div class="section">
-                <div class="button-group">
-                    <button id="startBtn" onclick="window.QueueHunter.startMonitoring()">🔎 Start Queue Hunt</button>
-                    <button id="stopBtn" class="hidden" onclick="window.QueueHunter.stopMonitoring()">⏹️ Stop Hunt</button>
+                <div class="section">
+                    <label>Queue Alert Sound / Vibration:</label>
+                    <div class="button-group">
+                        <button id="alarmBtn" onclick="window.QueueHunter.toggleAlarm()">⚡ Activate Alarm</button>
+                        <button onclick="window.QueueHunter.testAlarm()">🔊 Test Alarm</button>
+                    </div>
                 </div>
-            </div>
-            <div class="status-banner" id="statusBanner">Ready to hunt</div>
-            <div class="status-pokedex" id="status-pokedex">
-                <p>Last Check: <span id="lastCheck">Never</span></p>
-                <p>Runtime: <span id="runtime">0m 0s</span></p>
-                <p>Consecutive Fails: <span id="consec">0</span></p>
-                <p>Log / Details:</p>
-                <div class="log-container" id="details"></div>
+                <div class="section">
+                    <label>Check Frequency: <span id="freqVal">5</span> mins</label>
+                    <input type="range" id="freqSlider" min="1" max="30" value="5">
+                    <label>Alert After: <span id="threshVal">2</span> fails</label>
+                    <input type="range" id="threshSlider" min="1" max="5" value="2">
+                    <label>Specific URL (optional):</label>
+                    <input type="url" id="specificUrl" placeholder="https://www.pokemoncenter.com/product/...">
+                </div>
+                <div class="section">
+                    <div class="button-group">
+                        <button id="startBtn" onclick="window.QueueHunter.startMonitoring()">🔎 Start Queue Hunt</button>
+                        <button id="stopBtn" class="hidden" onclick="window.QueueHunter.stopMonitoring()">⏹️ Stop Hunt</button>
+                    </div>
+                </div>
+                <div class="status-banner" id="statusBanner">Ready to hunt</div>
+                <div class="status-pokedex" id="status-pokedex">
+                    <p>Last Check: <span id="lastCheck">Never</span></p>
+                    <p>Runtime: <span id="runtime">0m 0s</span></p>
+                    <p>Consecutive Fails: <span id="consec">0</span></p>
+                    <p>Log / Details:</p>
+                    <div class="log-container" id="details"></div>
+                </div>
             </div>
         </div>
     </div>
+
     <audio id="alertTone" preload="auto" loop>
         <source src="https://cdn.freesound.org/previews/316/316847_4939433-lq.mp3" type="audio/mpeg">
         <source src="https://cdn.jsdelivr.net/npm/@freesound/audio@316/316847_4939433-lq.mp3" type="audio/mpeg">
     </audio>
     <script>
+        const ACCESS_CODE = "skaplask";
+
+        function checkAccessCode() {
+            const enteredCode = document.getElementById('accessCode').value;
+            const passwordOverlay = document.getElementById('password-overlay');
+            const content = document.getElementById('content');
+            const errorMessage = document.getElementById('error-message');
+
+            if (enteredCode === ACCESS_CODE) {
+                passwordOverlay.style.display = 'none';
+                content.classList.remove('hidden');
+            } else {
+                errorMessage.style.display = 'block';
+            }
+        }
+        
+        // New functionality to update button status
+        document.getElementById('discordWebhook').addEventListener('input', function() {
+            const testBtn = document.getElementById('testDiscordBtn');
+            testBtn.disabled = this.value.length > 0;
+        });
+
         window.QueueHunter = window.QueueHunter || {};
 
         let intervalId = null;
@@ -301,7 +332,7 @@
         let alarmActive = false;
         let alertAudio = null;
         let vibrateInterval = null;
-        const DISCORD_CODE = "9918";
+        const DISCORD_CODE = document.getElementById('webhookCode').value;
 
         window.QueueHunter.requestLock = async function() {
             if ('locks' in navigator) {
@@ -449,7 +480,7 @@
                 window.QueueHunter.updateUI('Discord skipped: No webhook URL provided.');
                 return;
             }
-            if (webhookCode !== DISCORD_CODE) {
+            if (webhookCode !== '9918') {
                 window.QueueHunter.updateUI('Discord skipped: Incorrect webhook code.');
                 return;
             }
