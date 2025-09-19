@@ -373,21 +373,21 @@
 
     // Proxy Test/Rotate
     async function getHealthyProxy(url) {
-      for (let p of proxies.filter(pr => !blacklisted.has(pr))) {
-        updateUI('Ready to investigate!', `Trying proxy: ${p}`);
+      for (let proxy of proxies.filter(pr => !blacklisted.has(pr))) {
+        updateUI('Ready to investigate!', `Trying proxy: ${proxy}`);
         try {
           const ctrl = new AbortController();
           setTimeout(() => ctrl.abort(), 8000);
-          const res = await fetch(`${p}${encodeURIComponent(url)}`, { signal: ctrl.signal });
+          const res = await fetch(`${proxy}${encodeURIComponent(url)}`, { signal: ctrl.signal });
           if (res.ok) {
-            updateUI('Ready to investigate!', `Using proxy: ${p}`);
-            return p;
+            updateUI('Ready to investigate!', `Using proxy: ${proxy}`);
+            return proxy;
           }
         } catch (e) {
           console.error('Proxy error:', e.message);
-          blacklisted.add(p);
-          setTimeout(() => blacklisted.delete(p), 300000);
-          updateUI('Ready to investigate!', `Proxy error for ${p}: ${e.message}`);
+          blacklisted.add(proxy);
+          setTimeout(() => blacklisted.delete(proxy), 300000);
+          updateUI('Ready to investigate!', `Proxy error for ${proxy}: ${e.message}`);
         }
       }
       return null;
@@ -427,7 +427,8 @@
         try {
           const ctrl = new AbortController();
           setTimeout(() => ctrl.abort(), 8000);
-          let res = await fetch(`${p}${encodeURIComponent(url)}`, { signal: ctrl.signal });
+          console.log(`[${new Date().toISOString()}] Fetching ${proxy}${encodeURIComponent(url)}`);
+          let res = await fetch(`${proxy}${encodeURIComponent(url)}`, { signal: ctrl.signal });
           if (res.ok) {
             let text = proxy.includes('allorigins') ? (await res.json()).contents : await res.text();
             const finalUrl = decodeURIComponent(res.url.replace(proxy, ''));
@@ -540,7 +541,7 @@
 
     // Logging
     function logCheck(status, details, queue) {
-      console.log(`${new Date().toISOString()}: ${status} - ${details} (Queue: ${queue || 'None'})`);
+      console.log(`[${new Date().toISOString()}] ${status} - ${details} (Queue: ${queue || 'None'})`);
     }
 
     // Load Saved
