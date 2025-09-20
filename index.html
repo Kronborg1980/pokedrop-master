@@ -19,7 +19,6 @@
             padding: 1rem;
             box-sizing: border-box;
         }
-
         .container {
             display: flex;
             flex-direction: column;
@@ -27,7 +26,6 @@
             width: 100%;
             max-width: 450px;
         }
-
         .pokedex {
             background: linear-gradient(145deg, rgba(30, 30, 50, 0.9), rgba(0, 0, 20, 0.9));
             border: 3px solid #FFD700;
@@ -38,18 +36,17 @@
             backdrop-filter: blur(8px);
             z-index: 10;
         }
-        
+       
         .header {
             text-align: center;
             margin-bottom: 1.5rem;
         }
-        
+       
         .header img {
             width: 100px;
             filter: drop-shadow(0 0 12px #FFD700);
             margin-bottom: 0.5rem;
         }
-
         .header h1 {
             font-family: 'Orbitron', sans-serif;
             color: #FFD700;
@@ -57,14 +54,13 @@
             text-shadow: 1px 1px 3px #000;
             margin: 0;
         }
-        
+       
         .header p {
             color: #fff;
             font-size: 0.9rem;
             text-shadow: 1px 1px 2px #000;
             margin: 0.5rem 0 0;
         }
-
         .section {
             margin-bottom: 1.2rem;
             padding: 1rem;
@@ -73,7 +69,6 @@
             border: 1px solid #FFD700;
             backdrop-filter: blur(5px);
         }
-
         .section label {
             display: block;
             font-family: 'Orbitron', sans-serif;
@@ -81,7 +76,7 @@
             color: #fff;
             margin-bottom: 0.5rem;
         }
-        
+       
         input, select {
             border: 1px solid #FFD700;
             border-radius: 8px;
@@ -94,13 +89,12 @@
             font-family: 'Roboto', sans-serif;
             transition: all 0.3s;
         }
-        
+       
         input:focus, select:focus {
             border-color: #FFB300;
             box-shadow: 0 0 8px #FFD700;
             outline: none;
         }
-
         .button-group {
             display: flex;
             gap: 0.75rem;
@@ -108,17 +102,15 @@
             justify-content: center;
             margin-top: 0.75rem;
         }
-        
+       
         .input-with-button {
             display: flex;
             gap: 0.5rem;
             align-items: center;
         }
-
         .input-with-button input {
             flex-grow: 1;
         }
-
         button {
             background: linear-gradient(145deg, #FFD700, #FFB300);
             color: #1A1A1A;
@@ -134,17 +126,16 @@
             overflow: hidden;
             flex-grow: 1;
         }
-        
+       
         button:active {
             transform: translateY(1px);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
         }
-
         button:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
         }
-        
+       
         button:disabled {
             background: #666;
             color: #999;
@@ -152,7 +143,7 @@
             cursor: not-allowed;
             box-shadow: none;
         }
-        
+       
         .status-banner {
             margin-bottom: 1.2rem;
             padding: 1rem;
@@ -171,7 +162,6 @@
             backdrop-filter: blur(5px);
             z-index: 20;
         }
-
         .status-pokedex {
             background: linear-gradient(145deg, #3F51B5, #1A237E);
             color: #FFF;
@@ -184,18 +174,15 @@
             max-height: 250px;
             overflow-y: auto;
         }
-
         .status-pokedex p {
             margin: 0.4rem 0;
             font-size: 0.8rem;
         }
-        
-
+       
         .status-banner.green { color: #00FF00; border-color: #00FF00; text-shadow: 0 0 8px #00FF00; }
         .status-banner.red { color: #FF0000; border-color: #FF0000; text-shadow: 0 0 8px #FF0000; animation: zap 0.3s ease infinite; }
         .status-banner.yellow { color: #FFD700; border-color: #FFD700; text-shadow: 0 0 8px #FFD700; }
         .status-banner.gray { color: #999; border-color: #999; text-shadow: 0 0 8px #999; }
-
         .log-container {
             max-height: 150px;
             overflow-y: auto;
@@ -211,20 +198,15 @@
             white-space: pre-wrap;
             word-wrap: break-word;
         }
-
         .alert-zap {
             animation: zap 0.3s ease infinite;
         }
-
         @keyframes zap {
             0%, 100% { border-color: #FFD700; box-shadow: 0 0 20px #FFD700; }
             50% { border-color: #FFB300; box-shadow: 0 0 30px #FFB300; }
         }
-
         .hidden { display: none; }
         .grayed-out { background: #666 !important; color: #999 !important; border-color: #555 !important; cursor: not-allowed; }
-
-
         @media (max-width: 480px) {
             .container { padding: 0.5rem; }
             .status-banner { font-size: 1.2rem; padding: 0.8rem; margin-bottom: 1rem; }
@@ -239,6 +221,25 @@
             .status-pokedex p { font-size: 0.7rem; }
             .log-container { font-size: 0.65rem; }
         }
+        .email-list {
+            margin-top: 0.5rem;
+            list-style: none;
+            padding: 0;
+        }
+        .email-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem;
+            border-radius: 5px;
+            margin-bottom: 0.5rem;
+        }
+        .email-list button {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.7rem;
+            background: linear-gradient(145deg, #FF4500, #FF0000);
+        }
     </style>
 </head>
 <body>
@@ -251,7 +252,6 @@
             <p id="error-message" style="color: #FF0000; margin-top: 1rem; display: none;">Incorrect code. Please try again.</p>
         </div>
     </div>
-
     <div id="content" class="hidden">
         <div class="container">
             <div class="pokedex">
@@ -263,12 +263,24 @@
                 <div class="section">
                     <label>Discord Webhook URL:</label>
                     <div class="input-with-button">
-                        <input type="url" id="discordWebhook" placeholder="https://discord.com/api/webhooks/...">
+                        <input type="url" id="discordWebhook" value="https://discord.com/api/webhooks/1418654823745716436/vuMKu1s095Cq3BfU06OF_Z_mwxG39zHppHJ3c4BX5X38WuJFWPGhIZdopWTEEXlophiN" placeholder="https://discord.com/api/webhooks/...">
                         <button id="submitWebhookBtn" onclick="window.QueueHunter.submitWebhook()">Submit</button>
+                        <button id="clearWebhookBtn" onclick="window.QueueHunter.clearWebhook()">Clear</button>
                     </div>
                     <input type="hidden" id="webhookCode" value="9918">
                     <div class="button-group">
                         <button id="testDiscordBtn" onclick="window.QueueHunter.testDiscord()">📬 Test Discord</button>
+                    </div>
+                </div>
+                <div class="section">
+                    <label>Email Notifications:</label>
+                    <div class="input-with-button">
+                        <input type="email" id="emailInput" placeholder="Enter email address">
+                        <button id="addEmailBtn" onclick="window.QueueHunter.addEmail()">Add</button>
+                    </div>
+                    <ul id="emailList" class="email-list"></ul>
+                    <div class="button-group">
+                        <button id="testEmailBtn" onclick="window.QueueHunter.testEmail()">✉️ Test Email</button>
                     </div>
                 </div>
                 <div class="section">
@@ -303,20 +315,18 @@
             </div>
         </div>
     </div>
-
     <audio id="alertTone" preload="auto" loop>
         <source src="https://cdn.freesound.org/previews/316/316847_4939433-lq.mp3" type="audio/mpeg">
         <source src="https://cdn.jsdelivr.net/npm/@freesound/audio@316/316847_4939433-lq.mp3" type="audio/mpeg">
     </audio>
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <script>
         const ACCESS_CODE = "skaplask";
-
         function checkAccessCode() {
             const enteredCode = document.getElementById('accessCode').value;
             const passwordOverlay = document.getElementById('password-overlay');
             const content = document.getElementById('content');
             const errorMessage = document.getElementById('error-message');
-
             if (enteredCode === ACCESS_CODE) {
                 passwordOverlay.style.display = 'none';
                 content.classList.remove('hidden');
@@ -324,39 +334,57 @@
                 errorMessage.style.display = 'block';
             }
         }
-        
+       
         window.QueueHunter = window.QueueHunter || {};
         window.QueueHunter.isWebhookSubmitted = false;
-        
+        window.QueueHunter.emails = ['kronborgnielsen@gmail.com'];  // Default email
+       
         document.getElementById('discordWebhook').addEventListener('input', function() {
             const submitBtn = document.getElementById('submitWebhookBtn');
             const testBtn = document.getElementById('testDiscordBtn');
+            const clearBtn = document.getElementById('clearWebhookBtn');
             submitBtn.disabled = !this.value;
+            clearBtn.disabled = !this.value;
             if (this.value) {
                 this.classList.remove('grayed-out');
-                testBtn.disabled = true;
+                testBtn.disabled = !window.QueueHunter.isWebhookSubmitted;
             } else {
                 window.QueueHunter.isWebhookSubmitted = false;
                 testBtn.disabled = true;
             }
         });
-        
+       
         window.QueueHunter.submitWebhook = function() {
             const webhookUrlInput = document.getElementById('discordWebhook');
             const testBtn = document.getElementById('testDiscordBtn');
             const submitBtn = document.getElementById('submitWebhookBtn');
-
+            const clearBtn = document.getElementById('clearWebhookBtn');
             if (webhookUrlInput.value) {
                 window.QueueHunter.isWebhookSubmitted = true;
                 webhookUrlInput.classList.add('grayed-out');
                 submitBtn.disabled = true;
+                clearBtn.disabled = false;
                 testBtn.disabled = false;
                 window.QueueHunter.updateUI('Discord webhook URL submitted.');
             } else {
                 window.QueueHunter.updateUI('Please enter a valid webhook URL.');
             }
         };
-
+       
+        window.QueueHunter.clearWebhook = function() {
+            const webhookUrlInput = document.getElementById('discordWebhook');
+            const testBtn = document.getElementById('testDiscordBtn');
+            const submitBtn = document.getElementById('submitWebhookBtn');
+            const clearBtn = document.getElementById('clearWebhookBtn');
+            webhookUrlInput.value = '';
+            webhookUrlInput.classList.remove('grayed-out');
+            window.QueueHunter.isWebhookSubmitted = false;
+            submitBtn.disabled = true;
+            clearBtn.disabled = true;
+            testBtn.disabled = true;
+            window.QueueHunter.updateUI('Discord webhook cleared.');
+        };
+       
         let intervalId = null;
         let startTime = null;
         let consecFails = 0;
@@ -377,14 +405,28 @@
         let alertAudio = null;
         let vibrateInterval = null;
         const DISCORD_CODE = document.getElementById('webhookCode').value;
-        
+
+        emailjs.init('LxaYn4E6okRV7RG0O');  // REPLACE WITH YOUR EMAILJS PUBLIC KEY
+
+        window.QueueHunter.emailServiceId = 'service_ahqdaj5';
+        window.QueueHunter.emailTemplateId = 'template_whhvnra';
+       
         document.addEventListener('DOMContentLoaded', () => {
             const testBtn = document.getElementById('testDiscordBtn');
             const submitBtn = document.getElementById('submitWebhookBtn');
+            const clearBtn = document.getElementById('clearWebhookBtn');
+            const addEmailBtn = document.getElementById('addEmailBtn');
+            const testEmailBtn = document.getElementById('testEmailBtn');
             testBtn.disabled = true;
-            submitBtn.disabled = true;
+            submitBtn.disabled = false;  // Enabled due to default webhook
+            clearBtn.disabled = false;   // Enabled due to default webhook
+            addEmailBtn.disabled = true;
+            testEmailBtn.disabled = window.QueueHunter.emails.length === 0;
+            document.getElementById('emailInput').addEventListener('input', function() {
+                addEmailBtn.disabled = !this.value || !/\S+@\S+\.\S+/.test(this.value);
+            });
+            window.QueueHunter.renderEmailList();  // Render default email
         });
-
         window.QueueHunter.requestLock = async function() {
             if ('locks' in navigator) {
                 try {
@@ -401,7 +443,6 @@
                 window.QueueHunter.updateUI('Background operation limited; keep browser open');
             }
         };
-
         window.QueueHunter.registerServiceWorker = async function() {
             if ('serviceWorker' in navigator && location.protocol !== 'about:') {
                 try {
@@ -417,7 +458,6 @@
                 window.QueueHunter.updateUI('Background checks limited; keep browser open');
             }
         };
-
         window.QueueHunter.updateStatusBanner = function(text, colorClass) {
             const banner = document.getElementById('statusBanner');
             if (banner) {
@@ -425,7 +465,6 @@
                 banner.className = 'status-banner ' + colorClass;
             }
         };
-
         window.QueueHunter.updateUI = function(logMessage) {
             const lastCheck = document.getElementById('lastCheck');
             if (lastCheck) lastCheck.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -446,7 +485,6 @@
             }
             window.QueueHunter.updateRuntime();
         };
-
         window.QueueHunter.updateRuntime = function() {
             const runtime = document.getElementById('runtime');
             if (startTime && runtime) {
@@ -454,7 +492,6 @@
             }
         };
         setInterval(window.QueueHunter.updateRuntime, 1000);
-
         window.QueueHunter.toggleAlarm = function() {
             alarmActive = !alarmActive;
             window.QueueHunter.stopAlert();
@@ -464,7 +501,6 @@
             }
             window.QueueHunter.updateUI(`Alarm ${alarmActive ? 'activated' : 'deactivated'}`);
         };
-
         window.QueueHunter.testAlarm = function() {
             try {
                 const audio = document.getElementById('alertTone');
@@ -485,7 +521,6 @@
                 window.QueueHunter.updateUI(`Test alarm error: ${e.message}`);
             }
         };
-
         window.QueueHunter.playAlert = function() {
             if (alarmActive && !alertAudio) {
                 try {
@@ -509,7 +544,6 @@
                 }
             }
         };
-
         window.QueueHunter.stopAlert = function() {
             if (alertAudio) {
                 alertAudio.pause();
@@ -522,11 +556,10 @@
                 navigator.vibrate(0);
             }
         };
-
         window.QueueHunter.sendDiscord = async function(title, desc, color = 0xFFD700) {
             const webhookUrl = document.getElementById('discordWebhook')?.value || '';
             const webhookCode = document.getElementById('webhookCode')?.value || '';
-            
+           
             if (!webhookUrl || !window.QueueHunter.isWebhookSubmitted) {
                 window.QueueHunter.updateUI('Discord skipped: Webhook not submitted.');
                 return;
@@ -539,7 +572,6 @@
             const originalText = testBtn.textContent;
             testBtn.textContent = 'Ping Sent!';
             setTimeout(() => testBtn.textContent = originalText, 2000);
-
             const embed = { title, description: desc, color, footer: { text: 'Queue Hunter' } };
             try {
                 await fetch(webhookUrl, {
@@ -553,11 +585,99 @@
                 window.QueueHunter.updateUI(`Discord error: ${e.message}`);
             }
         };
-
         window.QueueHunter.testDiscord = async function() {
             await window.QueueHunter.sendDiscord('📬 Test Ping', 'Webhook online! Ready to catch queue alerts! ⚡');
         };
-
+        window.QueueHunter.addEmail = function() {
+            const emailInput = document.getElementById('emailInput');
+            const email = emailInput.value.trim();
+            if (email && !window.QueueHunter.emails.includes(email)) {
+                window.QueueHunter.emails.push(email);
+                window.QueueHunter.renderEmailList();
+                emailInput.value = '';
+                emailInput.classList.add('grayed-out');
+                setTimeout(() => emailInput.classList.remove('grayed-out'), 2000);  // Gray out temporarily
+                document.getElementById('addEmailBtn').disabled = true;
+                document.getElementById('testEmailBtn').disabled = window.QueueHunter.emails.length === 0;
+                window.QueueHunter.updateUI(`Added email: ${email}`);
+            } else {
+                window.QueueHunter.updateUI('Invalid or duplicate email.');
+            }
+        };
+        window.QueueHunter.removeEmail = function(email) {
+            window.QueueHunter.emails = window.QueueHunter.emails.filter(e => e !== email);
+            window.QueueHunter.renderEmailList();
+            document.getElementById('testEmailBtn').disabled = window.QueueHunter.emails.length === 0;
+            window.QueueHunter.updateUI(`Removed email: ${email}`);
+        };
+        window.QueueHunter.renderEmailList = function() {
+            const emailList = document.getElementById('emailList');
+            emailList.innerHTML = '';
+            window.QueueHunter.emails.forEach(email => {
+                const li = document.createElement('li');
+                li.textContent = email;
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = 'Remove';
+                removeBtn.onclick = () => window.QueueHunter.removeEmail(email);
+                li.appendChild(removeBtn);
+                emailList.appendChild(li);
+            });
+        };
+        window.QueueHunter.sendEmail = async function(status, details) {
+            if (window.QueueHunter.emails.length === 0) {
+                window.QueueHunter.updateUI('Email skipped: No emails added.');
+                return;
+            }
+            const fancyDetails = `🚨 **Alert Details:** ${details}\n\n**Powered by Queue Hunter** – Catch 'em all! ⚡\n(Magikarp approves! 🐟)`;
+            const timestamp = new Date().toLocaleString();
+            let successCount = 0;
+            for (const email of window.QueueHunter.emails) {
+                try {
+                    const templateParams = {
+                        status: status,
+                        details: fancyDetails,
+                        timestamp: timestamp,
+                        to_email: email
+                    };
+                    const response = await emailjs.send(window.QueueHunter.emailServiceId, window.QueueHunter.emailTemplateId, templateParams);
+                    successCount++;
+                    window.QueueHunter.updateUI(`Sent Email to ${email}: ${status}`);
+                } catch (e) {
+                    console.error('Email fail:', e);
+                    window.QueueHunter.updateUI(`Email error for ${email}: ${e.text || e.message || 'Unknown error'}`);
+                }
+            }
+            if (successCount > 0) {
+                window.QueueHunter.updateUI(`Successfully sent email to ${successCount} address${successCount > 1 ? 'es' : ''}.`);
+            }
+        };
+        window.QueueHunter.testEmail = async function() {
+            const testBtn = document.getElementById('testEmailBtn');
+            const originalText = testBtn.textContent;
+            testBtn.textContent = 'Test Sent!';
+            setTimeout(() => testBtn.textContent = originalText, 2000);
+            let successCount = 0;
+            const timestamp = new Date().toLocaleString();
+            const details = 'Email notifications are online! Ready to hunt queues! ⚡';
+            const fancyDetails = `🚨 **Test Alert:** ${details}\n\n**Powered by Queue Hunter** – Catch 'em all! ⚡\n(Magikarp approves! 🐟)`;
+            for (const email of window.QueueHunter.emails) {
+                try {
+                    const templateParams = {
+                        status: '✉️ Test Alert',
+                        details: fancyDetails,
+                        timestamp: timestamp,
+                        to_email: email
+                    };
+                    const response = await emailjs.send(window.QueueHunter.emailServiceId, window.QueueHunter.emailTemplateId, templateParams);
+                    successCount++;
+                    window.QueueHunter.updateUI(`Test email sent to ${email}`);
+                } catch (e) {
+                    console.error('Test email fail:', e);
+                    window.QueueHunter.updateUI(`Test email error for ${email}: ${e.text || e.message || 'Unknown error'}`);
+                }
+            }
+            window.QueueHunter.updateUI(`Test email sent to ${successCount} address${successCount > 1 ? 'es' : ''}${successCount === 0 ? ' (all failed)' : ''}.`);
+        };
         window.QueueHunter.getHealthyProxy = async function(url) {
             for (let p of proxies.filter(pr => !blacklisted.has(pr))) {
                 window.QueueHunter.updateStatusBanner('Checking proxies...', 'yellow');
@@ -579,7 +699,6 @@
             }
             return null;
         };
-
         window.QueueHunter.extractQueue = function(text, url, headers) {
             const posMatch = text.match(/pos["']?\s*[:=]\s*["']?(\d+)/i) || url.match(/pos=(\d+)/i);
             const queueItScript = /queueit\.js/i.test(text);
@@ -590,7 +709,6 @@
             if (queueItScript || queueItHeader || queueItUrl || waitingRoom) return 'Unknown';
             return null;
         };
-
         window.QueueHunter.checkSite = async function(isConsec = false, retries = 0) {
             const specific = document.getElementById('specificUrl')?.value || '';
             const urls = specific ? [specific] : [
@@ -599,10 +717,10 @@
                 'https://www.pokemoncenter.com/category/trading-card-game'
             ];
             let success = false, queuePos = null, details = '';
-            
+           
             window.QueueHunter.updateStatusBanner('Checking...', 'yellow');
             window.QueueHunter.updateUI(`Investigating ${specific || 'Pokémon Center'}...`);
-            
+           
             for (let url of urls) {
                 window.QueueHunter.updateUI(`Sleuthing URL: ${url}`);
                 const proxy = await window.QueueHunter.getHealthyProxy(url);
@@ -635,6 +753,7 @@
                             window.QueueHunter.playAlert();
                             window.QueueHunter.updateStatusBanner('Queue Detected 🚨', 'red');
                             window.QueueHunter.sendDiscord('🚨 Queue Alert!', details);
+                            window.QueueHunter.sendEmail('🚨 Queue Detected', details);
                             window.QueueHunter.logCheck('Queue', details, queuePos);
                             return { success: false, queuePos, isFail: true };
                         } else if (/pokemoncenter\.com/i.test(finalUrl) && text.length > 1000) {
@@ -686,7 +805,6 @@
             }
             return { success, queuePos, isFail: !success };
         };
-
         window.QueueHunter.verifyConsec = async function(count = 1) {
             if (count >= failThresh) {
                 window.QueueHunter.updateUI(`Confirming failure ${count} of ${failThresh}...`);
@@ -700,7 +818,6 @@
                 }
             }
         };
-
         window.QueueHunter.startMonitoring = async function() {
             consecFails = 0;
             retryCount = 0;
@@ -709,28 +826,26 @@
             window.QueueHunter.stopAlert();
             await window.QueueHunter.requestLock();
             await window.QueueHunter.registerServiceWorker();
-            
+           
             const startBtn = document.getElementById('startBtn');
             const stopBtn = document.getElementById('stopBtn');
             if (startBtn) startBtn.classList.add('hidden');
             if (stopBtn) stopBtn.classList.remove('hidden');
-
             const result = await window.QueueHunter.checkSite();
             if (result.isFail) {
                 consecFails++;
             }
-            
+           
             intervalId = setInterval(async () => {
                 const result = await window.QueueHunter.checkSite();
                 if (result.isFail) consecFails++;
                 if (consecFails >= failThresh) await window.QueueHunter.verifyConsec();
             }, checkFreq + Math.random() * 60000 - 30000);
-            
+           
             if (navigator.serviceWorker.controller) {
                 navigator.serviceWorker.controller.postMessage({ type: 'START_CHECK' });
             }
         };
-
         window.QueueHunter.stopMonitoring = function() {
             if (intervalId) {
                 clearInterval(intervalId);
@@ -744,15 +859,14 @@
             const stopBtn = document.getElementById('stopBtn');
             if (startBtn) startBtn.classList.remove('hidden');
             if (stopBtn) stopBtn.classList.add('hidden');
-            
+           
             window.QueueHunter.updateStatusBanner('Ready to hunt', 'gray');
             window.QueueHunter.updateUI('Investigation stopped');
-            
+           
             if (navigator.serviceWorker.controller) {
                 navigator.serviceWorker.controller.postMessage({ type: 'STOP_CHECK' });
             }
         };
-
         const freqSlider = document.getElementById('freqSlider');
         if (freqSlider) {
             freqSlider.addEventListener('input', function(e) {
@@ -765,7 +879,6 @@
                 window.QueueHunter.updateUI(`Check frequency set to ${e.target.value} mins`);
             });
         }
-
         const threshSlider = document.getElementById('threshSlider');
         if (threshSlider) {
             threshSlider.addEventListener('input', function(e) {
@@ -775,11 +888,9 @@
                 window.QueueHunter.updateUI(`Alert threshold set to ${e.target.value} fails`);
             });
         }
-
         window.QueueHunter.logCheck = function(status, details, queue) {
             console.log(`[${new Date().toISOString()}] ${status} - ${details} (Queue: ${queue || 'None'})`);
         };
-
         if (navigator.serviceWorker) {
             navigator.serviceWorker.addEventListener('message', function(event) {
                 if (event.data.type === 'CHECK_SITE') {
