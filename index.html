@@ -253,12 +253,13 @@
                 <div class="section">
                     <label>Discord Webhook URL:</label>
                     <div class="input-with-button">
-                        <input type="url" id="discordWebhook" value="https://discord.com/api/webhooks/1418654823745716436/vuMKu1s095Cq3BfU06OF_Z_mwxG39zHppHJ3c4BX5X38WuJFWPGhIZdopWTEEXlophiN" placeholder="https://discord.com/api/webhooks/...">
+                        <input type="url" id="discordWebhook" placeholder="https://discord.com/api/webhooks/...">
                         <button id="submitWebhookBtn" onclick="window.QueueHunter.submitWebhook()">Submit</button>
                         <button id="clearWebhookBtn" onclick="window.QueueHunter.clearWebhook()">Clear</button>
                     </div>
                     <input type="hidden" id="webhookCode" value="9918">
                     <div class="button-group">
+                        <button id="addPokezonanBtn" onclick="window.QueueHunter.addPokezonanWebhook()">🎮 Add Pokezonan Webhook</button>
                         <button id="testDiscordBtn" onclick="window.QueueHunter.testDiscord()">📬 Test Discord</button>
                     </div>
                 </div>
@@ -376,13 +377,33 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
             const testBtn = document.getElementById('testDiscordBtn');
             const submitBtn = document.getElementById('submitWebhookBtn');
             const clearBtn = document.getElementById('clearWebhookBtn');
+            const pokezonanBtn = document.getElementById('addPokezonanBtn');
             const addEmailBtn = document.getElementById('addEmailBtn');
             const testEmailBtn = document.getElementById('testEmailBtn');
+            const webhookInput = document.getElementById('discordWebhook');
+
+            // Initialize button states
             testBtn.disabled = true;
-            submitBtn.disabled = false; // Enabled due to default webhook
-            clearBtn.disabled = false; // Enabled due to default webhook
+            submitBtn.disabled = !webhookInput.value;
+            clearBtn.disabled = !webhookInput.value;
+            pokezonanBtn.disabled = false;
             addEmailBtn.disabled = true;
             testEmailBtn.disabled = window.QueueHunter.emails.length === 0;
+
+            // Webhook input listener
+            webhookInput.addEventListener('input', function() {
+                submitBtn.disabled = !this.value || !this.value.includes('discord.com/api/webhooks');
+                clearBtn.disabled = !this.value;
+                testBtn.disabled = !window.QueueHunter.isWebhookSubmitted || !this.value;
+                if (this.value) {
+                    this.classList.remove('grayed-out');
+                } else {
+                    this.classList.add('grayed-out');
+                    window.QueueHunter.isWebhookSubmitted = false;
+                    testBtn.disabled = true;
+                }
+            });
+
             document.getElementById('emailInput').addEventListener('input', function() {
                 addEmailBtn.disabled = !this.value || !/\S+@\S+\.\S+/.test(this.value);
             });
@@ -397,6 +418,82 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
             window.QueueHunter.renderEmailList();
             window.QueueHunter.updateHotProductsUI();
         });
+
+        // Add Pokezonan Webhook
+        window.QueueHunter.addPokezonanWebhook = function() {
+            const webhookUrlInput = document.getElementById('discordWebhook');
+            const testBtn = document.getElementById('testDiscordBtn');
+            const submitBtn = document.getElementById('submitWebhookBtn');
+            const clearBtn = document.getElementById('clearWebhookBtn');
+            const pokezonanBtn = document.getElementById('addPokezonanBtn');
+            const pokezonanWebhook = 'https://discord.com/api/webhooks/1418654823745716436/vuMKu1s095Cq3BfU06OF_Z_mwxG39zHppHJ3c4BX5X38WuJFWPGhIZdopWTEEXlophiN';
+            webhookUrlInput.value = pokezonanWebhook;
+            window.QueueHunter.isWebhookSubmitted = true;
+            webhookUrlInput.disabled = true;
+            webhookUrlInput.classList.add('grayed-out');
+            submitBtn.disabled = true;
+            clearBtn.disabled = false;
+            testBtn.disabled = false;
+            pokezonanBtn.textContent = 'Pokezonan Added!';
+            setTimeout(() => pokezonanBtn.textContent = '🎮 Add Pokezonan Webhook', 2000);
+            window.QueueHunter.updateUI('Pokezonan webhook added and submitted');
+        };
+
+        // Webhook submit function
+        window.QueueHunter.submitWebhook = function() {
+            const webhookUrlInput = document.getElementById('discordWebhook');
+            const testBtn = document.getElementById('testDiscordBtn');
+            const submitBtn = document.getElementById('submitWebhookBtn');
+            const clearBtn = document.getElementById('clearWebhookBtn');
+            if (webhookUrlInput.value && webhookUrlInput.value.includes('discord.com/api/webhooks')) {
+                window.QueueHunter.isWebhookSubmitted = true;
+                webhookUrlInput.disabled = true;
+                webhookUrlInput.classList.add('grayed-out');
+                submitBtn.disabled = true;
+                clearBtn.disabled = false;
+                testBtn.disabled = false;
+                submitBtn.textContent = 'Submitted!';
+                setTimeout(() => submitBtn.textContent = 'Submit', 2000);
+                window.QueueHunter.updateUI('Webhook submitted successfully');
+            } else {
+                window.QueueHunter.updateUI('Invalid Discord webhook URL');
+            }
+        };
+
+        // Webhook clear function
+        window.QueueHunter.clearWebhook = function() {
+            const webhookUrlInput = document.getElementById('discordWebhook');
+            const testBtn = document.getElementById('testDiscordBtn');
+            const submitBtn = document.getElementById('submitWebhookBtn');
+            const clearBtn = document.getElementById('clearWebhookBtn');
+            webhookUrlInput.value = '';
+            webhookUrlInput.disabled = false;
+            webhookUrlInput.classList.remove('grayed-out');
+            window.QueueHunter.isWebhookSubmitted = false;
+            submitBtn.disabled = true;
+            clearBtn.disabled = true;
+            testBtn.disabled = true;
+            clearBtn.textContent = 'Cleared!';
+            setTimeout(() => clearBtn.textContent = 'Clear', 2000);
+            window.QueueHunter.updateUI('Webhook cleared');
+        };
+
+        // Webhook test function
+        window.QueueHunter.testDiscord = async function() {
+            if (!window.QueueHunter.isWebhookSubmitted) {
+                window.QueueHunter.updateUI('Cannot test: Webhook not submitted');
+                return;
+            }
+            const webhookUrl = document.getElementById('discordWebhook').value;
+            if (!webhookUrl.includes('discord.com/api/webhooks')) {
+                window.QueueHunter.updateUI('Invalid webhook URL for testing');
+                return;
+            }
+            const testBtn = document.getElementById('testDiscordBtn');
+            testBtn.textContent = 'Testing...';
+            await window.QueueHunter.sendDiscord('📬 Test Ping', 'Webhook online! Ready to catch queue alerts! ⚡');
+            testBtn.textContent = '📬 Test Discord';
+        };
 
         // Dynamic: Update UI with current hot products
         window.QueueHunter.updateHotProductsUI = function() {
@@ -424,15 +521,13 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                 const res = await fetch(proxy + encodeURIComponent(newReleasesUrl), { signal: ctrl.signal });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const text = proxy.includes('allorigins') ? (await res.json()).contents : await res.text();
-                // Dynamic parsing: Extract product names from headings/links
                 const titleMatches = text.match(/<h[1-6][^>]*>([^<]+)<\/h[1-6]>/gi) || [];
                 const linkMatches = text.match(/<a[^>]*href="([^"]*)"[^>]*>([^<]+)<\/a>/gi) || [];
                 const allNames = [...new Set([...titleMatches.map(m => m.replace(/<[^>]*>/g, '').trim()), ...linkMatches.map(m => m.replace(/<[^>]*>/g, '').trim())])];
-                // Filter for likely TCG/high-demand (keywords)
                 const productNames = allNames.filter(name => /tcg|booster|collection|premium|tin|etb|box|deck/i.test(name.toLowerCase())).slice(0, 10);
                 hotProducts = productNames.map(name => ({
                     name: name,
-                    keywords: name.toLowerCase().split(/\s+/).filter(word => word.length > 3 && !['the', 'and', 'for', 'with', 'in'].includes(word)) // Auto-derive keywords
+                    keywords: name.toLowerCase().split(/\s+/).filter(word => word.length > 3 && !['the', 'and', 'for', 'with', 'in'].includes(word))
                 }));
                 window.QueueHunter.updateHotProductsUI();
                 window.QueueHunter.updateUI(`Refreshed ${hotProducts.length} hot products dynamically`);
@@ -600,8 +695,8 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
         };
 
         window.QueueHunter.sendDiscord = async function(title, desc, color = 0xFFD700) {
-            const webhookUrl = document.getElementById('discordWebhook')?.value || '';
-            const webhookCode = document.getElementById('webhookCode')?.value || '';
+            const webhookUrl = document.getElementById('discordWebhook').value;
+            const webhookCode = document.getElementById('webhookCode').value;
             if (!webhookUrl || !window.QueueHunter.isWebhookSubmitted) {
                 window.QueueHunter.updateUI('Discord skipped: Webhook not submitted.');
                 return;
@@ -610,26 +705,17 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                 window.QueueHunter.updateUI('Discord skipped: Incorrect webhook code.');
                 return;
             }
-            const testBtn = document.getElementById('testDiscordBtn');
-            const originalText = testBtn.textContent;
-            testBtn.textContent = 'Ping Sent!';
-            setTimeout(() => testBtn.textContent = originalText, 2000);
-            const embed = { title, description: desc, color, footer: { text: 'Queue Hunter' } };
             try {
                 await fetch(webhookUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ embeds: [embed] })
+                    body: JSON.stringify({ embeds: [{ title, description: desc, color, footer: { text: 'Queue Hunter' } }] })
                 });
                 window.QueueHunter.updateUI(`Sent Discord: ${title}`);
             } catch (e) {
                 console.error('Discord fail:', e.message);
                 window.QueueHunter.updateUI(`Discord error: ${e.message}`);
             }
-        };
-
-        window.QueueHunter.testDiscord = async function() {
-            await window.QueueHunter.sendDiscord('📬 Test Ping', 'Webhook online! Ready to catch queue alerts! ⚡');
         };
 
         window.QueueHunter.addEmail = function() {
@@ -886,9 +972,9 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
             startTime = Date.now();
             await window.QueueHunter.requestLock();
             await window.QueueHunter.registerServiceWorker();
-            await window.QueueHunter.refreshHotProducts(); // Initial product fetch
+            await window.QueueHunter.refreshHotProducts();
             if (document.getElementById('autoRefreshProducts').checked) {
-                productRefreshInterval = setInterval(window.QueueHunter.refreshHotProducts, 30 * 60 * 1000); // Refresh every 30 mins
+                productRefreshInterval = setInterval(window.QueueHunter.refreshHotProducts, 30 * 60 * 1000);
             }
             window.QueueHunter.updateUI('Hunt started!');
             intervalId = setInterval(async () => {
