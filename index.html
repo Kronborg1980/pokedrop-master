@@ -18,6 +18,8 @@
             justify-content: center;
             padding: 1rem;
             box-sizing: border-box;
+            position: relative;
+            overflow: auto;
         }
         .container {
             display: flex;
@@ -25,6 +27,8 @@
             align-items: center;
             width: 100%;
             max-width: 450px;
+            position: relative;
+            z-index: 10;
         }
         .pokedex {
             background: linear-gradient(145deg, rgba(30, 30, 50, 0.9), rgba(0, 0, 20, 0.9));
@@ -119,6 +123,7 @@
             position: relative;
             overflow: hidden;
             flex-grow: 1;
+            z-index: 10;
         }
         button:active {
             transform: translateY(1px);
@@ -134,6 +139,17 @@
             transform: none;
             cursor: not-allowed;
             box-shadow: none;
+        }
+        #pushBtn:disabled::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 1rem;
+            right: 1rem;
+            height: 2px;
+            background: #FF0000;
+            transform: rotate(-45deg);
+            z-index: 11;
         }
         .status-banner {
             margin-bottom: 1.2rem;
@@ -164,6 +180,7 @@
             backdrop-filter: blur(5px);
             max-height: 250px;
             overflow-y: auto;
+            z-index: 10;
         }
         .status-pokedex p {
             margin: 0.4rem 0;
@@ -197,6 +214,20 @@
         }
         .hidden { display: none; }
         .grayed-out { background: #666 !important; color: #999 !important; border-color: #555 !important; cursor: not-allowed; }
+        .pokemon-decoration {
+            position: absolute;
+            width: 80px;
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 5;
+            filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.5));
+        }
+        #cubone { top: 10%; left: 5%; }
+        #pinsir { top: 20%; right: 5%; }
+        #gardevoir { bottom: 15%; left: 10%; }
+        #suicune { bottom: 25%; right: 10%; }
+        #charizard { top: 30%; left: 15%; }
+        #vaporeon { bottom: 10%; right: 15%; }
         @media (max-width: 480px) {
             .container { padding: 0.5rem; }
             .status-banner { font-size: 1.2rem; padding: 0.8rem; margin-bottom: 1rem; }
@@ -210,6 +241,13 @@
             .status-pokedex { padding: 1rem; }
             .status-pokedex p { font-size: 0.7rem; }
             .log-container { font-size: 0.65rem; }
+            .pokemon-decoration { width: 60px; }
+            #cubone { top: 5%; left: 2%; }
+            #pinsir { top: 15%; right: 2%; }
+            #gardevoir { bottom: 10%; left: 5%; }
+            #suicune { bottom: 20%; right: 5%; }
+            #charizard { top: 25%; left: 8%; }
+            #vaporeon { bottom: 5%; right: 8%; }
         }
         .email-list {
             margin-top: 0.5rem;
@@ -242,6 +280,12 @@
             <p id="error-message" style="color: #FF0000; margin-top: 1rem; display: none;">Incorrect code. Please try again.</p>
         </div>
     </div>
+    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/104.png" alt="Cubone" id="cubone" class="pokemon-decoration">
+    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/127.png" alt="Pinsir" id="pinsir" class="pokemon-decoration">
+    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/282.png" alt="Gardevoir" id="gardevoir" class="pokemon-decoration">
+    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/245.png" alt="Suicune" id="suicune" class="pokemon-decoration">
+    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png" alt="Charizard" id="charizard" class="pokemon-decoration">
+    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/134.png" alt="Vaporeon" id="vaporeon" class="pokemon-decoration">
     <div id="content" class="hidden">
         <div class="container">
             <div class="pokedex">
