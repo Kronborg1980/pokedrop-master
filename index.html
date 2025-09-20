@@ -293,7 +293,7 @@
                     <label>Auto-Open Page on Detection:</label>
                     <input type="checkbox" id="autoOpen" checked>
                     <label>Push Notifications:</label>
-                    <button id="enablePushBtn" onclick="window.QueueHunter.enablePush()">🔔 Enable Push</button>
+                    <button id="pushBtn" onclick="window.QueueHunter.togglePush()">🔔 Enable Push Notifications</button>
                     <label>Auto-Refresh Products (every 30 mins):</label>
                     <input type="checkbox" id="autoRefreshProducts" checked>
                     <div class="button-group">
@@ -364,14 +364,12 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                 errorMessage.style.display = 'block';
             }
         }
-
         window.QueueHunter = window.QueueHunter || {};
         window.QueueHunter.isWebhookSubmitted = false;
         window.QueueHunter.emails = ['kronborgnielsen@gmail.com']; // Default email
         let pushEnabled = false;
         let hotProducts = []; // Dynamic - starts empty
         let productRefreshInterval = null;
-
         // Initialize UI and event listeners
         document.addEventListener('DOMContentLoaded', () => {
             const testBtn = document.getElementById('testDiscordBtn');
@@ -381,7 +379,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
             const addEmailBtn = document.getElementById('addEmailBtn');
             const testEmailBtn = document.getElementById('testEmailBtn');
             const webhookInput = document.getElementById('discordWebhook');
-
             // Initialize button states
             testBtn.disabled = true;
             submitBtn.disabled = !webhookInput.value;
@@ -389,7 +386,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
             pokezonanBtn.disabled = false;
             addEmailBtn.disabled = true;
             testEmailBtn.disabled = window.QueueHunter.emails.length === 0;
-
             // Webhook input listener
             webhookInput.addEventListener('input', function() {
                 submitBtn.disabled = !this.value || !this.value.includes('discord.com/api/webhooks');
@@ -403,7 +399,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                     testBtn.disabled = true;
                 }
             });
-
             document.getElementById('emailInput').addEventListener('input', function() {
                 addEmailBtn.disabled = !this.value || !/\S+@\S+\.\S+/.test(this.value);
             });
@@ -418,7 +413,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
             window.QueueHunter.renderEmailList();
             window.QueueHunter.updateHotProductsUI();
         });
-
         // Add Pokezonan Webhook
         window.QueueHunter.addPokezonanWebhook = function() {
             const webhookUrlInput = document.getElementById('discordWebhook');
@@ -438,7 +432,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
             setTimeout(() => pokezonanBtn.textContent = '🎮 Add Pokezonan Webhook', 2000);
             window.QueueHunter.updateUI('Pokezonan webhook added and submitted');
         };
-
         // Webhook submit function
         window.QueueHunter.submitWebhook = function() {
             const webhookUrlInput = document.getElementById('discordWebhook');
@@ -459,7 +452,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                 window.QueueHunter.updateUI('Invalid Discord webhook URL');
             }
         };
-
         // Webhook clear function
         window.QueueHunter.clearWebhook = function() {
             const webhookUrlInput = document.getElementById('discordWebhook');
@@ -477,7 +469,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
             setTimeout(() => clearBtn.textContent = 'Clear', 2000);
             window.QueueHunter.updateUI('Webhook cleared');
         };
-
         // Webhook test function
         window.QueueHunter.testDiscord = async function() {
             if (!window.QueueHunter.isWebhookSubmitted) {
@@ -494,7 +485,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
             await window.QueueHunter.sendDiscord('📬 Test Ping', 'Webhook online! Ready to catch queue alerts! ⚡');
             testBtn.textContent = '📬 Test Discord';
         };
-
         // Dynamic: Update UI with current hot products
         window.QueueHunter.updateHotProductsUI = function() {
             const hotEl = document.getElementById('hotProducts');
@@ -506,7 +496,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                 }
             }
         };
-
         // Dynamic: Fetch and parse hot products from new-releases page
         window.QueueHunter.refreshHotProducts = async function() {
             const newReleasesUrl = 'https://www.pokemoncenter.com/category/new-releases';
@@ -538,7 +527,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                 window.QueueHunter.updateHotProductsUI();
             }
         };
-
         // Dynamic: Infer product from queue-detected page text
         window.QueueHunter.getLikelyProducts = async function(url, proxy) {
             try {
@@ -555,7 +543,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                 return 'High-demand item - check page!';
             }
         };
-
         window.QueueHunter.requestLock = async function() {
             if ('locks' in navigator) {
                 try {
@@ -572,7 +559,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                 window.QueueHunter.updateUI('Background operation limited; keep browser open');
             }
         };
-
         window.QueueHunter.registerServiceWorker = async function() {
             if ('serviceWorker' in navigator && location.protocol !== 'about:') {
                 try {
@@ -588,7 +574,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                 window.QueueHunter.updateUI('Background checks limited; keep browser open');
             }
         };
-
         window.QueueHunter.updateStatusBanner = function(text, colorClass) {
             const banner = document.getElementById('statusBanner');
             if (banner) {
@@ -596,7 +581,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                 banner.className = 'status-banner ' + colorClass;
             }
         };
-
         window.QueueHunter.updateUI = function(logMessage) {
             const lastCheck = document.getElementById('lastCheck');
             if (lastCheck) lastCheck.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -617,7 +601,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
             }
             window.QueueHunter.updateRuntime();
         };
-
         window.QueueHunter.updateRuntime = function() {
             const runtime = document.getElementById('runtime');
             if (startTime && runtime) {
@@ -625,7 +608,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
             }
         };
         setInterval(window.QueueHunter.updateRuntime, 1000);
-
         window.QueueHunter.toggleAlarm = function() {
             alarmActive = !alarmActive;
             window.QueueHunter.stopAlert();
@@ -635,7 +617,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
             }
             window.QueueHunter.updateUI(`Alarm ${alarmActive ? 'activated' : 'deactivated'}`);
         };
-
         window.QueueHunter.testAlarm = function() {
             try {
                 const audio = document.getElementById('alertTone');
@@ -656,7 +637,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                 window.QueueHunter.updateUI(`Test alarm error: ${e.message}`);
             }
         };
-
         window.QueueHunter.playAlert = function() {
             if (alarmActive && !alertAudio) {
                 try {
@@ -680,7 +660,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                 }
             }
         };
-
         window.QueueHunter.stopAlert = function() {
             if (alertAudio) {
                 alertAudio.pause();
@@ -693,7 +672,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                 navigator.vibrate(0);
             }
         };
-
         window.QueueHunter.sendDiscord = async function(title, desc, color = 0xFFD700) {
             const webhookUrl = document.getElementById('discordWebhook').value;
             const webhookCode = document.getElementById('webhookCode').value;
@@ -717,7 +695,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                 window.QueueHunter.updateUI(`Discord error: ${e.message}`);
             }
         };
-
         window.QueueHunter.addEmail = function() {
             const emailInput = document.getElementById('emailInput');
             const email = emailInput.value.trim();
@@ -734,14 +711,12 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                 window.QueueHunter.updateUI('Invalid or duplicate email.');
             }
         };
-
         window.QueueHunter.removeEmail = function(email) {
             window.QueueHunter.emails = window.QueueHunter.emails.filter(e => e !== email);
             window.QueueHunter.renderEmailList();
             document.getElementById('testEmailBtn').disabled = window.QueueHunter.emails.length === 0;
             window.QueueHunter.updateUI(`Removed email: ${email}`);
         };
-
         window.QueueHunter.renderEmailList = function() {
             const emailList = document.getElementById('emailList');
             emailList.innerHTML = '';
@@ -755,7 +730,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                 emailList.appendChild(li);
             });
         };
-
         window.QueueHunter.sendEmail = async function(status, details) {
             if (window.QueueHunter.emails.length === 0) {
                 window.QueueHunter.updateUI('Email skipped: No emails added.');
@@ -784,7 +758,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                 window.QueueHunter.updateUI(`Successfully sent email to ${successCount} address${successCount > 1 ? 'es' : ''}.`);
             }
         };
-
         window.QueueHunter.testEmail = async function() {
             const testBtn = document.getElementById('testEmailBtn');
             const originalText = testBtn.textContent;
@@ -812,7 +785,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
             }
             window.QueueHunter.updateUI(`Test email sent to ${successCount} address${successCount > 1 ? 'es' : ''}${successCount === 0 ? ' (all failed)' : ''}.`);
         };
-
         window.QueueHunter.getHealthyProxy = async function(url) {
             for (let p of proxies.filter(pr => !blacklisted.has(pr))) {
                 window.QueueHunter.updateStatusBanner('Checking proxies...', 'yellow');
@@ -834,7 +806,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
             }
             return null;
         };
-
         window.QueueHunter.extractQueue = function(text, url, headers) {
             const posMatch = text.match(/pos["']?\s*[:=]\s*["']?(\d+)/i) || url.match(/pos=(\d+)/i);
             const queueItScript = /queueit\.js/i.test(text);
@@ -845,14 +816,12 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
             if (queueItScript || queueItHeader || queueItUrl || waitingRoom) return 'Unknown';
             return null;
         };
-
         window.QueueHunter.extractStock = function(text) {
             if (/add to cart/i.test(text) && !/sold out|unavailable/i.test(text)) {
                 return true; // In stock
             }
             return false;
         };
-
         window.QueueHunter.logCheck = function(status, details, queuePos) {
             const stockStatus = document.getElementById('stockStatus');
             if (stockStatus) {
@@ -860,7 +829,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
             }
             console.log(`[${new Date().toISOString()}] Check: ${status} - ${details}`);
         };
-
         window.QueueHunter.checkSite = async function(isConsec = false, retries = 0) {
             const urlInput = document.getElementById('urlList')?.value || '';
             const urls = urlInput ? urlInput.split(',').map(u => u.trim()) : [
@@ -869,10 +837,8 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                 'https://www.pokemoncenter.com/category/trading-card-game'
             ];
             let success = false, queuePos = null, inStock = false, details = '', detectedUrl = '';
-
             window.QueueHunter.updateStatusBanner('Checking...', 'yellow');
             window.QueueHunter.updateUI(`Scanning ${urls.length} URLs...`);
-
             const proxy = await window.QueueHunter.getHealthyProxy(urls[0]);
             if (!proxy) {
                 details = 'Investigation failed: No healthy proxies.';
@@ -887,7 +853,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                 window.QueueHunter.logCheck('Fail', details, queuePos);
                 return { success: false, queuePos, isFail: true };
             }
-
             for (const url of urls) {
                 window.QueueHunter.updateUI(`Sleuthing URL: ${url}`);
                 try {
@@ -948,7 +913,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                     details = `Error on ${url}: ${e.message}`;
                 }
             }
-
             if (!success) {
                 if (retries < maxRetries) {
                     window.QueueHunter.updateUI(`Retrying... (${retries + 1}/${maxRetries})`);
@@ -963,7 +927,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
             }
             return { success: true, isFail: false };
         };
-
         window.QueueHunter.startMonitoring = async function() {
             const startBtn = document.getElementById('startBtn');
             const stopBtn = document.getElementById('stopBtn');
@@ -988,7 +951,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
             }, checkFreq);
             await window.QueueHunter.checkSite();
         };
-
         window.QueueHunter.stopMonitoring = function() {
             const startBtn = document.getElementById('startBtn');
             const stopBtn = document.getElementById('stopBtn');
@@ -1004,30 +966,35 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
             window.QueueHunter.updateStatusBanner('Hunt stopped', 'gray');
             window.QueueHunter.updateUI('Hunt stopped. Ready for next round!');
         };
-
-        window.QueueHunter.enablePush = async function() {
-            if ("Notification" in window) {
-                const permission = await Notification.requestPermission();
-                if (permission === "granted") {
-                    pushEnabled = true;
-                    document.getElementById('enablePushBtn').textContent = '🔔 Push Enabled';
-                    document.getElementById('enablePushBtn').disabled = true;
-                    window.QueueHunter.updateUI('Push notifications enabled');
-                } else {
-                    window.QueueHunter.updateUI('Push notifications denied');
-                }
+        window.QueueHunter.togglePush = async function() {
+            const pushBtn = document.getElementById('pushBtn');
+            if (pushEnabled) {
+                pushEnabled = false;
+                pushBtn.textContent = '🔔 Enable Push Notifications';
+                pushBtn.disabled = false;
+                window.QueueHunter.updateUI('Push notifications disabled');
             } else {
-                window.QueueHunter.updateUI('Push notifications not supported');
+                if ("Notification" in window) {
+                    const permission = await Notification.requestPermission();
+                    if (permission === "granted") {
+                        pushEnabled = true;
+                        pushBtn.textContent = '🔔 Disable Push Notifications';
+                        pushBtn.disabled = false;
+                        window.QueueHunter.updateUI('Push notifications enabled');
+                    } else {
+                        window.QueueHunter.updateUI('Push notifications denied');
+                    }
+                } else {
+                    window.QueueHunter.updateUI('Push notifications not supported');
+                }
             }
         };
-
         function copyAtcScript() {
             const atcScript = document.getElementById('atcScript');
             atcScript.select();
             document.execCommand('copy');
             window.QueueHunter.updateUI('ATC script copied to clipboard');
         }
-
         window.QueueHunter.exportLog = function() {
             const blob = new Blob([logEntries.join('\n')], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
@@ -1038,7 +1005,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
             URL.revokeObjectURL(url);
             window.QueueHunter.updateUI('Log exported');
         };
-
         let intervalId = null;
         let startTime = null;
         let consecFails = 0;
