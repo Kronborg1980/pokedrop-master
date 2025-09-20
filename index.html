@@ -36,12 +36,10 @@
             backdrop-filter: blur(8px);
             z-index: 10;
         }
-      
         .header {
             text-align: center;
             margin-bottom: 1.5rem;
         }
-      
         .header img {
             width: 100px;
             filter: drop-shadow(0 0 12px #FFD700);
@@ -54,7 +52,6 @@
             text-shadow: 1px 1px 3px #000;
             margin: 0;
         }
-      
         .header p {
             color: #fff;
             font-size: 0.9rem;
@@ -76,7 +73,6 @@
             color: #fff;
             margin-bottom: 0.5rem;
         }
-      
         input, select, textarea {
             border: 1px solid #FFD700;
             border-radius: 8px;
@@ -89,7 +85,6 @@
             font-family: 'Roboto', sans-serif;
             transition: all 0.3s;
         }
-      
         input:focus, select:focus, textarea:focus {
             border-color: #FFB300;
             box-shadow: 0 0 8px #FFD700;
@@ -102,7 +97,6 @@
             justify-content: center;
             margin-top: 0.75rem;
         }
-      
         .input-with-button {
             display: flex;
             gap: 0.5rem;
@@ -126,7 +120,6 @@
             overflow: hidden;
             flex-grow: 1;
         }
-      
         button:active {
             transform: translateY(1px);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
@@ -135,7 +128,6 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
         }
-      
         button:disabled {
             background: #666;
             color: #999;
@@ -143,7 +135,6 @@
             cursor: not-allowed;
             box-shadow: none;
         }
-      
         .status-banner {
             margin-bottom: 1.2rem;
             padding: 1rem;
@@ -178,7 +169,6 @@
             margin: 0.4rem 0;
             font-size: 0.8rem;
         }
-      
         .status-banner.green { color: #00FF00; border-color: #00FF00; text-shadow: 0 0 8px #00FF00; }
         .status-banner.red { color: #FF0000; border-color: #FF0000; text-shadow: 0 0 8px #FF0000; animation: zap 0.3s ease infinite; }
         .status-banner.yellow { color: #FFD700; border-color: #FFD700; text-shadow: 0 0 8px #FFD700; }
@@ -216,7 +206,7 @@
             .button-group { flex-direction: column; }
             button { padding: 0.6rem 1rem; font-size: 0.7rem; }
             .section { padding: 0.8rem; }
-            input, select { padding: 0.5rem; font-size: 0.7rem; }
+            input, select, textarea { padding: 0.5rem; font-size: 0.7rem; }
             .status-pokedex { padding: 1rem; }
             .status-pokedex p { font-size: 0.7rem; }
             .log-container { font-size: 0.65rem; }
@@ -258,7 +248,7 @@
                 <div class="header">
                     <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/129.png" alt="Magikarp">
                     <h1>Queue Hunter Pro</h1>
-                    <p>Supercharged for restocks & queues! ⚡ Catch 'em before sold out!</p>
+                    <p>Dynamic restock & queue hunter! ⚡ Fresh products auto-loaded.</p>
                 </div>
                 <div class="section">
                     <label>Discord Webhook URL:</label>
@@ -301,8 +291,13 @@
                 <div class="section">
                     <label>Auto-Open Page on Detection:</label>
                     <input type="checkbox" id="autoOpen" checked>
-                    <label>Enable Push Notifications:</label>
+                    <label>Push Notifications:</label>
                     <button id="enablePushBtn" onclick="window.QueueHunter.enablePush()">🔔 Enable Push</button>
+                    <label>Auto-Refresh Products (every 30 mins):</label>
+                    <input type="checkbox" id="autoRefreshProducts" checked>
+                    <div class="button-group">
+                        <button onclick="window.QueueHunter.refreshHotProducts()">🔄 Refresh Hot Products Now</button>
+                    </div>
                 </div>
                 <div class="section">
                     <label>ATC Helper Script (Run on Product Page Console):</label>
@@ -314,26 +309,24 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
         "x-application-name": "tempo",
         "accept": "application/json",
         "accept-language": "en-GB,en;q=0.9",
-        "accept-language": "en-GB,en;q=0.9",
         "content-type": "application/json",
         "sec-ch-ua-mobile": "?0",
         "sec-fetch-dest": "empty",
         "sec-fetch-mode": "cors",
-        "sec-fetch-site": "same-site",
+        "sec-fetch-site": "same-site"
     },
     "referrer": referrer,
     "body": "{\"productURI\":\"" + addToCartForm + "\",\"quantity\":" + quantity + ",\"configuration\":{}}",
     "method": "POST",
     "mode": "cors",
     "credentials": "include"
-});
-window.open("https://www.pokemoncenter.com/cart");</textarea>
+}).then(() => window.open("https://www.pokemoncenter.com/cart"));</textarea>
                     <button onclick="copyAtcScript()">Copy Script</button>
                     <p>Instructions: On product page, F12 > Console > Paste & Enter. Adds to cart & opens cart.</p>
                 </div>
                 <div class="section">
                     <div class="button-group">
-                        <button id="startBtn" onclick="window.QueueHunter.startMonitoring()">🔎 Start Queue Hunt</button>
+                        <button id="startBtn" onclick="window.QueueHunter.startMonitoring()">🔎 Start Hunt</button>
                         <button id="stopBtn" class="hidden" onclick="window.QueueHunter.stopMonitoring()">⏹️ Stop Hunt</button>
                         <button onclick="window.QueueHunter.exportLog()">📥 Export Log</button>
                     </div>
@@ -344,6 +337,7 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
                     <p>Runtime: <span id="runtime">0m 0s</span></p>
                     <p>Consecutive Fails: <span id="consec">0</span></p>
                     <p>Stock Status: <span id="stockStatus">Unknown</span></p>
+                    <p>Hot Products: <span id="hotProducts">Click Refresh to load</span></p>
                     <p>Log / Details:</p>
                     <div class="log-container" id="details"></div>
                 </div>
@@ -369,83 +363,15 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
                 errorMessage.style.display = 'block';
             }
         }
-      
+
         window.QueueHunter = window.QueueHunter || {};
         window.QueueHunter.isWebhookSubmitted = false;
         window.QueueHunter.emails = ['kronborgnielsen@gmail.com']; // Default email
-      
-        document.getElementById('discordWebhook').addEventListener('input', function() {
-            const submitBtn = document.getElementById('submitWebhookBtn');
-            const testBtn = document.getElementById('testDiscordBtn');
-            const clearBtn = document.getElementById('clearWebhookBtn');
-            submitBtn.disabled = !this.value;
-            clearBtn.disabled = !this.value;
-            if (this.value) {
-                this.classList.remove('grayed-out');
-                testBtn.disabled = !window.QueueHunter.isWebhookSubmitted;
-            } else {
-                window.QueueHunter.isWebhookSubmitted = false;
-                testBtn.disabled = true;
-            }
-        });
-      
-        window.QueueHunter.submitWebhook = function() {
-            const webhookUrlInput = document.getElementById('discordWebhook');
-            const testBtn = document.getElementById('testDiscordBtn');
-            const submitBtn = document.getElementById('submitWebhookBtn');
-            const clearBtn = document.getElementById('clearWebhookBtn');
-            if (webhookUrlInput.value) {
-                window.QueueHunter.isWebhookSubmitted = true;
-                webhookUrlInput.classList.add('grayed-out');
-                submitBtn.disabled = true;
-                clearBtn.disabled = false;
-                testBtn.disabled = false;
-                window.QueueHunter.updateUI('Discord webhook URL submitted.');
-            } else {
-                window.QueueHunter.updateUI('Please enter a valid webhook URL.');
-            }
-        };
-      
-        window.QueueHunter.clearWebhook = function() {
-            const webhookUrlInput = document.getElementById('discordWebhook');
-            const testBtn = document.getElementById('testDiscordBtn');
-            const submitBtn = document.getElementById('submitWebhookBtn');
-            const clearBtn = document.getElementById('clearWebhookBtn');
-            webhookUrlInput.value = '';
-            webhookUrlInput.classList.remove('grayed-out');
-            window.QueueHunter.isWebhookSubmitted = false;
-            submitBtn.disabled = true;
-            clearBtn.disabled = true;
-            testBtn.disabled = true;
-            window.QueueHunter.updateUI('Discord webhook cleared.');
-        };
-      
-        let intervalId = null;
-        let startTime = null;
-        let consecFails = 0;
-        let failThresh = 2;
-        let checkFreq = 5 * 60 * 1000;
-        let proxies = [
-            'https://corsproxy.io/?',
-            'https://api.allorigins.win/get?url=',
-            'https://thingproxy.freeboard.io/fetch/',
-            'https://cors-anywhere.herokuapp.com/',
-            'https://api.codetabs.com/v1/proxy?quest=',
-            'https://corsproxy.org/?',
-            'https://proxy.cors.sh/'
-        ];
-        let blacklisted = new Set();
-        let logEntries = [];
-        let retryCount = 0;
-        const maxRetries = 5;
-        let alarmActive = false;
-        let alertAudio = null;
-        let vibrateInterval = null;
-        const DISCORD_CODE = document.getElementById('webhookCode').value;
-        emailjs.init('8w7eu6mrg3lRl6ta3'); // REPLACE WITH YOUR EMAILJS PUBLIC KEY
-        window.QueueHunter.emailServiceId = 'service_ahqdaj5';
-        window.QueueHunter.emailTemplateId = 'template_whhvnra';
-      
+        let pushEnabled = false;
+        let hotProducts = []; // Dynamic - starts empty
+        let productRefreshInterval = null;
+
+        // Initialize UI and event listeners
         document.addEventListener('DOMContentLoaded', () => {
             const testBtn = document.getElementById('testDiscordBtn');
             const submitBtn = document.getElementById('submitWebhookBtn');
@@ -460,14 +386,87 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
             document.getElementById('emailInput').addEventListener('input', function() {
                 addEmailBtn.disabled = !this.value || !/\S+@\S+\.\S+/.test(this.value);
             });
-            window.QueueHunter.renderEmailList(); // Render default email
+            document.getElementById('freqSlider').addEventListener('input', function() {
+                checkFreq = this.value * 60 * 1000;
+                document.getElementById('freqVal').textContent = this.value;
+            });
+            document.getElementById('threshSlider').addEventListener('input', function() {
+                failThresh = parseInt(this.value);
+                document.getElementById('threshVal').textContent = this.value;
+            });
+            window.QueueHunter.renderEmailList();
+            window.QueueHunter.updateHotProductsUI();
         });
+
+        // Dynamic: Update UI with current hot products
+        window.QueueHunter.updateHotProductsUI = function() {
+            const hotEl = document.getElementById('hotProducts');
+            if (hotEl) {
+                if (hotProducts.length === 0) {
+                    hotEl.textContent = 'No products loaded - click Refresh';
+                } else {
+                    hotEl.textContent = hotProducts.map(p => p.name).join(' | ');
+                }
+            }
+        };
+
+        // Dynamic: Fetch and parse hot products from new-releases page
+        window.QueueHunter.refreshHotProducts = async function() {
+            const newReleasesUrl = 'https://www.pokemoncenter.com/category/new-releases';
+            const proxy = await window.QueueHunter.getHealthyProxy(newReleasesUrl);
+            if (!proxy) {
+                window.QueueHunter.updateUI('Failed to refresh products: No proxy');
+                return;
+            }
+            try {
+                const ctrl = new AbortController();
+                setTimeout(() => ctrl.abort(), 10000);
+                const res = await fetch(proxy + encodeURIComponent(newReleasesUrl), { signal: ctrl.signal });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const text = proxy.includes('allorigins') ? (await res.json()).contents : await res.text();
+                // Dynamic parsing: Extract product names from headings/links
+                const titleMatches = text.match(/<h[1-6][^>]*>([^<]+)<\/h[1-6]>/gi) || [];
+                const linkMatches = text.match(/<a[^>]*href="([^"]*)"[^>]*>([^<]+)<\/a>/gi) || [];
+                const allNames = [...new Set([...titleMatches.map(m => m.replace(/<[^>]*>/g, '').trim()), ...linkMatches.map(m => m.replace(/<[^>]*>/g, '').trim())])];
+                // Filter for likely TCG/high-demand (keywords)
+                const productNames = allNames.filter(name => /tcg|booster|collection|premium|tin|etb|box|deck/i.test(name.toLowerCase())).slice(0, 10);
+                hotProducts = productNames.map(name => ({
+                    name: name,
+                    keywords: name.toLowerCase().split(/\s+/).filter(word => word.length > 3 && !['the', 'and', 'for', 'with', 'in'].includes(word)) // Auto-derive keywords
+                }));
+                window.QueueHunter.updateHotProductsUI();
+                window.QueueHunter.updateUI(`Refreshed ${hotProducts.length} hot products dynamically`);
+            } catch (e) {
+                console.error('Refresh error:', e);
+                window.QueueHunter.updateUI(`Dynamic refresh failed: ${e.message} - Using fallback`);
+                hotProducts = [{ name: 'Recent TCG Release', keywords: ['tcg', 'booster', 'collection'] }];
+                window.QueueHunter.updateHotProductsUI();
+            }
+        };
+
+        // Dynamic: Infer product from queue-detected page text
+        window.QueueHunter.getLikelyProducts = async function(url, proxy) {
+            try {
+                const ctrl = new AbortController();
+                setTimeout(() => ctrl.abort(), 5000);
+                const res = await fetch(proxy + encodeURIComponent(url), { signal: ctrl.signal });
+                if (!res.ok) return 'High-demand item - check page!';
+                const text = proxy.includes('allorigins') ? (await res.json()).contents : await res.text();
+                const lowerText = text.toLowerCase();
+                const matches = hotProducts.filter(p => p.keywords.some(kw => lowerText.includes(kw)));
+                return matches.length > 0 ? matches.map(p => p.name).join(', ') : 'General restock (e.g., new TCG set)';
+            } catch (e) {
+                console.error('Product inference error:', e);
+                return 'High-demand item - check page!';
+            }
+        };
+
         window.QueueHunter.requestLock = async function() {
             if ('locks' in navigator) {
                 try {
                     await navigator.locks.request('queue_hunt_lock', { mode: 'shared' }, async () => {
-                        console.log(`[${new Date().toISOString()}] Acquired web lock for background operation`);
-                        window.QueueHunter.updateUI('Background operation enabled (keep browser open)');
+                        console.log(`[${new Date().toISOString()}] Acquired web lock`);
+                        window.QueueHunter.updateUI('Background operation enabled');
                     });
                 } catch (e) {
                     console.error('Web lock error:', e.message);
@@ -478,6 +477,7 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
                 window.QueueHunter.updateUI('Background operation limited; keep browser open');
             }
         };
+
         window.QueueHunter.registerServiceWorker = async function() {
             if ('serviceWorker' in navigator && location.protocol !== 'about:') {
                 try {
@@ -489,10 +489,11 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
                     window.QueueHunter.updateUI(`Background checks may pause: ${e.message}`);
                 }
             } else {
-                console.warn('Service Worker not supported or running in restricted context');
+                console.warn('Service Worker not supported or restricted');
                 window.QueueHunter.updateUI('Background checks limited; keep browser open');
             }
         };
+
         window.QueueHunter.updateStatusBanner = function(text, colorClass) {
             const banner = document.getElementById('statusBanner');
             if (banner) {
@@ -500,6 +501,7 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
                 banner.className = 'status-banner ' + colorClass;
             }
         };
+
         window.QueueHunter.updateUI = function(logMessage) {
             const lastCheck = document.getElementById('lastCheck');
             if (lastCheck) lastCheck.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -515,11 +517,12 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
             const statusPokedex = document.getElementById('status-pokedex');
             if (statusPokedex) {
                 const bannerText = document.getElementById('statusBanner').textContent;
-                if (/queue detected/i.test(bannerText)) statusPokedex.classList.add('alert-zap');
+                if (/queue detected|restock detected/i.test(bannerText)) statusPokedex.classList.add('alert-zap');
                 else statusPokedex.classList.remove('alert-zap');
             }
             window.QueueHunter.updateRuntime();
         };
+
         window.QueueHunter.updateRuntime = function() {
             const runtime = document.getElementById('runtime');
             if (startTime && runtime) {
@@ -527,6 +530,7 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
             }
         };
         setInterval(window.QueueHunter.updateRuntime, 1000);
+
         window.QueueHunter.toggleAlarm = function() {
             alarmActive = !alarmActive;
             window.QueueHunter.stopAlert();
@@ -536,6 +540,7 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
             }
             window.QueueHunter.updateUI(`Alarm ${alarmActive ? 'activated' : 'deactivated'}`);
         };
+
         window.QueueHunter.testAlarm = function() {
             try {
                 const audio = document.getElementById('alertTone');
@@ -556,6 +561,7 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
                 window.QueueHunter.updateUI(`Test alarm error: ${e.message}`);
             }
         };
+
         window.QueueHunter.playAlert = function() {
             if (alarmActive && !alertAudio) {
                 try {
@@ -579,6 +585,7 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
                 }
             }
         };
+
         window.QueueHunter.stopAlert = function() {
             if (alertAudio) {
                 alertAudio.pause();
@@ -591,10 +598,10 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
                 navigator.vibrate(0);
             }
         };
+
         window.QueueHunter.sendDiscord = async function(title, desc, color = 0xFFD700) {
             const webhookUrl = document.getElementById('discordWebhook')?.value || '';
             const webhookCode = document.getElementById('webhookCode')?.value || '';
-          
             if (!webhookUrl || !window.QueueHunter.isWebhookSubmitted) {
                 window.QueueHunter.updateUI('Discord skipped: Webhook not submitted.');
                 return;
@@ -620,9 +627,11 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
                 window.QueueHunter.updateUI(`Discord error: ${e.message}`);
             }
         };
+
         window.QueueHunter.testDiscord = async function() {
             await window.QueueHunter.sendDiscord('📬 Test Ping', 'Webhook online! Ready to catch queue alerts! ⚡');
         };
+
         window.QueueHunter.addEmail = function() {
             const emailInput = document.getElementById('emailInput');
             const email = emailInput.value.trim();
@@ -631,7 +640,7 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
                 window.QueueHunter.renderEmailList();
                 emailInput.value = '';
                 emailInput.classList.add('grayed-out');
-                setTimeout(() => emailInput.classList.remove('grayed-out'), 2000); // Gray out temporarily
+                setTimeout(() => emailInput.classList.remove('grayed-out'), 2000);
                 document.getElementById('addEmailBtn').disabled = true;
                 document.getElementById('testEmailBtn').disabled = window.QueueHunter.emails.length === 0;
                 window.QueueHunter.updateUI(`Added email: ${email}`);
@@ -639,12 +648,14 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
                 window.QueueHunter.updateUI('Invalid or duplicate email.');
             }
         };
+
         window.QueueHunter.removeEmail = function(email) {
             window.QueueHunter.emails = window.QueueHunter.emails.filter(e => e !== email);
             window.QueueHunter.renderEmailList();
             document.getElementById('testEmailBtn').disabled = window.QueueHunter.emails.length === 0;
             window.QueueHunter.updateUI(`Removed email: ${email}`);
         };
+
         window.QueueHunter.renderEmailList = function() {
             const emailList = document.getElementById('emailList');
             emailList.innerHTML = '';
@@ -658,6 +669,7 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
                 emailList.appendChild(li);
             });
         };
+
         window.QueueHunter.sendEmail = async function(status, details) {
             if (window.QueueHunter.emails.length === 0) {
                 window.QueueHunter.updateUI('Email skipped: No emails added.');
@@ -674,9 +686,9 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
                         timestamp: timestamp,
                         to_email: email
                     };
-                    const response = await emailjs.send(window.QueueHunter.emailServiceId, window.QueueHunter.emailTemplateId, templateParams);
+                    await emailjs.send(window.QueueHunter.emailServiceId, window.QueueHunter.emailTemplateId, templateParams);
                     successCount++;
-                    window.QueueHunter.updateUI(`Sent Email to ${email}: ${status}`);
+                    window.QueueHunter.updateUI(`Sent email to ${email}: ${status}`);
                 } catch (e) {
                     console.error('Email fail:', e);
                     window.QueueHunter.updateUI(`Email error for ${email}: ${e.text || e.message || 'Unknown error'}`);
@@ -686,6 +698,7 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
                 window.QueueHunter.updateUI(`Successfully sent email to ${successCount} address${successCount > 1 ? 'es' : ''}.`);
             }
         };
+
         window.QueueHunter.testEmail = async function() {
             const testBtn = document.getElementById('testEmailBtn');
             const originalText = testBtn.textContent;
@@ -703,7 +716,7 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
                         timestamp: timestamp,
                         to_email: email
                     };
-                    const response = await emailjs.send(window.QueueHunter.emailServiceId, window.QueueHunter.emailTemplateId, templateParams);
+                    await emailjs.send(window.QueueHunter.emailServiceId, window.QueueHunter.emailTemplateId, templateParams);
                     successCount++;
                     window.QueueHunter.updateUI(`Test email sent to ${email}`);
                 } catch (e) {
@@ -713,6 +726,7 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
             }
             window.QueueHunter.updateUI(`Test email sent to ${successCount} address${successCount > 1 ? 'es' : ''}${successCount === 0 ? ' (all failed)' : ''}.`);
         };
+
         window.QueueHunter.getHealthyProxy = async function(url) {
             for (let p of proxies.filter(pr => !blacklisted.has(pr))) {
                 window.QueueHunter.updateStatusBanner('Checking proxies...', 'yellow');
@@ -734,6 +748,7 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
             }
             return null;
         };
+
         window.QueueHunter.extractQueue = function(text, url, headers) {
             const posMatch = text.match(/pos["']?\s*[:=]\s*["']?(\d+)/i) || url.match(/pos=(\d+)/i);
             const queueItScript = /queueit\.js/i.test(text);
@@ -744,12 +759,22 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
             if (queueItScript || queueItHeader || queueItUrl || waitingRoom) return 'Unknown';
             return null;
         };
+
         window.QueueHunter.extractStock = function(text) {
             if (/add to cart/i.test(text) && !/sold out|unavailable/i.test(text)) {
                 return true; // In stock
             }
             return false;
         };
+
+        window.QueueHunter.logCheck = function(status, details, queuePos) {
+            const stockStatus = document.getElementById('stockStatus');
+            if (stockStatus) {
+                stockStatus.textContent = status === 'Restock' ? 'In Stock' : status === 'Queue' ? 'Queue Detected' : 'No Queue';
+            }
+            console.log(`[${new Date().toISOString()}] Check: ${status} - ${details}`);
+        };
+
         window.QueueHunter.checkSite = async function(isConsec = false, retries = 0) {
             const urlInput = document.getElementById('urlList')?.value || '';
             const urls = urlInput ? urlInput.split(',').map(u => u.trim()) : [
@@ -762,7 +787,7 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
             window.QueueHunter.updateStatusBanner('Checking...', 'yellow');
             window.QueueHunter.updateUI(`Scanning ${urls.length} URLs...`);
 
-            const proxy = await window.QueueHunter.getHealthyProxy(urls[0]); // Use first for simplicity, or rotate
+            const proxy = await window.QueueHunter.getHealthyProxy(urls[0]);
             if (!proxy) {
                 details = 'Investigation failed: No healthy proxies.';
                 if (retries < maxRetries) {
@@ -777,7 +802,7 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
                 return { success: false, queuePos, isFail: true };
             }
 
-            const fetchPromises = urls.map(async (url) => {
+            for (const url of urls) {
                 window.QueueHunter.updateUI(`Sleuthing URL: ${url}`);
                 try {
                     const ctrl = new AbortController();
@@ -791,14 +816,15 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
                         queuePos = window.QueueHunter.extractQueue(text, finalUrl, res.headers);
                         inStock = window.QueueHunter.extractStock(text);
                         if (queuePos) {
-                            details = `Queue detected! Position: ${queuePos} at ${url}.`;
+                            const productInfo = await window.QueueHunter.getLikelyProducts(url, proxy);
+                            details = `Queue detected! Position: ${queuePos} at ${url}. Likely for: ${productInfo}`;
                             detectedUrl = url;
                             if (!isConsec) window.location.href = 'https://www.pokemoncenter.com/';
                             window.QueueHunter.playAlert();
-                            window.QueueHunter.updateStatusBanner('Queue Detected 🚨', 'red');
+                            window.QueueHunter.updateStatusBanner(`Queue Detected 🚨 (Likely: ${productInfo})`, 'red');
                             window.QueueHunter.sendDiscord('🚨 Queue Alert!', details, 0xFF0000);
                             window.QueueHunter.sendEmail('🚨 Queue Detected', details);
-                            if ("Notification" in window && Notification.permission === "granted") {
+                            if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
                                 new Notification('Queue Detected!', { body: details });
                             }
                             if (document.getElementById('autoOpen').checked) window.open(detectedUrl, '_blank');
@@ -811,7 +837,7 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
                             window.QueueHunter.updateStatusBanner('Restock Detected 🎉', 'green');
                             window.QueueHunter.sendDiscord('🎉 Restock Alert!', details, 0x00FF00);
                             window.QueueHunter.sendEmail('🎉 Restock Detected', details);
-                            if ("Notification" in window && Notification.permission === "granted") {
+                            if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
                                 new Notification('Restock Detected!', { body: details });
                             }
                             if (document.getElementById('autoOpen').checked) window.open(detectedUrl, '_blank');
@@ -824,169 +850,134 @@ window.open("https://www.pokemoncenter.com/cart");</textarea>
                             window.QueueHunter.updateStatusBanner('No queue found', 'green');
                             window.QueueHunter.updateUI(details);
                             consecFails = 0;
-                            window.QueueHunter.logCheck('Success', details, null);
-                            return { success: true, isFail: false };
+                            window.QueueHunter.logCheck('Success', details, queuePos);
                         } else {
                             details = `Unexpected clues from ${url}. Final URL: ${finalUrl}, Size: ${text.length} chars.`;
-                            return { success: false, isFail: true };
                         }
                     } else {
                         details = `HTTP error: ${res.status} at ${url}`;
-                        return { success: false, isFail: true };
                     }
                 } catch (e) {
                     console.error('Check site error:', e.message);
                     details = `Error on ${url}: ${e.message}`;
-                    return { success: false, isFail: true };
                 }
-            });
-
-            const results = await Promise.all(fetchPromises);
-            const hasQueue = results.some(r => r?.queue);
-            const hasRestock = results.some(r => r?.restock);
-            success = results.some(r => r?.success);
-            const isFail = !success && !hasQueue && !hasRestock;
-
-            if (isFail && retries < maxRetries) {
-                window.QueueHunter.updateUI(`Retrying all... (${retries + 1}/${maxRetries})`);
-                await new Promise(r => setTimeout(r, 3000));
-                return window.QueueHunter.checkSite(isConsec, retries + 1);
             }
 
-            if (isFail) {
+            if (!success) {
+                if (retries < maxRetries) {
+                    window.QueueHunter.updateUI(`Retrying... (${retries + 1}/${maxRetries})`);
+                    await new Promise(r => setTimeout(r, 3000));
+                    return window.QueueHunter.checkSite(isConsec, retries + 1);
+                }
                 window.QueueHunter.updateStatusBanner('No queue found', 'gray');
                 window.QueueHunter.updateUI(details);
                 consecFails++;
                 window.QueueHunter.logCheck('Fail', details, queuePos);
+                return { success: false, queuePos, isFail: true };
             }
-
-            // Update stock status in UI
-            const stockEl = document.getElementById('stockStatus');
-            if (stockEl) stockEl.textContent = inStock ? 'In Stock' : 'Out of Stock';
-
-            return { success, queuePos, isFail };
+            return { success: true, isFail: false };
         };
-        window.QueueHunter.verifyConsec = async function(count = 1) {
-            if (count >= failThresh) {
-                window.QueueHunter.updateUI(`Confirming failure ${count} of ${failThresh}...`);
-                const result = await window.QueueHunter.checkSite(true);
-                if (!result.isFail) {
-                    consecFails = 0;
-                    window.QueueHunter.stopAlert();
-                } else {
-                    await new Promise(r => setTimeout(r, 5000));
-                    await window.QueueHunter.verifyConsec(count + 1);
-                }
-            }
-        };
+
         window.QueueHunter.startMonitoring = async function() {
-            consecFails = 0;
-            retryCount = 0;
+            const startBtn = document.getElementById('startBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            startBtn.classList.add('hidden');
+            stopBtn.classList.remove('hidden');
             startTime = Date.now();
-            logEntries = [];
-            window.QueueHunter.stopAlert();
             await window.QueueHunter.requestLock();
             await window.QueueHunter.registerServiceWorker();
-          
+            await window.QueueHunter.refreshHotProducts(); // Initial product fetch
+            if (document.getElementById('autoRefreshProducts').checked) {
+                productRefreshInterval = setInterval(window.QueueHunter.refreshHotProducts, 30 * 60 * 1000); // Refresh every 30 mins
+            }
+            window.QueueHunter.updateUI('Hunt started!');
+            intervalId = setInterval(async () => {
+                const result = await window.QueueHunter.checkSite(true);
+                if (consecFails >= failThresh) {
+                    window.QueueHunter.updateStatusBanner('Too many fails!', 'red');
+                    window.QueueHunter.sendDiscord('⚠️ Hunt Paused', `Too many consecutive fails (${consecFails}). Check setup or proxies.`, 0xFF0000);
+                    window.QueueHunter.sendEmail('⚠️ Hunt Paused', `Too many consecutive fails (${consecFails}). Check setup or proxies.`);
+                    window.QueueHunter.stopMonitoring();
+                }
+            }, checkFreq);
+            await window.QueueHunter.checkSite();
+        };
+
+        window.QueueHunter.stopMonitoring = function() {
             const startBtn = document.getElementById('startBtn');
             const stopBtn = document.getElementById('stopBtn');
-            if (startBtn) startBtn.classList.add('hidden');
-            if (stopBtn) stopBtn.classList.remove('hidden');
-            const result = await window.QueueHunter.checkSite();
-            if (result.isFail) {
-                consecFails++;
-            }
-          
-            intervalId = setInterval(async () => {
-                const result = await window.QueueHunter.checkSite();
-                if (result.isFail) consecFails++;
-                if (consecFails >= failThresh) await window.QueueHunter.verifyConsec();
-            }, checkFreq + Math.random() * 60000 - 30000);
-          
-            if (navigator.serviceWorker.controller) {
-                navigator.serviceWorker.controller.postMessage({ type: 'START_CHECK' });
-            }
-        };
-        window.QueueHunter.stopMonitoring = function() {
-            if (intervalId) {
-                clearInterval(intervalId);
-                intervalId = null;
-            }
+            startBtn.classList.remove('hidden');
+            stopBtn.classList.add('hidden');
+            clearInterval(intervalId);
+            clearInterval(productRefreshInterval);
+            intervalId = null;
+            productRefreshInterval = null;
             startTime = null;
             consecFails = 0;
-            retryCount = 0;
             window.QueueHunter.stopAlert();
-            const startBtn = document.getElementById('startBtn');
-            const stopBtn = document.getElementById('stopBtn');
-            if (startBtn) startBtn.classList.remove('hidden');
-            if (stopBtn) stopBtn.classList.add('hidden');
-          
-            window.QueueHunter.updateStatusBanner('Ready to hunt', 'gray');
-            window.QueueHunter.updateUI('Investigation stopped');
-          
-            if (navigator.serviceWorker.controller) {
-                navigator.serviceWorker.controller.postMessage({ type: 'STOP_CHECK' });
+            window.QueueHunter.updateStatusBanner('Hunt stopped', 'gray');
+            window.QueueHunter.updateUI('Hunt stopped. Ready for next round!');
+        };
+
+        window.QueueHunter.enablePush = async function() {
+            if ("Notification" in window) {
+                const permission = await Notification.requestPermission();
+                if (permission === "granted") {
+                    pushEnabled = true;
+                    document.getElementById('enablePushBtn').textContent = '🔔 Push Enabled';
+                    document.getElementById('enablePushBtn').disabled = true;
+                    window.QueueHunter.updateUI('Push notifications enabled');
+                } else {
+                    window.QueueHunter.updateUI('Push notifications denied');
+                }
+            } else {
+                window.QueueHunter.updateUI('Push notifications not supported');
             }
         };
-        const freqSlider = document.getElementById('freqSlider');
-        if (freqSlider) {
-            freqSlider.addEventListener('input', function(e) {
-                const value = parseFloat(e.target.value);
-                checkFreq = value * 60 * 1000;
-                const freqVal = document.getElementById('freqVal');
-                if (freqVal) freqVal.textContent = value < 1 ? Math.round(value * 60) + ' secs' : value + ' mins';
-                if (navigator.serviceWorker.controller) {
-                    navigator.serviceWorker.controller.postMessage({ type: 'SET_INTERVAL', checkFreq });
-                }
-                window.QueueHunter.updateUI(`Check frequency set to ${freqVal.textContent}`);
-            });
-        }
-        const threshSlider = document.getElementById('threshSlider');
-        if (threshSlider) {
-            threshSlider.addEventListener('input', function(e) {
-                failThresh = e.target.value;
-                const threshVal = document.getElementById('threshVal');
-                if (threshVal) threshVal.textContent = e.target.value;
-                window.QueueHunter.updateUI(`Alert threshold set to ${e.target.value} fails`);
-            });
-        }
-        window.QueueHunter.logCheck = function(status, details, queue) {
-            console.log(`[${new Date().toISOString()}] ${status} - ${details} (Queue: ${queue || 'None'})`);
-        };
-        if (navigator.serviceWorker) {
-            navigator.serviceWorker.addEventListener('message', function(event) {
-                if (event.data.type === 'CHECK_SITE') {
-                    window.QueueHunter.checkSite();
-                }
-            });
-        }
-        window.QueueHunter.enablePush = async function() {
-            if (!("Notification" in window)) return window.QueueHunter.updateUI('Push not supported');
-            const permission = await Notification.requestPermission();
-            if (permission === 'granted') window.QueueHunter.updateUI('Push notifications enabled');
-        };
+
         function copyAtcScript() {
-            const scriptText = document.getElementById('atcScript');
-            scriptText.select();
+            const atcScript = document.getElementById('atcScript');
+            atcScript.select();
             document.execCommand('copy');
             window.QueueHunter.updateUI('ATC script copied to clipboard');
         }
-        setInterval(async () => {
-            for (let i = proxies.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [proxies[i], proxies[j]] = [proxies[j], proxies[i]];
-            }
-            blacklisted.clear();
-            window.QueueHunter.updateUI('Proxies refreshed and shuffled');
-        }, 300000); // Every 5 mins
+
         window.QueueHunter.exportLog = function() {
             const blob = new Blob([logEntries.join('\n')], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'queue_hunter_log.txt';
+            a.href = url;
+            a.download = `queue_hunter_log_${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
             a.click();
+            URL.revokeObjectURL(url);
             window.QueueHunter.updateUI('Log exported');
         };
+
+        let intervalId = null;
+        let startTime = null;
+        let consecFails = 0;
+        let failThresh = 2;
+        let checkFreq = 5 * 60 * 1000;
+        let proxies = [
+            'https://corsproxy.io/?',
+            'https://api.allorigins.win/get?url=',
+            'https://thingproxy.freeboard.io/fetch/',
+            'https://cors-anywhere.herokuapp.com/',
+            'https://api.codetabs.com/v1/proxy?quest=',
+            'https://corsproxy.org/?',
+            'https://proxy.cors.sh/'
+        ];
+        let blacklisted = new Set();
+        let logEntries = [];
+        let retryCount = 0;
+        const maxRetries = 5;
+        let alarmActive = false;
+        let alertAudio = null;
+        let vibrateInterval = null;
+        const DISCORD_CODE = document.getElementById('webhookCode').value;
+        emailjs.init('8w7eu6mrg3lRl6ta3'); // REPLACE WITH YOUR EMAILJS PUBLIC KEY
+        window.QueueHunter.emailServiceId = 'service_ahqdaj5';
+        window.QueueHunter.emailTemplateId = 'template_whhvnra';
     </script>
 </body>
 </html>
