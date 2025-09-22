@@ -179,6 +179,11 @@
         .status-banner.red { color: #FF0000; border-color: #FF0000; text-shadow: 0 0 8px #FF0000; animation: zap 0.3s ease infinite; }
         .status-banner.yellow { color: #FFD700; border-color: #FFD700; text-shadow: 0 0 8px #FFD700; }
         .status-banner.gray { color: #999; border-color: #999; text-shadow: 0 0 8px #999; }
+        .status-banner.orange { color: #FFA500; border-color: #FFA500; text-shadow: 0 0 8px #FFA500; animation: pulse 1s ease infinite; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
         .log-container {
             max-height: 150px;
             overflow-y: auto;
@@ -362,6 +367,7 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                     <div class="button-group">
                         <button id="startBtn" onclick="window.QueueHunter.startMonitoring()">🔎 Start Hunt</button>
                         <button id="stopBtn" class="hidden" onclick="window.QueueHunter.stopMonitoring()">⏹️ Stop Hunt</button>
+                        <button id="testNowBtn" onclick="window.QueueHunter.testNow()">🔍 Test Now</button>
                         <button onclick="window.QueueHunter.exportLog()">📥 Export Log</button>
                     </div>
                 </div>
@@ -533,17 +539,13 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
         };
         window.QueueHunter.refreshHotProducts = async function() {
             const newReleasesUrl = 'https://www.pokemoncenter.com/category/new-releases';
-            const proxy = await window.QueueHunter.getHealthyProxy(newReleasesUrl);
-            if (!proxy) {
-                window.QueueHunter.updateUI('Failed to refresh products: No proxy');
-                return;
-            }
+            const headers = window.QueueHunter.getRandomHeaders();
             try {
                 const ctrl = new AbortController();
-                setTimeout(() => ctrl.abort(), 10000);
-                const res = await fetch(proxy + encodeURIComponent(newReleasesUrl), { signal: ctrl.signal });
+                setTimeout(() => ctrl.abort(), 8000);
+                const res = await fetch(newReleasesUrl, { headers, signal: ctrl.signal });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const text = proxy.includes('allorigins') ? (await res.json()).contents : await res.text();
+                const text = await res.text();
                 const titleMatches = text.match(/<h[1-6][^>]*>([^<]+)<\/h[1-6]>/gi) || [];
                 const linkMatches = text.match(/<a[^>]*href="([^"]*)"[^>]*>([^<]+)<\/a>/gi) || [];
                 const allNames = [...new Set([...titleMatches.map(m => m.replace(/<[^>]*>/g, '').trim()), ...linkMatches.map(m => m.replace(/<[^>]*>/g, '').trim())])];
@@ -561,13 +563,13 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                 window.QueueHunter.updateHotProductsUI();
             }
         };
-        window.QueueHunter.getLikelyProducts = async function(url, proxy) {
+        window.QueueHunter.getLikelyProducts = async function(url, headers) {
             try {
                 const ctrl = new AbortController();
                 setTimeout(() => ctrl.abort(), 5000);
-                const res = await fetch(proxy + encodeURIComponent(url), { signal: ctrl.signal });
+                const res = await fetch(url, { headers, signal: ctrl.signal });
                 if (!res.ok) return 'High-demand item - check page!';
-                const text = proxy.includes('allorigins') ? (await res.json()).contents : await res.text();
+                const text = await res.text();
                 const lowerText = text.toLowerCase();
                 const matches = hotProducts.filter(p => p.keywords.some(kw => lowerText.includes(kw)));
                 return matches.length > 0 ? matches.map(p => p.name).join(', ') : 'General restock (e.g., new TCG set)';
@@ -575,6 +577,22 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                 console.error('Product inference error:', e);
                 return 'High-demand item - check page!';
             }
+        };
+        window.QueueHunter.getRandomHeaders = function() {
+            const userAgents = [
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
+                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0) Gecko/20100101 Firefox/130.0'
+            ];
+            return {
+                'User-Agent': userAgents[Math.floor(Math.random() * userAgents.length)],
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'none',
+                'Sec-Fetch-User': '?1'
+            };
         };
         window.QueueHunter.requestLock = async function() {
             if ('locks' in navigator) {
@@ -629,7 +647,7 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
             const statusPokedex = document.getElementById('status-pokedex');
             if (statusPokedex) {
                 const bannerText = document.getElementById('statusBanner').textContent;
-                if (/queue detected|restock detected/i.test(bannerText)) statusPokedex.classList.add('alert-zap');
+                if (/queue detected|restock detected|queue likely/i.test(bannerText)) statusPokedex.classList.add('alert-zap');
                 else statusPokedex.classList.remove('alert-zap');
             }
             window.QueueHunter.updateRuntime();
@@ -675,14 +693,14 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                 try {
                     alertAudio = document.getElementById('alertTone');
                     alertAudio.play().then(() => {
-                        window.QueueHunter.updateUI('Alert tone playing for queue detection');
+                        window.QueueHunter.updateUI('Alert tone playing for detection');
                     }).catch(e => {
                         console.error('Alert tone failed:', e.message);
                         window.QueueHunter.updateUI(`Alert tone error: ${e.message}`);
                     });
                     if (navigator.vibrate) {
                         vibrateInterval = setInterval(() => navigator.vibrate([300, 200, 300]), 1000);
-                        console.log(`[${new Date().toISOString()}] Started vibration for queue detection`);
+                        console.log(`[${new Date().toISOString()}] Started vibration for detection`);
                     } else {
                         console.warn('Vibration API not supported');
                         window.QueueHunter.updateUI('Vibration not supported on this device');
@@ -819,12 +837,13 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
             window.QueueHunter.updateUI(`Test email sent to ${successCount} address${successCount > 1 ? 'es' : ''}${successCount === 0 ? ' (all failed)' : ''}.`);
         };
         window.QueueHunter.getHealthyProxy = async function(url) {
-            for (let p of proxies.filter(pr => !blacklisted.has(pr))) {
+            const shuffledProxies = proxies.sort(() => Math.random() - 0.5);
+            for (let p of shuffledProxies.filter(pr => !blacklisted.has(pr))) {
                 window.QueueHunter.updateStatusBanner('Checking proxies...', 'yellow');
                 window.QueueHunter.updateUI(`Trying proxy: ${p}`);
                 try {
                     const ctrl = new AbortController();
-                    setTimeout(() => ctrl.abort(), 8000);
+                    setTimeout(() => ctrl.abort(), 5000);
                     const res = await fetch(p + encodeURIComponent(url), { signal: ctrl.signal });
                     if (res.ok) {
                         window.QueueHunter.updateUI(`Using proxy: ${p}`);
@@ -837,16 +856,44 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                     window.QueueHunter.updateUI(`Proxy ${p} error: ${e.message}`);
                 }
             }
+            window.QueueHunter.updateUI('All proxies failed, falling back to direct fetch');
             return null;
         };
+        window.QueueHunter.detectCaptcha = function(text, headers, url) {
+            const captchaIndicators = [
+                /hcaptcha\.com\/captcha/i,
+                /cloudflare/i,
+                /verify you are human/i,
+                /checking your browser/i,
+                /please wait/i,
+                /captcha/i,
+                /challenge/i,
+                /under attack mode/i,
+                /access denied/i
+            ];
+            const captchaHeader = headers.get('cf-challenge') || headers.get('x-cf-verify') || headers.get('cf-ray');
+            const isCaptchaUrl = /challenge|verify|403|503/i.test(url);
+            const isEmptyResponse = text.length < 500 && /html/i.test(headers.get('content-type') || '');
+            return captchaIndicators.some(regex => regex.test(text)) || captchaHeader || isCaptchaUrl || isEmptyResponse;
+        };
         window.QueueHunter.extractQueue = function(text, url, headers) {
+            const queueIndicators = [
+                /queueit\.js/i,
+                /queue-it\.net/i,
+                /waiting room/i,
+                /queue position/i,
+                /queueid/i,
+                /queue-it-token/i,
+                /redirect.*queue/i,
+                /maintenance/i,
+                /site down for maintenance/i
+            ];
             const posMatch = text.match(/pos["']?\s*[:=]\s*["']?(\d+)/i) || url.match(/pos=(\d+)/i);
-            const queueItScript = /queueit\.js/i.test(text);
+            const queueItScript = queueIndicators.some(regex => regex.test(text));
             const queueItHeader = headers.get('x-queueit') || headers.get('x-queueit-redirect');
             const queueItUrl = /queue-it\.net/i.test(url);
-            const waitingRoom = /waiting room|queueit/i.test(text);
             if (posMatch) return posMatch[1];
-            if (queueItScript || queueItHeader || queueItUrl || waitingRoom) return 'Unknown';
+            if (queueItScript || queueItHeader || queueItUrl) return 'Unknown';
             return null;
         };
         window.QueueHunter.extractStock = function(text) {
@@ -858,7 +905,7 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
         window.QueueHunter.logCheck = function(status, details, queuePos) {
             const stockStatus = document.getElementById('stockStatus');
             if (stockStatus) {
-                stockStatus.textContent = status === 'Restock' ? 'In Stock' : status === 'Queue' ? 'Queue Detected' : 'No Queue';
+                stockStatus.textContent = status === 'Restock' ? 'In Stock' : status === 'Queue' ? 'Queue Detected' : status === 'Queue Likely' ? 'Queue Likely' : 'No Queue';
             }
             console.log(`[${new Date().toISOString()}] Check: ${status} - ${details}`);
         };
@@ -869,96 +916,115 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                 'https://www.pokemoncenter.com/category/new-releases',
                 'https://www.pokemoncenter.com/category/trading-card-game'
             ];
-            let success = false, queuePos = null, inStock = false, details = '', detectedUrl = '';
+            let success = false, queuePos = null, inStock = false, captchaDetected = false, details = '', detectedUrl = '';
             window.QueueHunter.updateStatusBanner('Checking...', 'yellow');
-            window.QueueHunter.updateUI(`Scanning ${urls.length} URLs...`);
+            window.QueueHunter.updateUI(`Scanning ${urls.length} URLs (Attempt ${retries + 1}/${maxRetries})`);
+            const headers = window.QueueHunter.getRandomHeaders();
             const proxy = await window.QueueHunter.getHealthyProxy(urls[0]);
-            if (!proxy) {
-                details = 'Investigation failed: No healthy proxies.';
-                if (retries < maxRetries) {
-                    window.QueueHunter.updateUI(`Retrying... (${retries + 1}/${maxRetries})`);
-                    await new Promise(r => setTimeout(r, 3000));
-                    return window.QueueHunter.checkSite(isConsec, retries + 1);
-                }
-                window.QueueHunter.updateStatusBanner('No queue found', 'gray');
-                window.QueueHunter.updateUI(details);
-                consecFails++;
-                window.QueueHunter.logCheck('Fail', details, queuePos);
-                return { success: false, queuePos, isFail: true };
-            }
             for (const url of urls) {
-                window.QueueHunter.updateUI(`Sleuthing URL: ${url}`);
+                window.QueueHunter.updateUI(`Checking URL: ${url}`);
                 try {
                     const ctrl = new AbortController();
-                    setTimeout(() => ctrl.abort(), 8000);
-                    console.log(`[${new Date().toISOString()}] Fetching ${proxy}${encodeURIComponent(url)}`);
-                    const res = await fetch(proxy + encodeURIComponent(url), { signal: ctrl.signal });
-                    if (res.ok) {
-                        const text = proxy.includes('allorigins') ? (await res.json()).contents : await res.text();
-                        const finalUrl = decodeURIComponent(res.url.replace(proxy, ''));
-                        window.QueueHunter.updateUI(`Received clues from ${url} (Final: ${finalUrl}, Size: ${text.length} chars)`);
-                        queuePos = window.QueueHunter.extractQueue(text, finalUrl, res.headers);
-                        inStock = window.QueueHunter.extractStock(text);
-                        if (queuePos) {
-                            const productInfo = await window.QueueHunter.getLikelyProducts(url, proxy);
-                            details = `Queue detected! Position: ${queuePos} at ${url}. Expected product: ${productInfo}`;
+                    setTimeout(() => ctrl.abort(), 5000);
+                    const fetchUrl = proxy ? proxy + encodeURIComponent(url) : url;
+                    console.log(`[${new Date().toISOString()}] Fetching ${fetchUrl} with headers:`, headers);
+                    const res = await fetch(fetchUrl, { headers, signal: ctrl.signal });
+                    const finalUrl = proxy ? decodeURIComponent(res.url.replace(proxy, '')) : res.url;
+                    const contentType = res.headers.get('content-type') || 'unknown';
+                    window.QueueHunter.updateUI(`Response from ${url} (Final: ${finalUrl}, Status: ${res.status}, Type: ${contentType})`);
+                    if (!res.ok) {
+                        if ([403, 503].includes(res.status)) {
+                            captchaDetected = true;
+                            const productInfo = await window.QueueHunter.getLikelyProducts(url, headers);
+                            details = `Likely queue detected (HTTP ${res.status}) at ${url}. Expected product: ${productInfo}. Check manually now!`;
                             detectedUrl = url;
-                            if (!isConsec) window.location.href = 'https://www.pokemoncenter.com/';
-                            window.QueueHunter.playAlert();
-                            window.QueueHunter.updateStatusBanner(`Queue Detected 🚨 for Expected Product: ${productInfo}`, 'red');
-                            window.QueueHunter.sendDiscord('🚨 Queue Alert!', details, 0xFF0000);
-                            window.QueueHunter.sendEmail('🚨 Queue Detected', details);
-                            if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
-                                new Notification('Queue Detected!', { body: details });
-                            }
-                            if (document.getElementById('autoOpen').checked) window.open(detectedUrl, '_blank');
-                            window.QueueHunter.logCheck('Queue', details, queuePos);
-                            return { queue: true, success: false, isFail: true };
-                        } else if (inStock) {
-                            details = `Restock detected! Add to Cart available at ${url}.`;
-                            detectedUrl = url;
-                            window.QueueHunter.playAlert();
-                            window.QueueHunter.updateStatusBanner('Restock Detected 🎉', 'green');
-                            window.QueueHunter.sendDiscord('🎉 Restock Alert!', details, 0x00FF00);
-                            window.QueueHunter.sendEmail('🎉 Restock Detected', details);
-                            if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
-                                new Notification('Restock Detected!', { body: details });
-                            }
-                            if (document.getElementById('autoOpen').checked) window.open(detectedUrl, '_blank');
-                            window.QueueHunter.logCheck('Restock', details, null);
-                            return { restock: true, success: true, isFail: false };
-                        } else if (/pokemoncenter\.com/i.test(finalUrl) && text.length > 1000) {
-                            details = `No queue or restock. Proxy: ${proxy}, Final URL: ${finalUrl}, Size: ${text.length} chars.`;
-                            success = true;
-                            window.QueueHunter.stopAlert();
-                            window.QueueHunter.updateStatusBanner('No queue found', 'green');
-                            window.QueueHunter.updateUI(details);
-                            consecFails = 0;
-                            window.QueueHunter.logCheck('Success', details, queuePos);
                         } else {
-                            details = `Unexpected clues from ${url}. Final URL: ${finalUrl}, Size: ${text.length} chars.`;
+                            throw new Error(`HTTP ${res.status}`);
                         }
                     } else {
-                        details = `HTTP error: ${res.status} at ${url}`;
+                        const text = proxy && proxy.includes('allorigins') ? (await res.json()).contents : await res.text();
+                        window.QueueHunter.updateUI(`Received ${text.length} chars from ${url}`);
+                        captchaDetected = window.QueueHunter.detectCaptcha(text, res.headers, finalUrl);
+                        if (captchaDetected) {
+                            const productInfo = await window.QueueHunter.getLikelyProducts(url, headers);
+                            details = `Captcha detected! Likely queue starting at ${url}. Expected product: ${productInfo}. Check manually now!`;
+                            detectedUrl = url;
+                        } else {
+                            queuePos = window.QueueHunter.extractQueue(text, finalUrl, res.headers);
+                            inStock = window.QueueHunter.extractStock(text);
+                        }
+                    }
+                    if (captchaDetected || queuePos) {
+                        if (!isConsec) window.location.href = 'https://www.pokemoncenter.com/';
+                        window.QueueHunter.playAlert();
+                        window.QueueHunter.updateStatusBanner(captchaDetected ? `Queue Likely 🚨: ${hotProducts[0]?.name || 'Check Now'}` : `Queue Detected 🚨: ${hotProducts[0]?.name || 'Check Now'}`, captchaDetected ? 'orange' : 'red');
+                        window.QueueHunter.sendDiscord(captchaDetected ? '🚨 Queue Likely!' : '🚨 Queue Alert!', details, captchaDetected ? 0xFFA500 : 0xFF0000);
+                        window.QueueHunter.sendEmail(captchaDetected ? '🚨 Queue Likely' : '🚨 Queue Detected', details);
+                        if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
+                            new Notification(captchaDetected ? 'Queue Likely!' : 'Queue Detected!', { body: details });
+                        }
+                        if (document.getElementById('autoOpen').checked) window.open(detectedUrl, '_blank');
+                        window.QueueHunter.logCheck(captchaDetected ? 'Queue Likely' : 'Queue', details, queuePos);
+                        return { captcha: captchaDetected, queue: !!queuePos, success: false, isFail: true };
+                    } else if (inStock) {
+                        details = `Restock detected! Add to Cart available at ${url}.`;
+                        detectedUrl = url;
+                        window.QueueHunter.playAlert();
+                        window.QueueHunter.updateStatusBanner('Restock Detected 🎉', 'green');
+                        window.QueueHunter.sendDiscord('🎉 Restock Alert!', details, 0x00FF00);
+                        window.QueueHunter.sendEmail('🎉 Restock Detected', details);
+                        if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
+                            new Notification('Restock Detected!', { body: details });
+                        }
+                        if (document.getElementById('autoOpen').checked) window.open(detectedUrl, '_blank');
+                        window.QueueHunter.logCheck('Restock', details, null);
+                        return { restock: true, success: true, isFail: false };
+                    } else if (/pokemoncenter\.com/i.test(finalUrl) && contentType.includes('html')) {
+                        details = `No queue or restock at ${url}. Final URL: ${finalUrl}, Type: ${contentType}.`;
+                        success = true;
+                        window.QueueHunter.stopAlert();
+                        window.QueueHunter.updateStatusBanner('No queue found', 'green');
+                        window.QueueHunter.updateUI(details);
+                        consecFails = 0;
+                        window.QueueHunter.logCheck('Success', details, queuePos);
+                    } else {
+                        details = `Unexpected response from ${url}. Final URL: ${finalUrl}, Type: ${contentType}.`;
                     }
                 } catch (e) {
                     console.error('Check site error:', e.message);
                     details = `Error on ${url}: ${e.message}`;
+                    if (/aborted|timeout/i.test(e.message)) {
+                        details = `Timeout on ${url}. Possible queue or heavy traffic.`;
+                        captchaDetected = true;
+                    }
                 }
             }
             if (!success) {
                 if (retries < maxRetries) {
                     window.QueueHunter.updateUI(`Retrying... (${retries + 1}/${maxRetries})`);
-                    await new Promise(r => setTimeout(r, 3000));
+                    await new Promise(r => setTimeout(r, 1000));
                     return window.QueueHunter.checkSite(isConsec, retries + 1);
                 }
-                window.QueueHunter.updateStatusBanner('No queue found', 'gray');
-                window.QueueHunter.updateUI(details);
-                consecFails++;
-                window.QueueHunter.logCheck('Fail', details, queuePos);
-                return { success: false, queuePos, isFail: true };
+                const productInfo = await window.QueueHunter.getLikelyProducts(urls[0], headers);
+                details = `Max retries reached. Likely queue due to blocks at ${urls[0]}. Expected product: ${productInfo}. Check manually now!`;
+                detectedUrl = urls[0];
+                if (!isConsec) window.location.href = 'https://www.pokemoncenter.com/';
+                window.QueueHunter.playAlert();
+                window.QueueHunter.updateStatusBanner(`Queue Likely 🚨: ${hotProducts[0]?.name || 'Check Now'}`, 'orange');
+                window.QueueHunter.sendDiscord('🚨 Queue Likely!', details, 0xFFA500);
+                window.QueueHunter.sendEmail('🚨 Queue Likely', details);
+                if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
+                    new Notification('Queue Likely!', { body: details });
+                }
+                if (document.getElementById('autoOpen').checked) window.open(detectedUrl, '_blank');
+                window.QueueHunter.logCheck('Queue Likely', details, null);
+                return { captcha: true, success: false, isFail: true };
             }
             return { success: true, isFail: false };
+        };
+        window.QueueHunter.testNow = async function() {
+            window.QueueHunter.updateUI('Manual test triggered');
+            await window.QueueHunter.checkSite();
         };
         window.QueueHunter.startMonitoring = async function() {
             const startBtn = document.getElementById('startBtn');
@@ -1049,19 +1115,15 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
             'https://corsproxy.io/?',
             'https://api.allorigins.win/get?url=',
             'https://thingproxy.freeboard.io/fetch/',
-            'https://cors-anywhere.herokuapp.com/',
-            'https://api.codetabs.com/v1/proxy?quest=',
             'https://corsproxy.org/?',
             'https://proxy.cors.sh/'
         ];
         let blacklisted = new Set();
         let logEntries = [];
-        let retryCount = 0;
-        const maxRetries = 5;
+        const maxRetries = 10;
         let alarmActive = false;
         let alertAudio = null;
         let vibrateInterval = null;
-        const DISCORD_CODE = document.getElementById('webhookCode').value;
         emailjs.init('8w7eu6mrg3lRl6ta3');
         window.QueueHunter.emailServiceId = 'service_ahqdaj5';
         window.QueueHunter.emailTemplateId = 'template_whhvnra';
