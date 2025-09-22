@@ -955,7 +955,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                         }
                     }
                     if (captchaDetected || queuePos) {
-                        if (!isConsec) window.location.href = 'https://www.pokemoncenter.com/';
                         window.QueueHunter.playAlert();
                         window.QueueHunter.updateStatusBanner(captchaDetected ? `Queue Likely 🚨: ${hotProducts[0]?.name || 'Check Now'}` : `Queue Detected 🚨: ${hotProducts[0]?.name || 'Check Now'}`, captchaDetected ? 'orange' : 'red');
                         window.QueueHunter.sendDiscord(captchaDetected ? '🚨 Queue Likely!' : '🚨 Queue Alert!', details, captchaDetected ? 0xFFA500 : 0xFF0000);
@@ -963,7 +962,10 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                         if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
                             new Notification(captchaDetected ? 'Queue Likely!' : 'Queue Detected!', { body: details });
                         }
-                        if (document.getElementById('autoOpen').checked) window.open(detectedUrl, '_blank');
+                        if (document.getElementById('autoOpen').checked) {
+                            window.open(detectedUrl, '_blank');
+                            window.QueueHunter.updateUI(`Opened queue in new window: ${detectedUrl}`);
+                        }
                         window.QueueHunter.logCheck(captchaDetected ? 'Queue Likely' : 'Queue', details, queuePos);
                         return { captcha: captchaDetected, queue: !!queuePos, success: false, isFail: true };
                     } else if (inStock) {
@@ -976,16 +978,20 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                         if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
                             new Notification('Restock Detected!', { body: details });
                         }
-                        if (document.getElementById('autoOpen').checked) window.open(detectedUrl, '_blank');
+                        if (document.getElementById('autoOpen').checked) {
+                            window.open(detectedUrl, '_blank');
+                            window.QueueHunter.updateUI(`Opened restock in new window: ${detectedUrl}`);
+                        }
                         window.QueueHunter.logCheck('Restock', details, null);
                         return { restock: true, success: true, isFail: false };
                     } else if (/pokemoncenter\.com/i.test(finalUrl) && contentType.includes('html')) {
                         details = `No queue or restock at ${url}. Final URL: ${finalUrl}, Type: ${contentType}.`;
                         success = true;
+                        consecFails = 0;
                         window.QueueHunter.stopAlert();
                         window.QueueHunter.updateStatusBanner('No queue found', 'green');
                         window.QueueHunter.updateUI(details);
-                        consecFails = 0;
+                        window.QueueHunter.updateUI('Queue gone, resetting alerts');
                         window.QueueHunter.logCheck('Success', details, queuePos);
                     } else {
                         details = `Unexpected response from ${url}. Final URL: ${finalUrl}, Type: ${contentType}.`;
@@ -1008,7 +1014,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                 const productInfo = await window.QueueHunter.getLikelyProducts(urls[0], headers);
                 details = `Max retries reached. Likely queue due to blocks at ${urls[0]}. Expected product: ${productInfo}. Check manually now!`;
                 detectedUrl = urls[0];
-                if (!isConsec) window.location.href = 'https://www.pokemoncenter.com/';
                 window.QueueHunter.playAlert();
                 window.QueueHunter.updateStatusBanner(`Queue Likely 🚨: ${hotProducts[0]?.name || 'Check Now'}`, 'orange');
                 window.QueueHunter.sendDiscord('🚨 Queue Likely!', details, 0xFFA500);
@@ -1016,7 +1021,10 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
                 if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
                     new Notification('Queue Likely!', { body: details });
                 }
-                if (document.getElementById('autoOpen').checked) window.open(detectedUrl, '_blank');
+                if (document.getElementById('autoOpen').checked) {
+                    window.open(detectedUrl, '_blank');
+                    window.QueueHunter.updateUI(`Opened queue in new window: ${detectedUrl}`);
+                }
                 window.QueueHunter.logCheck('Queue Likely', details, null);
                 return { captcha: true, success: false, isFail: true };
             }
