@@ -1095,7 +1095,6 @@ fetch("https://www.pokemoncenter.com/tpci-ecommweb-api/cart?type=product&format=
             hasNotified = false;
             cleanChecks = 0;
             await window.QueueHunter.requestLock();
-            await window.QueueHunter.registerServiceWorker();
             await window.QueueHunter.refreshHotProducts();
             if (document.getElementById('autoRefreshProducts').checked) {
                 productRefreshInterval = setInterval(window.QueueHunter.refreshHotProducts, 30 * 60 * 1000);
