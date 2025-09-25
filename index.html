@@ -259,7 +259,7 @@
             border-radius: 5px;
             margin-bottom: 0.5rem;
         }
-        .email-list button {
+        .email-list li button {
             padding: 0.3rem 0.6rem;
             font-size: 0.7rem;
             background: linear-gradient(145deg, #FF4500, #FF0000);
@@ -325,8 +325,8 @@
                     <label>Notification Toggle:</label>
                     <div class="button-group">
                         <button id="toggleQueueDetectedBtn" onclick="window.QueueHunter.toggleNotification('queueDetected')">🔔 Queue Detected: On</button>
-                        <button id="toggleQueueLikelyBtn" onclick="window.QueueHunter.toggleNotification('queueLikely')">🔔 Queue Likely: On</button>
-                        <button id="toggleQueueImminentBtn" onclick="window.QueueHunter.toggleNotification('queueImminent')">🔔 Queue Imminent: On</button>
+                        <button id="toggleQueueLikelyBtn" onclick="window.QueueHunter.toggleNotification('queueLikely')">🔔 High Possibility for Queue: On</button>
+                        <button id="togglePossibleBotBlockBtn" onclick="window.QueueHunter.toggleNotification('possibleBotBlock')">🔔 Possible Queue (Bot Block): On</button>
                     </div>
                 </div>
                 <div class="section">
@@ -391,7 +391,7 @@
         window.QueueHunter.notificationSettings = {
             queueDetected: true,
             queueLikely: true,
-            queueImminent: true
+            possibleBotBlock: true
         };
         let pushEnabled = false;
         let hasNotified = false;
@@ -424,6 +424,7 @@
                     this.classList.add('grayed-out');
                     window.QueueHunter.isWebhookSubmitted = false;
                     testBtn.disabled = true;
+                    window.QueueHunter.updateUI('Please enter a valid Discord webhook URL to enable notifications');
                 }
             });
 
@@ -442,17 +443,20 @@
             });
 
             window.QueueHunter.renderEmailList();
+            if (window.QueueHunter.emails.length === 0) {
+                window.QueueHunter.updateUI('Add an email address to enable email notifications');
+            }
         });
 
         window.QueueHunter.toggleNotification = function(type) {
             window.QueueHunter.notificationSettings[type] = !window.QueueHunter.notificationSettings[type];
-            const btn = document.getElementById(`toggle${type.charAt(0).toUpperCase() + type.slice(1)}Btn`);
+            const btn = document.getElementById(`toggle${type.charAt(0).toUpperCase() + type.slice(1).replace(/([A-Z])/g, ' $1')}Btn`);
             if (btn) {
-                btn.textContent = `🔔 ${type.charAt(0).toUpperCase() + type.slice(1).replace(/([A-Z])/g, ' $1')}: ${window.QueueHunter.notificationSettings[type] ? 'On' : 'Off'}`;
+                btn.textContent = `🔔 ${type === 'queueDetected' ? 'Queue Detected' : type === 'queueLikely' ? 'High Possibility for Queue' : 'Possible Queue (Bot Block)'}: ${window.QueueHunter.notificationSettings[type] ? 'On' : 'Off'}`;
                 btn.style.background = window.QueueHunter.notificationSettings[type] ? 'linear-gradient(145deg, #FFD700, #FFB300)' : '#666';
                 btn.style.color = window.QueueHunter.notificationSettings[type] ? '#1A1A1A' : '#999';
             }
-            window.QueueHunter.updateUI(`${type.charAt(0).toUpperCase() + type.slice(1).replace(/([A-Z])/g, ' $1')} notifications ${window.QueueHunter.notificationSettings[type] ? 'enabled' : 'disabled'}`);
+            window.QueueHunter.updateUI(`${type === 'queueDetected' ? 'Queue Detected' : type === 'queueLikely' ? 'High Possibility for Queue' : 'Possible Queue (Bot Block)'} notifications ${window.QueueHunter.notificationSettings[type] ? 'enabled' : 'disabled'}`);
         };
 
         window.QueueHunter.addPokezonanWebhook = function() {
@@ -616,7 +620,7 @@
             const statusPokedex = document.getElementById('status-pokedex');
             if (statusPokedex) {
                 const bannerText = document.getElementById('statusBanner').textContent;
-                if (/queue detected|restock detected|queue likely|queue imminent/i.test(bannerText)) statusPokedex.classList.add('alert-zap');
+                if (/queue detected|high possibility|possible queue/i.test(bannerText)) statusPokedex.classList.add('alert-zap');
                 else statusPokedex.classList.remove('alert-zap');
             }
             window.QueueHunter.updateRuntime();
@@ -703,14 +707,13 @@
             const webhookUrl = document.getElementById('discordWebhook').value;
             const webhookCode = document.getElementById('webhookCode').value;
             if (!webhookUrl || !window.QueueHunter.isWebhookSubmitted) {
-                window.QueueHunter.updateUI('Discord skipped: Webhook not submitted.');
+                window.QueueHunter.updateUI('Discord skipped: Webhook not submitted. Please enter a valid Discord webhook URL.');
                 return;
             }
             if (webhookCode !== '9918') {
                 window.QueueHunter.updateUI('Discord skipped: Incorrect webhook code.');
                 return;
             }
-            desc += `\nCheck resale value on eBay: https://www.ebay.com/sch/i.html?_nkw=Pokemon+TCG+sold&_sop=12`;
             try {
                 await fetch(webhookUrl, {
                     method: 'POST',
@@ -746,6 +749,9 @@
             window.QueueHunter.renderEmailList();
             document.getElementById('testEmailBtn').disabled = window.QueueHunter.emails.length === 0;
             window.QueueHunter.updateUI(`Removed email: ${email}`);
+            if (window.QueueHunter.emails.length === 0) {
+                window.QueueHunter.updateUI('Add an email address to enable email notifications');
+            }
         };
 
         window.QueueHunter.renderEmailList = function() {
@@ -764,10 +770,10 @@
 
         window.QueueHunter.sendEmail = async function(status, details) {
             if (window.QueueHunter.emails.length === 0) {
-                window.QueueHunter.updateUI('Email skipped: No emails added.');
+                window.QueueHunter.updateUI('Email skipped: No emails added. Please add an email address.');
                 return;
             }
-            const fancyDetails = `🚨 **Alert Details:** ${details}\n\n**Powered by Queue Hunter Pro** – Catch 'em all! ⚡\n(Magikarp approves! 🐟)\nCheck resale value on eBay: https://www.ebay.com/sch/i.html?_nkw=Pokemon+TCG+sold&_sop=12`;
+            const fancyDetails = `🚨 ${details}\n\n**Powered by Queue Hunter Pro** – Catch 'em all! ⚡\n(Magikarp approves! 🐟)`;
             const timestamp = new Date().toLocaleString();
             let successCount = 0;
             for (const email of window.QueueHunter.emails) {
@@ -799,7 +805,7 @@
             let successCount = 0;
             const timestamp = new Date().toLocaleString();
             const details = 'Email notifications are online! Ready to hunt queues! ⚡';
-            const fancyDetails = `🚨 **Test Alert:** ${details}\n\n**Powered by Queue Hunter Pro** – Catch 'em all! ⚡\n(Magikarp approves! 🐟)`;
+            const fancyDetails = `🚨 ${details}\n\n**Powered by Queue Hunter Pro** – Catch 'em all! ⚡\n(Magikarp approves! 🐟)`;
             for (const email of window.QueueHunter.emails) {
                 try {
                     const templateParams = {
@@ -827,7 +833,7 @@
                 try {
                     await new Promise(r => setTimeout(r, Math.random() * 1000 + 500));
                     const ctrl = new AbortController();
-                    setTimeout(() => ctrl.abort(), 5000); // Increased timeout to 5 seconds
+                    setTimeout(() => ctrl.abort(), 7000);
                     const res = await fetch(p + encodeURIComponent(url), { signal: ctrl.signal, priority: 'high', headers: window.QueueHunter.getRandomHeaders() });
                     const text = p.includes('allorigins') ? (await res.json()).contents : await res.text();
                     if (res.ok && text.length > 1500) {
@@ -922,7 +928,7 @@
         window.QueueHunter.logCheck = function(status, details, queuePos) {
             const stockStatus = document.getElementById('stockStatus');
             if (stockStatus) {
-                stockStatus.textContent = status === 'Restock' ? 'In Stock' : status === 'Queue' ? 'Queue Detected' : status === 'Queue Likely' ? 'Queue Likely' : status === 'Queue Imminent' ? 'Queue Imminent' : 'No Queue';
+                stockStatus.textContent = status === 'Restock' ? 'In Stock' : status === 'Queue' ? 'Queue Detected' : status === 'Queue Likely' ? 'High Possibility for Queue' : status === 'Possible Queue (Bot Block)' ? 'Possible Queue (Bot Block)' : 'No Queue';
             }
             console.log(`[${new Date().toISOString()}] Check: ${status} - ${details}`);
         };
@@ -950,7 +956,7 @@
                     }
                     try {
                         const ctrl = new AbortController();
-                        setTimeout(() => ctrl.abort(), 5000); // Increased timeout
+                        setTimeout(() => ctrl.abort(), 7000);
                         const res = await fetch(fetchUrl, { headers, signal: ctrl.signal, priority: 'high' });
                         const finalUrl = proxy ? decodeURIComponent(res.url.replace(proxy, '')) : res.url;
                         const contentType = res.headers.get('content-type') || 'unknown';
@@ -966,7 +972,7 @@
                         details = `Error on ${response.url}: ${response.error}`;
                         if (/aborted|timeout|network|failed to fetch/i.test(response.error)) {
                             botBlock = true;
-                            details = `Timeout or network error on ${response.url}. Possible bot block or queue activity.`;
+                            details = `Timeout or network error on ${response.url}. Possible queue due to bot block.`;
                             suspectedQueue = true;
                         }
                         window.QueueHunter.updateUI(details);
@@ -979,7 +985,7 @@
                     if (!res.ok) {
                         botBlock = [403, 503].includes(status) || /error 15|error 17|access denied/i.test(text);
                         if (botBlock) {
-                            details = `Bot block detected (HTTP ${status}) at ${url}. Queue imminent due to potential pre-queue bot protection. Check manually now!`;
+                            details = `Possible queue due to bot block at ${url}.`;
                             detectedUrl = url;
                             suspectedQueue = true;
                         } else {
@@ -990,9 +996,9 @@
                         captchaDetected = window.QueueHunter.detectCaptcha(text, res.headers, finalUrl);
                         if (botBlock || captchaDetected) {
                             if (captchaDetected) {
-                                details = `Captcha detected at ${url}. Likely queue starting soon. Check manually now!`;
+                                details = `High possibility for a queue coming at ${url}.`;
                             } else {
-                                details = `Bot protection (e.g., HTTP 403 or short response) detected at ${url}. Queue imminent due to potential pre-queue activity. Check manually now!`;
+                                details = `Possible queue due to bot block at ${url}.`;
                             }
                             detectedUrl = url;
                             suspectedQueue = true;
@@ -1003,50 +1009,45 @@
                     }
 
                     const anomalyScore = window.QueueHunter.scoreAnomaly(text);
-                    if (anomalyScore > 0.3) {
-                        details += ` Anomaly score: ${anomalyScore.toFixed(2)}`;
+                    if (anomalyScore > 0.3 && !queuePos && !captchaDetected && !botBlock) {
+                        details = `High possibility for a queue coming at ${url}. Anomaly score: ${anomalyScore.toFixed(2)}.`;
+                        detectedUrl = url;
                         suspectedQueue = true;
                     }
 
                     if (queuePos && window.QueueHunter.notificationSettings.queueDetected) {
                         if (!hasNotified) {
                             window.QueueHunter.playAlert();
-                            window.QueueHunter.updateStatusBanner(`Queue Detected 🚨: Check Now`, 'red');
-                            const lightDetails = `${details}\n\n**What this means**: A queue has been confirmed on the Pokémon Center website, likely due to a high-demand TCG restock. Queue indicators (e.g., queue-it scripts or tokens) were detected.\n**Action**: Visit ${detectedUrl || url} immediately to join the queue and secure your items!`;
-                            window.QueueHunter.sendDiscord('🚨 Queue Detected!', lightDetails, 0xFF0000);
-                            window.QueueHunter.sendEmail('🚨 Queue Detected', lightDetails);
+                            window.QueueHunter.updateStatusBanner(`Queue Detected 🚨`, 'red');
+                            window.QueueHunter.sendDiscord('🚨 Queue Detected', detectedUrl || url, 0xFF0000);
+                            window.QueueHunter.sendEmail('🚨 Queue Detected', detectedUrl || url);
                             if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
-                                new Notification('Queue Detected!', { body: `A queue is active at ${detectedUrl || url}. Join now to secure your items!` });
+                                new Notification('Queue Detected', { body: detectedUrl || url });
                             }
                             if (document.getElementById('autoOpen').checked) {
                                 window.open(detectedUrl || url, '_blank');
-                                window.QueueHunter.updateUI(`Opened queue in new window: ${detectedUrl || url}`);
+                                window.QueueHunter.updateUI(`Opened queue: ${detectedUrl || url}`);
                             }
                             hasNotified = true;
-                            window.QueueHunter.updateUI('Full notifications sent for confirmed queue');
+                            window.QueueHunter.updateUI('Notifications sent for queue detected');
                         } else {
-                            window.QueueHunter.updateUI('Confirmed queue, but notifications already sent');
+                            window.QueueHunter.updateUI('Queue detected, but notifications already sent');
                         }
                         window.QueueHunter.logCheck('Queue', details, queuePos);
+                        consecFails = 0; // Reset consecutive failures on confirmed queue
                         return { queue: true, success: false, isFail: true, suspectedQueue: true };
-                    } else if (botBlock || captchaDetected) {
-                        const alertType = captchaDetected ? 'Queue Likely' : 'Queue Imminent';
-                        const color = captchaDetected ? 'orange' : 'purple';
-                        const notificationKey = captchaDetected ? 'queueLikely' : 'queueImminent';
-                        window.QueueHunter.updateStatusBanner(`${alertType} 🚨: Check Now`, color);
+                    } else if (botBlock || captchaDetected || anomalyScore > 0.3) {
+                        const alertType = captchaDetected || anomalyScore > 0.3 ? 'Queue Likely' : 'Possible Queue (Bot Block)';
+                        const color = captchaDetected || anomalyScore > 0.3 ? 'orange' : 'purple';
+                        const notificationKey = captchaDetected || anomalyScore > 0.3 ? 'queueLikely' : 'possibleBotBlock';
+                        window.QueueHunter.updateStatusBanner(`${alertType} 🚨`, color);
                         if (window.QueueHunter.notificationSettings[notificationKey] && !hasNotified) {
                             window.QueueHunter.playAlert();
-                            const lightDetails = captchaDetected
-                                ? `${details}\n\n**What this means**: A captcha was detected on the Pokémon Center website, indicating a queue is likely forming soon, possibly for a TCG restock. Captchas often appear before a queue is activated.\n**Action**: Visit ${detectedUrl || url} now to bypass the captcha and prepare for a potential queue!`
-                                : `${details}\n\n**What this means**: Bot protection (e.g., HTTP 403 errors or short responses) was detected on the Pokémon Center website, suggesting a queue may form soon, likely for a high-demand TCG restock.\n**Action**: Visit ${detectedUrl || url} immediately to monitor for a queue and be ready to act!`;
-                            window.QueueHunter.sendDiscord(`${alertType}!`, lightDetails, captchaDetected ? 0xFFA500 : 0x9370DB);
+                            const lightDetails = captchaDetected || anomalyScore > 0.3 ? `High possibility for a queue coming at ${detectedUrl || url}` : `Possible queue due to bot block at ${detectedUrl || url}`;
+                            window.QueueHunter.sendDiscord(`${alertType}!`, lightDetails, captchaDetected || anomalyScore > 0.3 ? 0xFFA500 : 0x9370DB);
                             window.QueueHunter.sendEmail(`${alertType}`, lightDetails);
                             if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
-                                new Notification(`${alertType}!`, {
-                                    body: captchaDetected
-                                        ? `Captcha detected at ${detectedUrl || url}. A queue is likely starting. Check now!`
-                                        : `Bot protection at ${detectedUrl || url}. A queue may start soon. Check now!`
-                                });
+                                new Notification(`${alertType}`, { body: detectedUrl || url });
                             }
                             if (document.getElementById('autoOpen').checked) {
                                 window.open(detectedUrl || url, '_blank');
@@ -1055,19 +1056,20 @@
                             hasNotified = true;
                             window.QueueHunter.updateUI(`Notifications sent for ${alertType.toLowerCase()}`);
                         } else {
-                            window.QueueHunter.updateUI(`Block detected, but notifications ${window.QueueHunter.notificationSettings[notificationKey] ? 'already sent' : 'disabled for ' + alertType}`);
+                            window.QueueHunter.updateUI(`Block or anomaly detected, but notifications ${window.QueueHunter.notificationSettings[notificationKey] ? 'already sent' : 'disabled for ' + alertType}`);
                         }
                         window.QueueHunter.logCheck(alertType, details, null);
+                        consecFails = 0; // Reset consecutive failures on suspected queue
                         return { block: true, success: false, isFail: true, suspectedQueue: true };
                     } else if (/pokemoncenter\.com/i.test(finalUrl) && contentType.includes('html') && text.length > 2000) {
                         details = `No queue or restock at ${url}. Final URL: ${finalUrl}, Type: ${contentType}, Length: ${text.length} chars.`;
                         success = true;
                         consecFails = 0;
                         cleanChecks++;
-                        if (cleanChecks >= 2 && hasNotified) {
+                        if (cleanChecks >= 5 && hasNotified) {
                             hasNotified = false;
                             cleanChecks = 0;
-                            window.QueueHunter.updateUI('Two clean checks - notification state reset');
+                            window.QueueHunter.updateUI('Five clean checks - notification state reset');
                         }
                         window.QueueHunter.stopAlert();
                         window.QueueHunter.updateStatusBanner('No queue found', 'green');
@@ -1075,7 +1077,7 @@
                         window.QueueHunter.logCheck('Success', details, queuePos);
                     } else {
                         details = `Unexpected response from ${url}. Final URL: ${finalUrl}, Type: ${contentType}, Length: ${text.length} chars.`;
-                        suspectedQueue = text.length < 2000; // Suspect queue if response is unusually short
+                        suspectedQueue = text.length < 2000;
                     }
                 }
             } catch (e) {
@@ -1091,26 +1093,20 @@
                     await new Promise(r => setTimeout(r, 1500 * Math.pow(1.5, retries)));
                     return window.QueueHunter.checkSite(isConsec, retries + 1);
                 }
-                details = `Max retries reached. No confirmed queue at ${urls[0]}. Possible queue activity due to bot block or captcha.`;
+                details = `Possible queue due to bot block at ${urls[0]}.`;
                 detectedUrl = urls[0];
                 if (botBlock || captchaDetected || suspectedQueue) {
-                    const alertType = captchaDetected ? 'Queue Likely' : 'Queue Imminent';
-                    const color = captchaDetected ? 'orange' : 'purple';
-                    const notificationKey = captchaDetected ? 'queueLikely' : 'queueImminent';
-                    window.QueueHunter.updateStatusBanner(`${alertType} 🚨: Check Now`, color);
+                    const alertType = captchaDetected || anomalyScore > 0.3 ? 'Queue Likely' : 'Possible Queue (Bot Block)';
+                    const color = captchaDetected || anomalyScore > 0.3 ? 'orange' : 'purple';
+                    const notificationKey = captchaDetected || anomalyScore > 0.3 ? 'queueLikely' : 'possibleBotBlock';
+                    window.QueueHunter.updateStatusBanner(`${alertType} 🚨`, color);
                     if (window.QueueHunter.notificationSettings[notificationKey] && !hasNotified) {
                         window.QueueHunter.playAlert();
-                        const lightDetails = captchaDetected
-                            ? `${details}\n\n**What this means**: A captcha was detected on the Pokémon Center website after multiple retries, indicating a queue is likely forming soon, possibly for a TCG restock. Captchas often appear before a queue is activated.\n**Action**: Visit ${detectedUrl} now to bypass the captcha and prepare for a potential queue!`
-                            : `${details}\n\n**What this means**: Bot protection or network issues detected on the Pokémon Center website after multiple retries, suggesting a queue may form soon, likely for a high-demand TCG restock.\n**Action**: Visit ${detectedUrl} immediately to monitor for a queue and be ready to act!`;
-                        window.QueueHunter.sendDiscord(`${alertType}!`, lightDetails, captchaDetected ? 0xFFA500 : 0x9370DB);
+                        const lightDetails = captchaDetected || anomalyScore > 0.3 ? `High possibility for a queue coming at ${detectedUrl}` : `Possible queue due to bot block at ${detectedUrl}`;
+                        window.QueueHunter.sendDiscord(`${alertType}!`, lightDetails, captchaDetected || anomalyScore > 0.3 ? 0xFFA500 : 0x9370DB);
                         window.QueueHunter.sendEmail(`${alertType}`, lightDetails);
                         if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
-                            new Notification(`${alertType}!`, {
-                                body: captchaDetected
-                                    ? `Captcha detected at ${detectedUrl}. A queue is likely starting. Check now!`
-                                    : `Bot protection or network issue at ${detectedUrl}. A queue may start soon. Check now!`
-                            });
+                            new Notification(`${alertType}`, { body: detectedUrl });
                         }
                         if (document.getElementById('autoOpen').checked) {
                             window.open(detectedUrl, '_blank');
@@ -1122,6 +1118,7 @@
                         window.QueueHunter.updateUI(`Block or network issue detected, but notifications ${window.QueueHunter.notificationSettings[notificationKey] ? 'already sent' : 'disabled for ' + alertType}`);
                     }
                     window.QueueHunter.logCheck(alertType, details, null);
+                    consecFails = 0; // Reset consecutive failures on suspected queue
                     return { block: true, success: false, isFail: true, suspectedQueue: true };
                 } else {
                     window.QueueHunter.updateStatusBanner('No queue found', 'green');
@@ -1147,18 +1144,21 @@
             startTime = Date.now();
             hasNotified = false;
             cleanChecks = 0;
+            consecFails = 0;
             await window.QueueHunter.requestLock();
             window.QueueHunter.updateUI('Hunt started!');
             function runCheck() {
                 window.QueueHunter.checkSite(true).then(result => {
-                    if (consecFails >= failThresh) {
+                    if (consecFails >= failThresh && !result.suspectedQueue) {
                         window.QueueHunter.updateStatusBanner('Too many fails!', 'red');
-                        window.QueueHunter.sendDiscord('⚠️ Hunt Paused', `Too many consecutive fails (${consecFails}). Check setup or proxies.`, 0xFF0000);
-                        window.QueueHunter.sendEmail('⚠️ Hunt Paused', `Too many consecutive fails (${consecFails}). Check setup or proxies.`);
+                        window.QueueHunter.updateUI(`Too many consecutive fails (${consecFails}). Stopping hunt. Check setup or proxies.`);
                         window.QueueHunter.stopMonitoring();
+                    } else if (result.suspectedQueue) {
+                        window.QueueHunter.updateUI(`Suspected queue detected, continuing hunt and resetting failures (was ${consecFails})`);
+                        consecFails = 0;
+                        setTimeout(runCheck, window.QueueHunter.getDynamicFreq(true));
                     } else {
-                        const nextFreq = window.QueueHunter.getDynamicFreq(result.suspectedQueue);
-                        setTimeout(runCheck, nextFreq);
+                        setTimeout(runCheck, window.QueueHunter.getDynamicFreq(result.suspectedQueue));
                     }
                 });
             }
