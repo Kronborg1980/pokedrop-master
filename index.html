@@ -584,12 +584,13 @@
 
         window.QueueHunter.getDynamicFreq = function(suspectedQueue = false) {
             if (suspectedQueue) {
-                return 1000; // 1 second if queue is suspected
+                window.QueueHunter.updateUI(`Scheduling next check in ${baseCheckFreq / 60000} minutes due to queue/block detection`);
+                return baseCheckFreq; // Use user-defined frequency after queue/block
             }
             if (window.QueueHunter.isDropWindow()) {
                 return 2000; // 2 seconds during drop windows
             }
-            return baseCheckFreq;
+            return baseCheckFreq; // Default to user-defined frequency
         };
 
         window.QueueHunter.requestLock = async function() {
@@ -845,7 +846,7 @@
                 try {
                     await new Promise(r => setTimeout(r, Math.random() * 1000 + 500));
                     const ctrl = new AbortController();
-                    setTimeout(() => ctrl.abort(), 15000); // Increased timeout to 15s
+                    setTimeout(() => ctrl.abort(), 15000);
                     const res = await fetch(p + encodeURIComponent(url), { signal: ctrl.signal, priority: 'high', headers: window.QueueHunter.getRandomHeaders() });
                     const text = p.includes('allorigins') ? (await res.json()).contents : await res.text();
                     if (res.ok && text.length > 1500) {
@@ -864,7 +865,7 @@
             window.QueueHunter.updateUI('All proxies failed, attempting direct fetch with enhanced headers');
             try {
                 const ctrl = new AbortController();
-                setTimeout(() => ctrl.abort(), 20000); // Direct fetch timeout 20s
+                setTimeout(() => ctrl.abort(), 20000);
                 const res = await fetch(url, { signal: ctrl.signal, priority: 'high', headers: window.QueueHunter.getRandomHeaders() });
                 const text = await res.text();
                 if (res.ok && text.length > 1500) {
@@ -1113,10 +1114,10 @@
                         success = true;
                         consecFails = 0;
                         cleanChecks++;
-                        if (cleanChecks >= 4 && hasNotified) {
+                        if (cleanChecks >= 1 && hasNotified) {
                             hasNotified = false;
                             cleanChecks = 0;
-                            window.QueueHunter.updateUI('Four clean checks - notification state reset');
+                            window.QueueHunter.updateUI('One clean check - notification state reset');
                         }
                         window.QueueHunter.stopAlert();
                         window.QueueHunter.updateStatusBanner('No queue found', 'green');
@@ -1166,7 +1167,6 @@
                 cleanChecks = 0;
                 return { block: true, success: false, isFail: true, suspectedQueue: true };
             }
-            cleanChecks = success ? cleanChecks + 1 : 0;
             return { success: true, isFail: false, suspectedQueue: false };
         };
 
@@ -1240,7 +1240,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `queue_hunter_log_${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
+            a.download = `queue_hunter_log_${new Date().toISOString().replace(/[:26:/.]/g, '-')}.txt`;
             a.click();
             URL.revokeObjectURL(url);
             window.QueueHunter.updateUI('Log exported');
