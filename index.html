@@ -224,26 +224,26 @@
         #suicune { bottom: 25%; right: 10%; }
         #charizard { top: 30%; left: 15%; }
         #vaporeon { bottom: 10%; right: 15%; }
-        @-filesystem
-        .container { padding: 0.5rem; }
-        .status-banner { font-size: 1.2rem; padding: 0.8rem; margin-bottom: 1rem; }
-        .pokedex { padding: 1.5rem; }
-        .header h1 { font-size: 1.5rem; }
-        .header img { width: 80px; }
-        .button-group { flex-direction: column; }
-        button { padding: 0.6rem 1rem; font-size: 0.7rem; }
-        .section { padding: 0.8rem; }
-        input, textarea { padding: 0.5rem; font-size: 0.7rem; }
-        .status-pokedex { padding: 1rem; }
-        .status-pokedex p { font-size: 0.7rem; }
-        .log-container { font-size: 0.65rem; }
-        .pokemon-decoration { width: 60px; }
-        #cubone { top: 5%; left: 2%; }
-        #pinsir { top: 15%; right: 2%; }
-        #gardevoir { bottom: 10%; left: 5%; }
-        #suicune { bottom: 20%; right: 5%; }
-        #charizard { top: 25%; left: 8%; }
-        #vaporeon { bottom: 5%; right: 8%; }
+        @media (max-width: 480px) {
+            .container { padding: 0.5rem; }
+            .status-banner { font-size: 1.2rem; padding: 0.8rem; margin-bottom: 1rem; }
+            .pokedex { padding: 1.5rem; }
+            .header h1 { font-size: 1.5rem; }
+            .header img { width: 80px; }
+            .button-group { flex-direction: column; }
+            button { padding: 0.6rem 1rem; font-size: 0.7rem; }
+            .section { padding: 0.8rem; }
+            input, textarea { padding: 0.5rem; font-size: 0.7rem; }
+            .status-pokedex { padding: 1rem; }
+            .status-pokedex p { font-size: 0.7rem; }
+            .log-container { font-size: 0.65rem; }
+            .pokemon-decoration { width: 60px; }
+            #cubone { top: 5%; left: 2%; }
+            #pinsir { top: 15%; right: 2%; }
+            #gardevoir { bottom: 10%; left: 5%; }
+            #suicune { bottom: 20%; right: 5%; }
+            #charizard { top: 25%; left: 8%; }
+            #vaporeon { bottom: 5%; right: 8%; }
         }
         .email-list {
             margin-top: 0.5rem;
@@ -473,10 +473,12 @@
             document.getElementById('freqSlider').addEventListener('input', function() {
                 baseCheckFreq = this.value * 60 * 1000;
                 document.getElementById('freqVal').textContent = this.value;
+                window.QueueHunter.updateUI(`Check frequency updated to ${this.value} minutes`);
             });
             document.getElementById('threshSlider').addEventListener('input', function() {
                 failThresh = parseInt(this.value);
                 document.getElementById('threshVal').textContent = this.value;
+                window.QueueHunter.updateUI(`Alert threshold updated to ${this.value} consecutive fails`);
             });
             window.QueueHunter.renderEmailList();
             if (window.QueueHunter.emails.length === 0) {
@@ -588,6 +590,7 @@
             }
             const testBtn = document.getElementById('testDiscordBtn');
             testBtn.textContent = 'Testing...';
+            window.QueueHunter.updateUI('Initiating Discord webhook test');
             await window.QueueHunter.sendDiscord('📬 Test Ping', 'Webhook online! Ready to catch queue alerts! ⚡');
             testBtn.textContent = '📬 Test Discord';
         };
@@ -601,7 +604,7 @@
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Edg/129.0.0.0',
                 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
             ];
-            return {
+            const headers = {
                 'User-Agent': userAgents[Math.floor(Math.random() * userAgents.length)],
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
                 'Accept-Language': 'en-US,en;q=0.5',
@@ -612,6 +615,8 @@
                 'Cache-Control': 'no-cache',
                 'Pragma': 'no-cache'
             };
+            window.QueueHunter.updateUI(`Generated random headers: User-Agent=${headers['User-Agent'].substring(0, 30)}...`);
+            return headers;
         };
 
         window.QueueHunter.isDropWindow = function() {
@@ -620,7 +625,9 @@
             const hour = now.getHours();
             const minute = now.getMinutes();
             const etHour = (hour - 4 + 24) % 24; // Adjust to ET (UTC-4)
-            return (day === 1 || day === 2 || day === 4) && etHour >= 11 && etHour < 13;
+            const isDrop = (day === 1 || day === 2 || day === 4) && etHour >= 11 && etHour < 13;
+            window.QueueHunter.updateUI(`Checked drop window: ${isDrop ? 'Active (faster checks)' : 'Inactive (normal checks)'}`);
+            return isDrop;
         };
 
         window.QueueHunter.getDynamicFreq = function(suspectedQueue = false) {
@@ -629,8 +636,10 @@
                 return baseCheckFreq;
             }
             if (window.QueueHunter.isDropWindow()) {
+                window.QueueHunter.updateUI('Drop window detected, using 2-second check interval');
                 return 2000; // 2 seconds during drop windows
             }
+            window.QueueHunter.updateUI(`Using user-defined check interval: ${baseCheckFreq / 60000} minutes`);
             return baseCheckFreq; // Default to user-defined frequency
         };
 
@@ -639,15 +648,15 @@
                 try {
                     await navigator.locks.request('queue_hunt_lock', { mode: 'shared' }, async () => {
                         console.log(`[${new Date().toISOString()}] Acquired web lock`);
-                        window.QueueHunter.updateUI('Background operation enabled');
+                        window.QueueHunter.updateUI('Acquired web lock for background operation');
                     });
                 } catch (e) {
                     console.error('Web lock error:', e.message);
-                    window.QueueHunter.updateUI(`Background operation may pause: ${e.message}`);
+                    window.QueueHunter.updateUI(`Web lock error: ${e.message}. Background operation may pause`);
                 }
             } else {
                 console.warn('Web Locks API not supported');
-                window.QueueHunter.updateUI('Background operation limited; keep browser open');
+                window.QueueHunter.updateUI('Web Locks API not supported; keep browser open for continuous monitoring');
             }
         };
 
@@ -656,6 +665,7 @@
             if (banner) {
                 banner.textContent = text;
                 banner.className = 'status-banner ' + colorClass;
+                window.QueueHunter.updateUI(`Updated status banner to: ${text} (${colorClass})`);
             }
         };
 
@@ -704,15 +714,16 @@
                 const audio = document.getElementById('alertTone');
                 audio.play().then(() => {
                     if (navigator.vibrate) navigator.vibrate([300, 200, 300]);
+                    window.QueueHunter.updateUI('Testing alert tone and vibration for 5 seconds');
                     setTimeout(() => {
                         audio.pause();
                         audio.currentTime = 0;
                         navigator.vibrate(0);
+                        window.QueueHunter.updateUI('Alert tone and vibration test completed');
                     }, 5000);
-                    window.QueueHunter.updateUI('Tested alert tone and vibration for 5 seconds');
                 }).catch(e => {
                     console.error('Alert tone test failed:', e.message);
-                    window.QueueHunter.updateUI(`Alert tone test error: ${e.message}`);
+                    window.QueueHunter.updateUI(`Alert tone test failed: ${e.message}`);
                 });
             } catch (e) {
                 console.error('Test alarm error:', e.message);
@@ -725,17 +736,17 @@
                 try {
                     alertAudio = document.getElementById('alertTone');
                     alertAudio.play().then(() => {
-                        window.QueueHunter.updateUI('Alert tone playing for detection');
+                        window.QueueHunter.updateUI('Playing alert tone for queue detection');
                     }).catch(e => {
                         console.error('Alert tone failed:', e.message);
                         window.QueueHunter.updateUI(`Alert tone error: ${e.message}`);
                     });
                     if (navigator.vibrate) {
                         vibrateInterval = setInterval(() => navigator.vibrate([300, 200, 300]), 1000);
-                        console.log(`[${new Date().toISOString()}] Started vibration for detection`);
+                        window.QueueHunter.updateUI('Started vibration pattern for queue detection');
                     } else {
                         console.warn('Vibration API not supported');
-                        window.QueueHunter.updateUI('Vibration not supported on this device');
+                        window.QueueHunter.updateUI('Vibration API not supported on this device');
                     }
                 } catch (e) {
                     console.error('Play alert error:', e.message);
@@ -749,11 +760,13 @@
                 alertAudio.pause();
                 alertAudio.currentTime = 0;
                 alertAudio = null;
+                window.QueueHunter.updateUI('Stopped alert tone');
             }
             if (vibrateInterval) {
                 clearInterval(vibrateInterval);
                 vibrateInterval = null;
                 navigator.vibrate(0);
+                window.QueueHunter.updateUI('Stopped vibration pattern');
             }
         };
 
@@ -765,23 +778,24 @@
             const webhookUrl = document.getElementById('discordWebhook').value;
             const webhookCode = document.getElementById('webhookCode').value;
             if (!webhookUrl || !window.QueueHunter.isWebhookSubmitted) {
-                window.QueueHunter.updateUI('Discord skipped: Webhook not submitted. Please enter a valid Discord webhook URL.');
+                window.QueueHunter.updateUI('Discord notification skipped: Webhook not submitted');
                 return;
             }
             if (webhookCode !== '9918') {
-                window.QueueHunter.updateUI('Discord skipped: Incorrect webhook code.');
+                window.QueueHunter.updateUI('Discord notification skipped: Incorrect webhook code');
                 return;
             }
             try {
+                window.QueueHunter.updateUI(`Sending Discord notification: ${title}`);
                 await fetch(webhookUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ embeds: [{ title, description: desc, color, footer: { text: 'Queue Hunter Pro' } }] })
                 });
-                window.QueueHunter.updateUI(`Sent Discord: ${title}`);
+                window.QueueHunter.updateUI(`Successfully sent Discord notification: ${title}`);
             } catch (e) {
                 console.error('Discord fail:', e.message);
-                window.QueueHunter.updateUI(`Discord error: ${e.message}`);
+                window.QueueHunter.updateUI(`Discord notification error: ${e.message}`);
             }
         };
 
@@ -796,9 +810,9 @@
                 setTimeout(() => emailInput.classList.remove('grayed-out'), 2000);
                 document.getElementById('addEmailBtn').disabled = true;
                 document.getElementById('testEmailBtn').disabled = window.QueueHunter.emails.length === 0;
-                window.QueueHunter.updateUI(`Added email: ${email}`);
+                window.QueueHunter.updateUI(`Added email address: ${email}`);
             } else {
-                window.QueueHunter.updateUI('Invalid or duplicate email.');
+                window.QueueHunter.updateUI('Invalid or duplicate email address');
             }
         };
 
@@ -806,9 +820,9 @@
             window.QueueHunter.emails = window.QueueHunter.emails.filter(e => e !== email);
             window.QueueHunter.renderEmailList();
             document.getElementById('testEmailBtn').disabled = window.QueueHunter.emails.length === 0;
-            window.QueueHunter.updateUI(`Removed email: ${email}`);
+            window.QueueHunter.updateUI(`Removed email address: ${email}`);
             if (window.QueueHunter.emails.length === 0) {
-                window.QueueHunter.updateUI('Add an email address to enable email notifications');
+                window.QueueHunter.updateUI('No email addresses remain; add one to enable email notifications');
             }
         };
 
@@ -824,6 +838,7 @@
                 li.appendChild(removeBtn);
                 emailList.appendChild(li);
             });
+            window.QueueHunter.updateUI(`Updated email list: ${window.QueueHunter.emails.length} email(s)`);
         };
 
         window.QueueHunter.sendEmail = async function(status, details) {
@@ -832,12 +847,13 @@
                 return;
             }
             if (window.QueueHunter.emails.length === 0) {
-                window.QueueHunter.updateUI('Email skipped: No emails added. Please add an email address.');
+                window.QueueHunter.updateUI('Email notification skipped: No email addresses added');
                 return;
             }
             const fancyDetails = `🚨 ${details}\n\n**Powered by Queue Hunter Pro** – Catch 'em all! ⚡\n(Magikarp approves! 🐟)`;
             const timestamp = new Date().toLocaleString();
             let successCount = 0;
+            window.QueueHunter.updateUI(`Attempting to send email notifications to ${window.QueueHunter.emails.length} address(es)`);
             for (const email of window.QueueHunter.emails) {
                 try {
                     const templateParams = {
@@ -846,17 +862,16 @@
                         timestamp: timestamp,
                         to_email: email
                     };
+                    window.QueueHunter.updateUI(`Sending email to ${email}: ${status}`);
                     await emailjs.send(window.QueueHunter.emailServiceId, window.QueueHunter.emailTemplateId, templateParams);
                     successCount++;
-                    window.QueueHunter.updateUI(`Sent email to ${email}: ${status}`);
+                    window.QueueHunter.updateUI(`Successfully sent email to ${email}: ${status}`);
                 } catch (e) {
                     console.error('Email fail:', e);
                     window.QueueHunter.updateUI(`Email error for ${email}: ${e.text || e.message || 'Unknown error'}`);
                 }
             }
-            if (successCount > 0) {
-                window.QueueHunter.updateUI(`Successfully sent email to ${successCount} address${successCount > 1 ? 'es' : ''}.`);
-            }
+            window.QueueHunter.updateUI(`Email notification result: ${successCount} successful, ${window.QueueHunter.emails.length - successCount} failed`);
         };
 
         window.QueueHunter.testEmail = async function() {
@@ -868,6 +883,7 @@
             const originalText = testBtn.textContent;
             testBtn.textContent = 'Test Sent!';
             setTimeout(() => testBtn.textContent = originalText, 2000);
+            window.QueueHunter.updateUI('Initiating test email notification');
             let successCount = 0;
             const timestamp = new Date().toLocaleString();
             const details = 'Email notifications are online! Ready to hunt queues! ⚡';
@@ -880,22 +896,24 @@
                         timestamp: timestamp,
                         to_email: email
                     };
+                    window.QueueHunter.updateUI(`Sending test email to ${email}`);
                     await emailjs.send(window.QueueHunter.emailServiceId, window.QueueHunter.emailTemplateId, templateParams);
                     successCount++;
-                    window.QueueHunter.updateUI(`Test email sent to ${email}`);
+                    window.QueueHunter.updateUI(`Test email successfully sent to ${email}`);
                 } catch (e) {
                     console.error('Test email fail:', e);
                     window.QueueHunter.updateUI(`Test email error for ${email}: ${e.text || e.message || 'Unknown error'}`);
                 }
             }
-            window.QueueHunter.updateUI(`Test email sent to ${successCount} address${successCount > 1 ? 'es' : ''}${successCount === 0 ? ' (all failed)' : ''}.`);
+            window.QueueHunter.updateUI(`Test email result: ${successCount} successful, ${window.QueueHunter.emails.length - successCount} failed`);
         };
 
         window.QueueHunter.getHealthyProxy = async function(url) {
+            window.QueueHunter.updateUI(`Searching for healthy proxy for URL: ${url}`);
             const shuffledProxies = proxies.sort(() => Math.random() - 0.5);
             for (let p of shuffledProxies.filter(pr => !blacklisted.has(pr))) {
                 window.QueueHunter.updateStatusBanner('Checking proxies...', 'yellow');
-                window.QueueHunter.updateUI(`Trying proxy: ${p}`);
+                window.QueueHunter.updateUI(`Attempting proxy: ${p}`);
                 try {
                     await new Promise(r => setTimeout(r, Math.random() * 1000 + 500));
                     const ctrl = new AbortController();
@@ -903,7 +921,7 @@
                     const res = await fetch(p + encodeURIComponent(url), { signal: ctrl.signal, priority: 'high', headers: window.QueueHunter.getRandomHeaders() });
                     const text = p.includes('allorigins') ? (await res.json()).contents : await res.text();
                     if (res.ok && text.length > 1500) {
-                        window.QueueHunter.updateUI(`Using proxy: ${p}`);
+                        window.QueueHunter.updateUI(`Proxy ${p} successful: Response length ${text.length} chars`);
                         return p;
                     } else {
                         window.QueueHunter.updateUI(`Proxy ${p} failed: Response too short (${text.length} chars) or status ${res.status}`);
@@ -911,18 +929,21 @@
                 } catch (e) {
                     console.error('Proxy error:', e.message);
                     blacklisted.add(p);
-                    setTimeout(() => blacklisted.delete(p), 300000);
-                    window.QueueHunter.updateUI(`Proxy ${p} error: ${e.message}`);
+                    setTimeout(() => {
+                        blacklisted.delete(p);
+                        window.QueueHunter.updateUI(`Proxy ${p} removed from blacklist after timeout`);
+                    }, 300000);
+                    window.QueueHunter.updateUI(`Proxy ${p} error: ${e.message}; blacklisted for 5 minutes`);
                 }
             }
-            window.QueueHunter.updateUI('All proxies failed, attempting direct fetch with enhanced headers');
+            window.QueueHunter.updateUI('All proxies failed; attempting direct fetch');
             try {
                 const ctrl = new AbortController();
                 setTimeout(() => ctrl.abort(), 20000);
                 const res = await fetch(url, { signal: ctrl.signal, priority: 'high', headers: window.QueueHunter.getRandomHeaders() });
                 const text = await res.text();
                 if (res.ok && text.length > 1500) {
-                    window.QueueHunter.updateUI(`Direct fetch successful for ${url}`);
+                    window.QueueHunter.updateUI(`Direct fetch successful for ${url}: Response length ${text.length} chars`);
                     return null;
                 } else {
                     window.QueueHunter.updateUI(`Direct fetch failed: Response too short (${text.length} chars) or status ${res.status}`);
@@ -943,8 +964,12 @@
             ];
             for (const pattern of patterns) {
                 const match = text.match(pattern);
-                if (match) return match[1];
+                if (match) {
+                    window.QueueHunter.updateUI(`Queue length detected: ${match[1]} (pattern: ${pattern.source})`);
+                    return match[1];
+                }
             }
+            window.QueueHunter.updateUI('No queue length detected in response');
             return null;
         };
 
@@ -954,13 +979,16 @@
                 'https://www.pokemoncenter.com/',
                 'https://www.pokemoncenter.com/category/trading-card-game'
             ];
+            window.QueueHunter.updateUI(`Starting ${isConsecutiveCheck ? 'consecutive' : 'initial'} check for ${urls.length} URL(s): ${urls.join(', ')}`);
             let response = null;
             let proxyUsed = '';
             let urlUsed = '';
             let proxyErrors = [];
             for (const targetUrl of urls) {
+                window.QueueHunter.updateUI(`Checking URL: ${targetUrl}`);
                 for (const proxy of proxies.filter(pr => !blacklisted.has(pr))) {
                     try {
+                        window.QueueHunter.updateUI(`Attempting fetch via proxy ${proxy} for ${targetUrl}`);
                         response = await fetch(proxy + encodeURIComponent(targetUrl), {
                             method: 'GET',
                             headers: window.QueueHunter.getRandomHeaders(),
@@ -968,88 +996,107 @@
                         });
                         proxyUsed = proxy;
                         urlUsed = targetUrl;
-                        if (response.ok && response.status === 200) break;
+                        if (response.ok && response.status === 200) {
+                            window.QueueHunter.updateUI(`Fetch successful via proxy ${proxy} for ${targetUrl}: Status ${response.status}`);
+                            break;
+                        }
                         proxyErrors.push(`Proxy ${proxy} for ${targetUrl} returned status: ${response?.status || 'unknown'}`);
+                        window.QueueHunter.updateUI(`Proxy ${proxy} failed for ${targetUrl}: Status ${response?.status || 'unknown'}`);
                     } catch (proxyError) {
                         proxyErrors.push(`Proxy ${proxy} for ${targetUrl} failed: ${proxyError.message}`);
+                        window.QueueHunter.updateUI(`Proxy ${proxy} error for ${targetUrl}: ${proxyError.message}`);
                         console.warn(`Proxy ${proxy} for ${targetUrl} failed:`, proxyError);
                     }
                     if (response && response.ok && response.status === 200) break;
                 }
                 if (response && response.ok && response.status === 200) break;
             }
-            const now = new Date().toLocaleTimeString();
             if (!response || !response.ok) {
                 const status = 'Proxy error';
                 const details = `Failed to fetch page through all proxies. Errors: ${proxyErrors.join('; ')}. Please check the site manually.`;
+                window.QueueHunter.updateUI(`Check failed: ${details}`);
                 return { status, details, isFailure: true, url: urlUsed };
             }
             let text = '';
             if (proxyUsed.includes('api.allorigins.win/get')) {
+                window.QueueHunter.updateUI('Processing allorigins.win response');
                 const jsonResponse = await response.json();
                 text = jsonResponse.contents || '';
             } else {
                 text = await response.text();
             }
+            window.QueueHunter.updateUI(`Received response: ${text.length} chars`);
             const finalUrl = decodeURIComponent(response.url.replace(proxyUsed, ''));
+            window.QueueHunter.updateUI(`Final URL after fetch: ${finalUrl}`);
             const isQueue =
                 /queue-it\.net/i.test(finalUrl) ||
                 /waiting room|queue-it|waitingroom|virtual waiting|queue\s*position/i.test(text);
+            window.QueueHunter.updateUI(`Queue detection: ${isQueue ? 'Queue indicators found' : 'No queue indicators'}`);
             if (isQueue) {
                 const queueLength = window.QueueHunter.extractQueueLength(text);
                 const status = 'Queue Detected';
                 const details = `Queue detected at ${finalUrl} (checked ${urlUsed}). Queue length: ${queueLength || 'unknown'}.`;
                 if (!isConsecutiveCheck && document.getElementById('autoOpen').checked) {
                     window.open('https://www.pokemoncenter.com/', '_blank');
-                    window.QueueHunter.updateUI(`Opened queue: ${finalUrl}`);
+                    window.QueueHunter.updateUI(`Auto-opened queue page: https://www.pokemoncenter.com/`);
                 }
+                window.QueueHunter.updateUI(`Queue detection confirmed: ${details}`);
                 return { status, details, isFailure: true, url: finalUrl, queueLength };
             } else if (/pokemoncenter\.com(\/|$|\/category\/)/i.test(finalUrl)) {
                 const hasShopContent = /shop|products|category|store|cart|new releases|all products|add to cart|merchandise|collectibles|plush|trading card|Pokémon|shop now|browse|collections/i.test(text);
                 const hasDynamicElements = /<nav\b|<a\b[^>]*href=["'][^"']*(product|shop|category|collections)[^"']*["']|<div\b[^>]*class=["'][^"']*(product|shop|category|collections)[^"']*["']/i.test(text);
                 const isLargeResponse = text.length > 1000;
+                window.QueueHunter.updateUI(`Shop content check: Shop keywords=${hasShopContent}, Dynamic elements=${hasDynamicElements}, Response length=${text.length}`);
                 if (hasShopContent || hasDynamicElements || isLargeResponse) {
                     const status = 'Shop Accessible';
                     const details = `Reached ${finalUrl} (checked ${urlUsed}), shop content detected (keywords or dynamic elements present). Response length: ${text.length} chars.`;
+                    window.QueueHunter.updateUI(`Shop accessible: ${details}`);
                     return { status, details, isFailure: false, url: finalUrl };
                 } else {
                     const status = 'Queue Soon or Active';
                     const details = `Reached ${finalUrl} (checked ${urlUsed}), but no shop content or dynamic elements found. Likely a static landing page. Response length: ${text.length} chars.`;
+                    window.QueueHunter.updateUI(`Possible queue soon: ${details}`);
                     return { status, details, isFailure: true, url: finalUrl };
                 }
             } else {
                 const status = 'Possible Queue';
                 const details = `Reached ${finalUrl} (checked ${urlUsed}), but it does not appear to be the Pokémon Center shop. Response length: ${text.length} chars.`;
+                window.QueueHunter.updateUI(`Unexpected page detected: ${details}`);
                 return { status, details, isFailure: true, url: finalUrl };
             }
         };
 
         window.QueueHunter.performConsecutiveChecks = async function(currentFailureCount, maxFailures, status, details, url, queueLength = null) {
+            window.QueueHunter.updateUI(`Starting consecutive check ${currentFailureCount}/${maxFailures} for status: ${status}`);
             if (currentFailureCount >= maxFailures) {
                 const stockStatus = document.getElementById('stockStatus');
                 if (stockStatus) stockStatus.textContent = status;
                 window.QueueHunter.updateStatusBanner(status === 'Queue Detected' ? 'Queue Detected 🚨' : status, status === 'Queue Detected' ? 'red' : status === 'Queue Soon or Active' ? 'orange' : 'purple');
-                window.QueueHunter.updateUI(details);
+                window.QueueHunter.updateUI(`Confirmed ${status}: ${details}`);
                 if (window.QueueHunter.notificationSettings[status === 'Queue Detected' ? 'queueDetected' : status === 'Queue Soon or Active' ? 'queueSoon' : 'possibleBotBlock'] && !hasNotified) {
+                    window.QueueHunter.updateUI('Triggering notifications for confirmed status');
                     window.QueueHunter.playAlert();
                     window.QueueHunter.sendDiscord(`${status} 🚨`, details, status === 'Queue Detected' ? 0xFF0000 : status === 'Queue Soon or Active' ? 0xFFA500 : 0x9370DB);
                     window.QueueHunter.sendEmail(status, details);
                     if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
                         new Notification(status, { body: url });
+                        window.QueueHunter.updateUI(`Sent push notification: ${status} - ${url}`);
                     }
                     hasNotified = true;
                     window.QueueHunter.updateUI(`Notifications sent for ${status.toLowerCase()}`);
                 }
                 isCheckingConsecutiveFailures = false;
+                window.QueueHunter.updateUI('Consecutive checks completed');
                 return true;
             }
+            window.QueueHunter.updateUI(`Waiting 5 seconds before consecutive check ${currentFailureCount + 1}`);
             await new Promise(resolve => setTimeout(resolve, 5000));
             const result = await window.QueueHunter.checkShopAccess(true);
             if (!result.isFailure) {
                 const stockStatus = document.getElementById('stockStatus');
                 if (stockStatus) stockStatus.textContent = 'In Stock';
                 window.QueueHunter.updateStatusBanner('Shop Accessible', 'green');
-                window.QueueHunter.updateUI(result.details);
+                window.QueueHunter.updateUI(`Consecutive check passed: ${result.details}`);
                 consecFails = 0;
                 cleanChecks++;
                 if (cleanChecks >= 1 && hasNotified) {
@@ -1059,6 +1106,7 @@
                 }
                 window.QueueHunter.stopAlert();
                 isCheckingConsecutiveFailures = false;
+                window.QueueHunter.updateUI('Consecutive checks aborted due to successful access');
                 return false;
             }
             return await window.QueueHunter.performConsecutiveChecks(currentFailureCount + 1, maxFailures, result.status, result.details, result.url, result.queueLength);
@@ -1067,17 +1115,17 @@
         window.QueueHunter.checkSite = async function(isConsec = false) {
             const currentEmails = window.QueueHunter.emails.filter(email => /\S+@\S+\.\S+/.test(email));
             if (currentEmails.length === 0) {
-                window.QueueHunter.updateUI('No valid email addresses provided. Skipping email notifications.');
+                window.QueueHunter.updateUI('No valid email addresses provided; email notifications will be skipped');
             }
             window.QueueHunter.updateStatusBanner('Checking...', 'yellow');
-            window.QueueHunter.updateUI(`Scanning ${isConsec ? 'consecutive check' : 'initial check'}`);
+            window.QueueHunter.updateUI(`Initiating ${isConsec ? 'consecutive' : 'initial'} site check`);
             const result = await window.QueueHunter.checkShopAccess();
             document.getElementById('lastCheck').textContent = new Date().toLocaleTimeString();
             if (!result.isFailure) {
                 const stockStatus = document.getElementById('stockStatus');
                 if (stockStatus) stockStatus.textContent = 'In Stock';
                 window.QueueHunter.updateStatusBanner('Shop Accessible', 'green');
-                window.QueueHunter.updateUI(result.details);
+                window.QueueHunter.updateUI(`Site check successful: ${result.details}`);
                 consecFails = 0;
                 cleanChecks++;
                 if (cleanChecks >= 1 && hasNotified) {
@@ -1089,20 +1137,21 @@
                 return { success: true, isFail: false, suspectedQueue: false };
             } else {
                 consecFails++;
-                window.QueueHunter.updateUI(`Potential failure detected, consecutive count: ${consecFails}`);
+                window.QueueHunter.updateUI(`Potential failure detected, consecutive fails: ${consecFails}/${failThresh}`);
                 if (consecFails >= failThresh) {
                     isCheckingConsecutiveFailures = true;
+                    window.QueueHunter.updateUI(`Threshold reached; initiating consecutive checks for confirmation`);
                     const confirmed = await window.QueueHunter.performConsecutiveChecks(1, failThresh, result.status, result.details, result.url, result.queueLength);
                     if (!confirmed) {
                         consecFails = 0;
-                        window.QueueHunter.updateUI('Consecutive checks passed, resetting failure count');
+                        window.QueueHunter.updateUI('Consecutive checks passed; resetting failure count');
                     }
                     return { success: false, isFail: true, suspectedQueue: true };
                 } else {
                     const stockStatus = document.getElementById('stockStatus');
                     if (stockStatus) stockStatus.textContent = result.status;
                     window.QueueHunter.updateStatusBanner(result.status, result.status === 'Queue Detected' ? 'red' : result.status === 'Queue Soon or Active' ? 'orange' : 'purple');
-                    window.QueueHunter.updateUI(result.details);
+                    window.QueueHunter.updateUI(`Site check failed: ${result.details}`);
                     return { success: false, isFail: true, suspectedQueue: true };
                 }
             }
@@ -1118,7 +1167,7 @@
             const stopBtn = document.getElementById('stopBtn');
             const currentEmails = window.QueueHunter.emails.filter(email => /\S+@\S+\.\S+/.test(email));
             if (currentEmails.length === 0) {
-                window.QueueHunter.updateUI('Please add at least one valid email address.');
+                window.QueueHunter.updateUI('Monitoring aborted: At least one valid email address required');
                 return;
             }
             startBtn.classList.add('hidden');
@@ -1127,17 +1176,21 @@
             hasNotified = false;
             cleanChecks = 0;
             consecFails = 0;
+            window.QueueHunter.updateUI('Monitoring started; initializing background lock');
             await window.QueueHunter.requestLock();
-            window.QueueHunter.updateUI('Hunt started!');
+            window.QueueHunter.updateUI('Hunt started, beginning site checks');
             function runCheck() {
                 if (isCheckingConsecutiveFailures) {
+                    window.QueueHunter.updateUI('Waiting for consecutive checks to complete');
                     intervalId = setTimeout(runCheck, 1000);
                     return;
                 }
                 window.QueueHunter.checkSite(true).then(result => {
-                    intervalId = setTimeout(runCheck, window.QueueHunter.getDynamicFreq(result.suspectedQueue));
+                    const nextInterval = window.QueueHunter.getDynamicFreq(result.suspectedQueue);
+                    window.QueueHunter.updateUI(`Scheduling next check in ${nextInterval / 1000} seconds`);
+                    intervalId = setTimeout(runCheck, nextInterval);
                 }).catch(e => {
-                    window.QueueHunter.updateUI(`CheckSite error: ${e.message}. Continuing monitoring.`);
+                    window.QueueHunter.updateUI(`CheckSite error: ${e.message}; continuing monitoring`);
                     intervalId = setTimeout(runCheck, window.QueueHunter.getDynamicFreq(true));
                 });
             }
@@ -1150,6 +1203,7 @@
             if (intervalId) {
                 clearTimeout(intervalId);
                 intervalId = null;
+                window.QueueHunter.updateUI('Monitoring interval cleared');
             }
             startBtn.classList.remove('hidden');
             stopBtn.classList.add('hidden');
@@ -1160,7 +1214,7 @@
             isCheckingConsecutiveFailures = false;
             window.QueueHunter.stopAlert();
             window.QueueHunter.updateStatusBanner('Stopped', 'gray');
-            window.QueueHunter.updateUI('Monitoring stopped.');
+            window.QueueHunter.updateUI('Monitoring stopped');
         };
 
         window.QueueHunter.togglePush = async function() {
@@ -1172,6 +1226,7 @@
                 window.QueueHunter.updateUI('Push notifications disabled');
             } else {
                 if ("Notification" in window) {
+                    window.QueueHunter.updateUI('Requesting push notification permission');
                     const permission = await Notification.requestPermission();
                     if (permission === "granted") {
                         pushEnabled = true;
@@ -1180,16 +1235,17 @@
                         window.QueueHunter.updateUI('Push notifications enabled');
                     } else {
                         pushBtn.disabled = true;
-                        window.QueueHunter.updateUI('Push notifications denied');
+                        window.QueueHunter.updateUI('Push notifications denied by user');
                     }
                 } else {
                     pushBtn.disabled = true;
-                    window.QueueHunter.updateUI('Push notifications not supported');
+                    window.QueueHunter.updateUI('Push notifications not supported by browser');
                 }
             }
         };
 
         window.QueueHunter.exportLog = function() {
+            window.QueueHunter.updateUI('Exporting log file');
             const blob = new Blob([logEntries.join('\n')], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1197,7 +1253,7 @@
             a.download = `queue_hunter_log_${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
             a.click();
             URL.revokeObjectURL(url);
-            window.QueueHunter.updateUI('Log exported');
+            window.QueueHunter.updateUI('Log exported successfully');
         };
     </script>
 </body>
