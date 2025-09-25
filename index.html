@@ -845,12 +845,14 @@
                 try {
                     await new Promise(r => setTimeout(r, Math.random() * 1000 + 500));
                     const ctrl = new AbortController();
-                    setTimeout(() => ctrl.abort(), 10000);
+                    setTimeout(() => ctrl.abort(), 15000); // Increased timeout to 15s
                     const res = await fetch(p + encodeURIComponent(url), { signal: ctrl.signal, priority: 'high', headers: window.QueueHunter.getRandomHeaders() });
                     const text = p.includes('allorigins') ? (await res.json()).contents : await res.text();
                     if (res.ok && text.length > 1500) {
                         window.QueueHunter.updateUI(`Using proxy: ${p}`);
                         return p;
+                    } else {
+                        window.QueueHunter.updateUI(`Proxy ${p} failed: Response too short (${text.length} chars) or status ${res.status}`);
                     }
                 } catch (e) {
                     console.error('Proxy error:', e.message);
@@ -860,7 +862,21 @@
                 }
             }
             window.QueueHunter.updateUI('All proxies failed, attempting direct fetch with enhanced headers');
-            return null;
+            try {
+                const ctrl = new AbortController();
+                setTimeout(() => ctrl.abort(), 20000); // Direct fetch timeout 20s
+                const res = await fetch(url, { signal: ctrl.signal, priority: 'high', headers: window.QueueHunter.getRandomHeaders() });
+                const text = await res.text();
+                if (res.ok && text.length > 1500) {
+                    window.QueueHunter.updateUI(`Direct fetch successful for ${url}`);
+                    return null;
+                } else {
+                    window.QueueHunter.updateUI(`Direct fetch failed: Response too short (${text.length} chars) or status ${res.status}`);
+                }
+            } catch (e) {
+                window.QueueHunter.updateUI(`Direct fetch error for ${url}: ${e.message}`);
+                return null;
+            }
         };
 
         window.QueueHunter.detectBotBlock = function(text, headers, url, status) {
@@ -966,6 +982,7 @@
             ];
             let success = false, queuePos = null, inStock = false, captchaDetected = false, botBlock = false, details = '', detectedUrl = '';
             let suspectedQueue = false;
+            let anomalyScore = 0;
             window.QueueHunter.updateStatusBanner('Checking...', 'yellow');
             window.QueueHunter.updateUI(`Scanning ${urls.length} URLs (Attempt ${retries + 1}/${maxRetries})${window.QueueHunter.isDropWindow() ? ' - Drop Window Active' : ''}`);
             const headers = window.QueueHunter.getRandomHeaders();
@@ -979,7 +996,7 @@
                     }
                     try {
                         const ctrl = new AbortController();
-                        setTimeout(() => ctrl.abort(), 10000);
+                        setTimeout(() => ctrl.abort(), 15000);
                         const res = await fetch(fetchUrl, { headers, signal: ctrl.signal, priority: 'high' });
                         const finalUrl = proxy ? decodeURIComponent(res.url.replace(proxy, '')) : res.url;
                         const contentType = res.headers.get('content-type') || 'unknown';
@@ -995,7 +1012,8 @@
                         details = `Error on ${response.url}: ${response.error}`;
                         if (/aborted|timeout|network|failed to fetch/i.test(response.error)) {
                             botBlock = true;
-                            details = `Timeout or network error on ${response.url}. Possible queue due to bot block.`;
+                            details = `Timeout or network error on ${response.url}: ${response.error}. Possible queue due to bot block.`;
+                            detectedUrl = response.url;
                             suspectedQueue = true;
                         }
                         window.QueueHunter.updateUI(details);
@@ -1008,7 +1026,7 @@
                     if (!res.ok) {
                         botBlock = [403, 503].includes(status) || /error 15|error 17|access denied/i.test(text);
                         if (botBlock) {
-                            details = `Possible queue due to bot block at ${url}.`;
+                            details = `Possible queue due to bot block at ${url} (Status: ${status}).`;
                             detectedUrl = url;
                             suspectedQueue = true;
                         } else {
@@ -1028,14 +1046,14 @@
                                 detectedUrl = url;
                                 suspectedQueue = true;
                             } else {
-                                details = `Possible queue due to bot block at ${url}.`;
+                                details = `Possible queue due to bot block at ${url} (Status: ${status}, Length: ${text.length}).`;
                                 detectedUrl = url;
                                 suspectedQueue = true;
                             }
                         }
                     }
 
-                    const anomalyScore = window.QueueHunter.scoreAnomaly(text);
+                    anomalyScore = window.QueueHunter.scoreAnomaly(text);
                     if (anomalyScore > 0.2 && !queuePos && !captchaDetected && !botBlock) {
                         details = `Either a queue will come soon, or a queue is already there at ${url}. Anomaly score: ${anomalyScore.toFixed(2)}.`;
                         detectedUrl = url;
@@ -1062,6 +1080,7 @@
                         }
                         window.QueueHunter.logCheck('Queue', details, queuePos);
                         consecFails = 0;
+                        cleanChecks = 0;
                         return { queue: true, success: false, isFail: true, suspectedQueue: true };
                     } else if (botBlock || captchaDetected || anomalyScore > 0.2) {
                         const alertType = captchaDetected || anomalyScore > 0.2 ? 'Queue Soon' : 'Possible Queue (Bot Block)';
@@ -1087,16 +1106,17 @@
                         }
                         window.QueueHunter.logCheck(alertType, details, null);
                         consecFails = 0;
+                        cleanChecks = 0;
                         return { block: true, success: false, isFail: true, suspectedQueue: true };
                     } else if (/pokemoncenter\.com/i.test(finalUrl) && contentType.includes('html') && text.length > 2000) {
                         details = `No queue or restock at ${url}. Final URL: ${finalUrl}, Type: ${contentType}, Length: ${text.length} chars.`;
                         success = true;
                         consecFails = 0;
                         cleanChecks++;
-                        if (cleanChecks >= 10 && hasNotified) {
+                        if (cleanChecks >= 4 && hasNotified) {
                             hasNotified = false;
                             cleanChecks = 0;
-                            window.QueueHunter.updateUI('Ten clean checks - notification state reset');
+                            window.QueueHunter.updateUI('Four clean checks - notification state reset');
                         }
                         window.QueueHunter.stopAlert();
                         window.QueueHunter.updateStatusBanner('No queue found', 'green');
@@ -1120,39 +1140,31 @@
                     await new Promise(r => setTimeout(r, 1500 * Math.pow(1.5, retries)));
                     return window.QueueHunter.checkSite(isConsec, retries + 1);
                 }
-                details = `Possible queue due to bot block at ${urls[0]}.`;
+                details = `Max retries (${maxRetries}) reached. Possible queue due to bot block at ${urls[0]}.`;
                 detectedUrl = urls[0];
-                if (botBlock || captchaDetected || suspectedQueue) {
-                    const alertType = captchaDetected || anomalyScore > 0.2 ? 'Queue Soon' : 'Possible Queue (Bot Block)';
-                    const color = captchaDetected || anomalyScore > 0.2 ? 'orange' : 'purple';
-                    const notificationKey = captchaDetected || anomalyScore > 0.2 ? 'queueSoon' : 'possibleBotBlock';
-                    window.QueueHunter.updateStatusBanner(`${alertType} 🚨`, color);
-                    if (window.QueueHunter.notificationSettings[notificationKey] && !hasNotified) {
-                        window.QueueHunter.playAlert();
-                        const lightDetails = captchaDetected || anomalyScore > 0.2 ? `Either a queue will come soon, or a queue is already there at ${detectedUrl}` : `Possible queue due to bot block at ${detectedUrl}`;
-                        window.QueueHunter.sendDiscord(`${alertType}!`, lightDetails, captchaDetected || anomalyScore > 0.2 ? 0xFFA500 : 0x9370DB);
-                        window.QueueHunter.sendEmail(`${alertType}`, lightDetails);
-                        if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
-                            new Notification(`${alertType}`, { body: detectedUrl });
-                        }
-                        if (document.getElementById('autoOpen').checked) {
-                            window.open(detectedUrl, '_blank');
-                            window.QueueHunter.updateUI(`Opened page for ${alertType.toLowerCase()}: ${detectedUrl}`);
-                        }
-                        hasNotified = true;
-                        window.QueueHunter.updateUI(`Notifications sent for ${alertType.toLowerCase()}`);
-                    } else {
-                        window.QueueHunter.updateUI(`Block or network issue detected, but notifications ${window.QueueHunter.notificationSettings[notificationKey] ? 'already sent' : 'disabled for ' + alertType}`);
+                botBlock = true;
+                window.QueueHunter.updateStatusBanner('Possible Queue (Bot Block) 🚨', 'purple');
+                if (window.QueueHunter.notificationSettings.possibleBotBlock && !hasNotified) {
+                    window.QueueHunter.playAlert();
+                    const lightDetails = `Possible queue due to bot block at ${detectedUrl}`;
+                    window.QueueHunter.sendDiscord('Possible Queue (Bot Block)!', lightDetails, 0x9370DB);
+                    window.QueueHunter.sendEmail('Possible Queue (Bot Block)', lightDetails);
+                    if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
+                        new Notification('Possible Queue (Bot Block)', { body: detectedUrl });
                     }
-                    window.QueueHunter.logCheck(alertType, details, null);
-                    consecFails = 0;
-                    return { block: true, success: false, isFail: true, suspectedQueue: true };
+                    if (document.getElementById('autoOpen').checked) {
+                        window.open(detectedUrl, '_blank');
+                        window.QueueHunter.updateUI(`Opened page for possible queue (bot block): ${detectedUrl}`);
+                    }
+                    hasNotified = true;
+                    window.QueueHunter.updateUI('Notifications sent for possible queue (bot block) after max retries');
                 } else {
-                    window.QueueHunter.updateStatusBanner('No queue found', 'green');
-                    window.QueueHunter.updateUI(details);
-                    window.QueueHunter.logCheck('Success', details, null);
-                    return { success: true, isFail: false, suspectedQueue: false };
+                    window.QueueHunter.updateUI(`Max retries reached, notifications ${window.QueueHunter.notificationSettings.possibleBotBlock ? 'already sent' : 'disabled for Possible Queue (Bot Block)'}`);
                 }
+                window.QueueHunter.logCheck('Possible Queue (Bot Block)', details, null);
+                consecFails = 0;
+                cleanChecks = 0;
+                return { block: true, success: false, isFail: true, suspectedQueue: true };
             }
             cleanChecks = success ? cleanChecks + 1 : 0;
             return { success: true, isFail: false, suspectedQueue: false };
@@ -1177,6 +1189,9 @@
             function runCheck() {
                 window.QueueHunter.checkSite(true).then(result => {
                     setTimeout(runCheck, window.QueueHunter.getDynamicFreq(result.suspectedQueue));
+                }).catch(e => {
+                    window.QueueHunter.updateUI(`CheckSite error: ${e.message}. Continuing monitoring.`);
+                    setTimeout(runCheck, window.QueueHunter.getDynamicFreq(true));
                 });
             }
             runCheck();
@@ -1260,7 +1275,7 @@
         ];
         let blacklisted = new Set();
         let logEntries = [];
-        const maxRetries = 7;
+        const maxRetries = 4;
         let alarmActive = false;
         let alertAudio = null;
         let vibrateInterval = null;
