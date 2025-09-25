@@ -384,6 +384,7 @@
                 errorMessage.style.display = 'block';
             }
         }
+
         window.QueueHunter = window.QueueHunter || {};
         window.QueueHunter.isWebhookSubmitted = false;
         window.QueueHunter.emails = ['kronborgnielsen@gmail.com'];
@@ -395,6 +396,7 @@
         let pushEnabled = false;
         let hasNotified = false;
         let cleanChecks = 0;
+
         document.addEventListener('DOMContentLoaded', () => {
             const testBtn = document.getElementById('testDiscordBtn');
             const submitBtn = document.getElementById('submitWebhookBtn');
@@ -411,6 +413,7 @@
             addEmailBtn.disabled = true;
             testEmailBtn.disabled = window.QueueHunter.emails.length === 0;
             pushBtn.disabled = !("Notification" in window);
+
             webhookInput.addEventListener('input', function() {
                 submitBtn.disabled = !this.value || !this.value.includes('discord.com/api/webhooks');
                 clearBtn.disabled = !this.value;
@@ -423,19 +426,24 @@
                     testBtn.disabled = true;
                 }
             });
+
             document.getElementById('emailInput').addEventListener('input', function() {
                 addEmailBtn.disabled = !this.value || !/\S+@\S+\.\S+/.test(this.value);
             });
+
             document.getElementById('freqSlider').addEventListener('input', function() {
                 baseCheckFreq = this.value * 60 * 1000;
                 document.getElementById('freqVal').textContent = this.value;
             });
+
             document.getElementById('threshSlider').addEventListener('input', function() {
                 failThresh = parseInt(this.value);
                 document.getElementById('threshVal').textContent = this.value;
             });
+
             window.QueueHunter.renderEmailList();
         });
+
         window.QueueHunter.toggleNotification = function(type) {
             window.QueueHunter.notificationSettings[type] = !window.QueueHunter.notificationSettings[type];
             const btn = document.getElementById(`toggle${type.charAt(0).toUpperCase() + type.slice(1)}Btn`);
@@ -446,6 +454,7 @@
             }
             window.QueueHunter.updateUI(`${type.charAt(0).toUpperCase() + type.slice(1).replace(/([A-Z])/g, ' $1')} notifications ${window.QueueHunter.notificationSettings[type] ? 'enabled' : 'disabled'}`);
         };
+
         window.QueueHunter.addPokezonanWebhook = function() {
             const webhookUrlInput = document.getElementById('discordWebhook');
             const testBtn = document.getElementById('testDiscordBtn');
@@ -466,6 +475,7 @@
             setTimeout(() => pokezonanBtn.textContent = '🎮 Add Pokezonan Webhook', 2000);
             window.QueueHunter.updateUI('Pokezonan webhook added and submitted');
         };
+
         window.QueueHunter.submitWebhook = function() {
             const webhookUrlInput = document.getElementById('discordWebhook');
             const testBtn = document.getElementById('testDiscordBtn');
@@ -488,6 +498,7 @@
                 window.QueueHunter.updateUI('Invalid Discord webhook URL');
             }
         };
+
         window.QueueHunter.clearWebhook = function() {
             const webhookUrlInput = document.getElementById('discordWebhook');
             const testBtn = document.getElementById('testDiscordBtn');
@@ -507,6 +518,7 @@
             setTimeout(() => clearBtn.textContent = 'Clear', 2000);
             window.QueueHunter.updateUI('Webhook cleared');
         };
+
         window.QueueHunter.testDiscord = async function() {
             if (!window.QueueHunter.isWebhookSubmitted) {
                 window.QueueHunter.updateUI('Cannot test: Webhook not submitted');
@@ -522,6 +534,7 @@
             await window.QueueHunter.sendDiscord('📬 Test Ping', 'Webhook online! Ready to catch queue alerts! ⚡');
             testBtn.textContent = '📬 Test Discord';
         };
+
         window.QueueHunter.getRandomHeaders = function() {
             const userAgents = [
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
@@ -538,9 +551,12 @@
                 'Sec-Fetch-Dest': 'document',
                 'Sec-Fetch-Mode': 'navigate',
                 'Sec-Fetch-Site': 'none',
-                'Sec-Fetch-User': '?1'
+                'Sec-Fetch-User': '?1',
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
             };
         };
+
         window.QueueHunter.isDropWindow = function() {
             const now = new Date();
             const day = now.getDay();
@@ -549,12 +565,17 @@
             const etHour = (hour - 4 + 24) % 24; // Adjust to ET (UTC-4)
             return (day === 1 || day === 2 || day === 4) && etHour >= 11 && etHour < 13;
         };
-        window.QueueHunter.getDynamicFreq = function() {
+
+        window.QueueHunter.getDynamicFreq = function(suspectedQueue = false) {
+            if (suspectedQueue) {
+                return 1000; // 1 second if queue is suspected
+            }
             if (window.QueueHunter.isDropWindow()) {
                 return 2000; // 2 seconds during drop windows
             }
             return baseCheckFreq;
         };
+
         window.QueueHunter.requestLock = async function() {
             if ('locks' in navigator) {
                 try {
@@ -571,6 +592,7 @@
                 window.QueueHunter.updateUI('Background operation limited; keep browser open');
             }
         };
+
         window.QueueHunter.updateStatusBanner = function(text, colorClass) {
             const banner = document.getElementById('statusBanner');
             if (banner) {
@@ -578,6 +600,7 @@
                 banner.className = 'status-banner ' + colorClass;
             }
         };
+
         window.QueueHunter.updateUI = function(logMessage) {
             const lastCheck = document.getElementById('lastCheck');
             if (lastCheck) lastCheck.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -598,13 +621,16 @@
             }
             window.QueueHunter.updateRuntime();
         };
+
         window.QueueHunter.updateRuntime = function() {
             const runtime = document.getElementById('runtime');
             if (startTime && runtime) {
                 runtime.textContent = `${Math.floor((Date.now() - startTime) / 60000)}m ${Math.floor(((Date.now() - startTime) % 60000) / 1000)}s`;
             }
         };
+
         setInterval(window.QueueHunter.updateRuntime, 1000);
+
         window.QueueHunter.toggleAlarm = function() {
             alarmActive = !alarmActive;
             window.QueueHunter.stopAlert();
@@ -614,6 +640,7 @@
             }
             window.QueueHunter.updateUI(`Alarm ${alarmActive ? 'activated' : 'deactivated'}`);
         };
+
         window.QueueHunter.testAlarm = function() {
             try {
                 const audio = document.getElementById('alertTone');
@@ -634,6 +661,7 @@
                 window.QueueHunter.updateUI(`Test alarm error: ${e.message}`);
             }
         };
+
         window.QueueHunter.playAlert = function() {
             if (alarmActive && !alertAudio) {
                 try {
@@ -657,6 +685,7 @@
                 }
             }
         };
+
         window.QueueHunter.stopAlert = function() {
             if (alertAudio) {
                 alertAudio.pause();
@@ -669,6 +698,7 @@
                 navigator.vibrate(0);
             }
         };
+
         window.QueueHunter.sendDiscord = async function(title, desc, color = 0xFFD700) {
             const webhookUrl = document.getElementById('discordWebhook').value;
             const webhookCode = document.getElementById('webhookCode').value;
@@ -693,6 +723,7 @@
                 window.QueueHunter.updateUI(`Discord error: ${e.message}`);
             }
         };
+
         window.QueueHunter.addEmail = function() {
             const emailInput = document.getElementById('emailInput');
             const email = emailInput.value.trim();
@@ -709,12 +740,14 @@
                 window.QueueHunter.updateUI('Invalid or duplicate email.');
             }
         };
+
         window.QueueHunter.removeEmail = function(email) {
             window.QueueHunter.emails = window.QueueHunter.emails.filter(e => e !== email);
             window.QueueHunter.renderEmailList();
             document.getElementById('testEmailBtn').disabled = window.QueueHunter.emails.length === 0;
             window.QueueHunter.updateUI(`Removed email: ${email}`);
         };
+
         window.QueueHunter.renderEmailList = function() {
             const emailList = document.getElementById('emailList');
             emailList.innerHTML = '';
@@ -728,6 +761,7 @@
                 emailList.appendChild(li);
             });
         };
+
         window.QueueHunter.sendEmail = async function(status, details) {
             if (window.QueueHunter.emails.length === 0) {
                 window.QueueHunter.updateUI('Email skipped: No emails added.');
@@ -756,6 +790,7 @@
                 window.QueueHunter.updateUI(`Successfully sent email to ${successCount} address${successCount > 1 ? 'es' : ''}.`);
             }
         };
+
         window.QueueHunter.testEmail = async function() {
             const testBtn = document.getElementById('testEmailBtn');
             const originalText = testBtn.textContent;
@@ -783,16 +818,17 @@
             }
             window.QueueHunter.updateUI(`Test email sent to ${successCount} address${successCount > 1 ? 'es' : ''}${successCount === 0 ? ' (all failed)' : ''}.`);
         };
+
         window.QueueHunter.getHealthyProxy = async function(url) {
             const shuffledProxies = proxies.sort(() => Math.random() - 0.5);
             for (let p of shuffledProxies.filter(pr => !blacklisted.has(pr))) {
                 window.QueueHunter.updateStatusBanner('Checking proxies...', 'yellow');
                 window.QueueHunter.updateUI(`Trying proxy: ${p}`);
                 try {
-                    await new Promise(r => setTimeout(r, Math.random() * 2000 + 1000));
+                    await new Promise(r => setTimeout(r, Math.random() * 1000 + 500));
                     const ctrl = new AbortController();
-                    setTimeout(() => ctrl.abort(), 3000);
-                    const res = await fetch(p + encodeURIComponent(url), { signal: ctrl.signal, priority: 'high' });
+                    setTimeout(() => ctrl.abort(), 5000); // Increased timeout to 5 seconds
+                    const res = await fetch(p + encodeURIComponent(url), { signal: ctrl.signal, priority: 'high', headers: window.QueueHunter.getRandomHeaders() });
                     const text = p.includes('allorigins') ? (await res.json()).contents : await res.text();
                     if (res.ok && text.length > 1500) {
                         window.QueueHunter.updateUI(`Using proxy: ${p}`);
@@ -805,9 +841,10 @@
                     window.QueueHunter.updateUI(`Proxy ${p} error: ${e.message}`);
                 }
             }
-            window.QueueHunter.updateUI('All proxies failed, falling back to direct fetch');
+            window.QueueHunter.updateUI('All proxies failed, attempting direct fetch with enhanced headers');
             return null;
         };
+
         window.QueueHunter.detectBotBlock = function(text, headers, url, status) {
             const blockIndicators = [
                 /error 15|error 17|suspicious activity/i.test(text),
@@ -815,11 +852,13 @@
                 /cf-cache-status/i.test(headers.get('cf-cache-status') || ''),
                 status === 403 || status === 503,
                 /access denied|blocked/i.test(text),
-                /under attack/i.test(text)
+                /under attack/i.test(text),
+                /bot verification/i.test(text)
             ];
-            const isShortResponse = text.length < 1500 && /html/i.test(headers.get('content-type') || '');
-            return blockIndicators.filter(ind => ind).length >= 2 || (isShortResponse && blockIndicators.some(ind => ind));
+            const isShortResponse = text.length < 2000 && /html/i.test(headers.get('content-type') || '');
+            return blockIndicators.filter(ind => ind).length >= 1 || isShortResponse;
         };
+
         window.QueueHunter.detectCaptcha = function(text, headers, url) {
             const captchaIndicators = [
                 /hcaptcha\.com\/captcha/i,
@@ -827,19 +866,19 @@
                 /verify you are human/i,
                 /checking your browser/i,
                 /please wait/i,
-                /captcha/i
-
-,
+                /captcha/i,
                 /under attack mode/i,
                 /access denied/i,
                 /cf-chl-bypass/i.test(headers.get('cf-chl-bypass') || ''),
                 /turnstile/i.test(text),
-                /managed challenge/i.test(text)
+                /managed challenge/i.test(text),
+                /challenge-platform/i.test(url)
             ];
             const captchaHeader = headers.get('cf-challenge') || headers.get('x-cf-verify');
             const isCaptchaUrl = /challenge|verify|403|503/i.test(url);
             return captchaIndicators.some(regex => regex.test(text)) || captchaHeader || isCaptchaUrl;
         };
+
         window.QueueHunter.extractQueue = function(text, url, headers) {
             const queueIndicators = [
                 /queueit\.js/i,
@@ -852,30 +891,34 @@
                 /x-queue-position/i,
                 /waiting-room/i,
                 /queue-fair/i,
-                /akamai/i.test(headers.get('server')) && /waiting/i.test(text)
+                /akamai/i.test(headers.get('server')) && /waiting|queue/i.test(text),
+                /cloudflare/i.test(headers.get('server')) && /waiting|queue/i.test(text)
             ];
             const posMatch = text.match(/pos["']?\s*[:=]\s*["']?(\d+)/i) || url.match(/pos=(\d+)/i);
             const queueItScript = queueIndicators.some(regex => regex.test(text));
             const queueItHeader = headers.get('x-queueit') || headers.get('x-queueit-redirect');
-            const queueItUrl = /queue-it\.net/i.test(url);
+            const queueItUrl = /queue-it\.net|waiting-room|queue/i.test(url);
             if (posMatch) return posMatch[1];
             if (queueItScript || queueItHeader || queueItUrl) return 'Unknown';
             return null;
         };
+
         window.QueueHunter.extractStock = function(text) {
-            if (/add to cart/i.test(text) && !/sold out|unavailable/i.test(text)) {
+            if (/add to cart|in stock/i.test(text) && !/sold out|unavailable/i.test(text)) {
                 return true;
             }
             return false;
         };
+
         window.QueueHunter.scoreAnomaly = function(text) {
-            const knownQueueKeywords = ['queueit', 'waiting room', 'position', 'queue-id', 'cloudflare challenge', 'verify human', 'turnstile'];
+            const knownQueueKeywords = ['queueit', 'waiting room', 'position', 'queue-id', 'cloudflare challenge', 'verify human', 'turnstile', 'akamai', 'queue'];
             let score = 0;
             knownQueueKeywords.forEach(kw => {
                 if (text.toLowerCase().includes(kw)) score += 1;
             });
             return score / knownQueueKeywords.length;
         };
+
         window.QueueHunter.logCheck = function(status, details, queuePos) {
             const stockStatus = document.getElementById('stockStatus');
             if (stockStatus) {
@@ -883,24 +926,31 @@
             }
             console.log(`[${new Date().toISOString()}] Check: ${status} - ${details}`);
         };
+
         window.QueueHunter.checkSite = async function(isConsec = false, retries = 0) {
             const urlInput = document.getElementById('urlList')?.value || '';
             const urls = urlInput ? urlInput.split(',').map(u => u.trim()) : [
                 'https://www.pokemoncenter.com/',
                 'https://www.pokemoncenter.com/category/new-releases',
-                'https://www.pokemoncenter.com/category/trading-card-game'
+                'https://www.pokemoncenter.com/category/trading-card-game',
+                'https://www.pokemoncenter.com/category/pokemon-tcg'
             ];
             let success = false, queuePos = null, inStock = false, captchaDetected = false, botBlock = false, details = '', detectedUrl = '';
+            let suspectedQueue = false;
             window.QueueHunter.updateStatusBanner('Checking...', 'yellow');
             window.QueueHunter.updateUI(`Scanning ${urls.length} URLs (Attempt ${retries + 1}/${maxRetries})${window.QueueHunter.isDropWindow() ? ' - Drop Window Active' : ''}`);
             const headers = window.QueueHunter.getRandomHeaders();
-            const proxy = await window.QueueHunter.getHealthyProxy(urls[0]);
+
             try {
                 const responses = await Promise.all(urls.map(async url => {
+                    let fetchUrl = url;
+                    let proxy = await window.QueueHunter.getHealthyProxy(url);
+                    if (proxy) {
+                        fetchUrl = proxy + encodeURIComponent(url);
+                    }
                     try {
-                        const fetchUrl = proxy ? proxy + encodeURIComponent(url) : url;
                         const ctrl = new AbortController();
-                        setTimeout(() => ctrl.abort(), 3000);
+                        setTimeout(() => ctrl.abort(), 5000); // Increased timeout
                         const res = await fetch(fetchUrl, { headers, signal: ctrl.signal, priority: 'high' });
                         const finalUrl = proxy ? decodeURIComponent(res.url.replace(proxy, '')) : res.url;
                         const contentType = res.headers.get('content-type') || 'unknown';
@@ -910,23 +960,28 @@
                         return { url, error: e.message };
                     }
                 }));
+
                 for (const response of responses) {
                     if (response.error) {
                         details = `Error on ${response.url}: ${response.error}`;
-                        if (/aborted|timeout/i.test(response.error)) {
+                        if (/aborted|timeout|network|failed to fetch/i.test(response.error)) {
                             botBlock = true;
-                            details = `Timeout on ${response.url}. Possible bot block or heavy traffic.`;
+                            details = `Timeout or network error on ${response.url}. Possible bot block or queue activity.`;
+                            suspectedQueue = true;
                         }
                         window.QueueHunter.updateUI(details);
                         continue;
                     }
+
                     const { url, finalUrl, res, text, contentType, status } = response;
                     window.QueueHunter.updateUI(`Response from ${url} (Final: ${finalUrl}, Status: ${status}, Type: ${contentType}, Length: ${text.length} chars)`);
+
                     if (!res.ok) {
-                        botBlock = [403, 503].includes(status) || /error 15|error 17/i.test(text);
+                        botBlock = [403, 503].includes(status) || /error 15|error 17|access denied/i.test(text);
                         if (botBlock) {
                             details = `Bot block detected (HTTP ${status}) at ${url}. Queue imminent due to potential pre-queue bot protection. Check manually now!`;
                             detectedUrl = url;
+                            suspectedQueue = true;
                         } else {
                             details = `HTTP error ${status} at ${url}`;
                         }
@@ -940,28 +995,32 @@
                                 details = `Bot protection (e.g., HTTP 403 or short response) detected at ${url}. Queue imminent due to potential pre-queue activity. Check manually now!`;
                             }
                             detectedUrl = url;
+                            suspectedQueue = true;
                         } else {
                             queuePos = window.QueueHunter.extractQueue(text, finalUrl, res.headers);
                             inStock = window.QueueHunter.extractStock(text);
                         }
                     }
+
                     const anomalyScore = window.QueueHunter.scoreAnomaly(text);
-                    if (anomalyScore > 0.5) {
-                        details += ` High anomaly score: ${anomalyScore}`;
+                    if (anomalyScore > 0.3) {
+                        details += ` Anomaly score: ${anomalyScore.toFixed(2)}`;
+                        suspectedQueue = true;
                     }
+
                     if (queuePos && window.QueueHunter.notificationSettings.queueDetected) {
                         if (!hasNotified) {
                             window.QueueHunter.playAlert();
                             window.QueueHunter.updateStatusBanner(`Queue Detected 🚨: Check Now`, 'red');
-                            const lightDetails = `${details}\n\n**What this means**: A queue has been confirmed on the Pokémon Center website, likely due to a high-demand TCG restock. Queue indicators (e.g., queue-it scripts or tokens) were detected.\n**Action**: Visit ${detectedUrl} immediately to join the queue and secure your items!`;
+                            const lightDetails = `${details}\n\n**What this means**: A queue has been confirmed on the Pokémon Center website, likely due to a high-demand TCG restock. Queue indicators (e.g., queue-it scripts or tokens) were detected.\n**Action**: Visit ${detectedUrl || url} immediately to join the queue and secure your items!`;
                             window.QueueHunter.sendDiscord('🚨 Queue Detected!', lightDetails, 0xFF0000);
                             window.QueueHunter.sendEmail('🚨 Queue Detected', lightDetails);
                             if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
-                                new Notification('Queue Detected!', { body: `A queue is active at ${detectedUrl}. Join now to secure your items!` });
+                                new Notification('Queue Detected!', { body: `A queue is active at ${detectedUrl || url}. Join now to secure your items!` });
                             }
-                            if (documentgetElementById('autoOpen').checked) {
-                                window.open(detectedUrl, '_blank');
-                                window.QueueHunter.updateUI(`Opened queue in new window: ${detectedUrl}`);
+                            if (document.getElementById('autoOpen').checked) {
+                                window.open(detectedUrl || url, '_blank');
+                                window.QueueHunter.updateUI(`Opened queue in new window: ${detectedUrl || url}`);
                             }
                             hasNotified = true;
                             window.QueueHunter.updateUI('Full notifications sent for confirmed queue');
@@ -969,7 +1028,7 @@
                             window.QueueHunter.updateUI('Confirmed queue, but notifications already sent');
                         }
                         window.QueueHunter.logCheck('Queue', details, queuePos);
-                        return { queue: true, success: false, isFail: true };
+                        return { queue: true, success: false, isFail: true, suspectedQueue: true };
                     } else if (botBlock || captchaDetected) {
                         const alertType = captchaDetected ? 'Queue Likely' : 'Queue Imminent';
                         const color = captchaDetected ? 'orange' : 'purple';
@@ -978,20 +1037,20 @@
                         if (window.QueueHunter.notificationSettings[notificationKey] && !hasNotified) {
                             window.QueueHunter.playAlert();
                             const lightDetails = captchaDetected
-                                ? `${details}\n\n**What this means**: A captcha was detected on the Pokémon Center website, indicating a queue is likely forming soon, possibly for a TCG restock. Captchas often appear before a queue is activated.\n**Action**: Visit ${detectedUrl} now to bypass the captcha and prepare for a potential queue!`
-                                : `${details}\n\n**What this means**: Bot protection (e.g., HTTP 403 errors or short responses) was detected on the Pokémon Center website, suggesting a queue may form soon, likely for a high-demand TCG restock.\n**Action**: Visit ${detectedUrl} immediately to monitor for a queue and be ready to act!`;
+                                ? `${details}\n\n**What this means**: A captcha was detected on the Pokémon Center website, indicating a queue is likely forming soon, possibly for a TCG restock. Captchas often appear before a queue is activated.\n**Action**: Visit ${detectedUrl || url} now to bypass the captcha and prepare for a potential queue!`
+                                : `${details}\n\n**What this means**: Bot protection (e.g., HTTP 403 errors or short responses) was detected on the Pokémon Center website, suggesting a queue may form soon, likely for a high-demand TCG restock.\n**Action**: Visit ${detectedUrl || url} immediately to monitor for a queue and be ready to act!`;
                             window.QueueHunter.sendDiscord(`${alertType}!`, lightDetails, captchaDetected ? 0xFFA500 : 0x9370DB);
                             window.QueueHunter.sendEmail(`${alertType}`, lightDetails);
                             if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
                                 new Notification(`${alertType}!`, {
                                     body: captchaDetected
-                                        ? `Captcha detected at ${detectedUrl}. A queue is likely starting. Check now!`
-                                        : `Bot protection at ${detectedUrl}. A queue may start soon. Check now!`
+                                        ? `Captcha detected at ${detectedUrl || url}. A queue is likely starting. Check now!`
+                                        : `Bot protection at ${detectedUrl || url}. A queue may start soon. Check now!`
                                 });
                             }
                             if (document.getElementById('autoOpen').checked) {
-                                window.open(detectedUrl, '_blank');
-                                window.QueueHunter.updateUI(`Opened page for ${alertType.toLowerCase()}: ${detectedUrl}`);
+                                window.open(detectedUrl || url, '_blank');
+                                window.QueueHunter.updateUI(`Opened page for ${alertType.toLowerCase()}: ${detectedUrl || url}`);
                             }
                             hasNotified = true;
                             window.QueueHunter.updateUI(`Notifications sent for ${alertType.toLowerCase()}`);
@@ -999,7 +1058,7 @@
                             window.QueueHunter.updateUI(`Block detected, but notifications ${window.QueueHunter.notificationSettings[notificationKey] ? 'already sent' : 'disabled for ' + alertType}`);
                         }
                         window.QueueHunter.logCheck(alertType, details, null);
-                        return { block: true, success: false, isFail: true };
+                        return { block: true, success: false, isFail: true, suspectedQueue: true };
                     } else if (/pokemoncenter\.com/i.test(finalUrl) && contentType.includes('html') && text.length > 2000) {
                         details = `No queue or restock at ${url}. Final URL: ${finalUrl}, Type: ${contentType}, Length: ${text.length} chars.`;
                         success = true;
@@ -1016,21 +1075,25 @@
                         window.QueueHunter.logCheck('Success', details, queuePos);
                     } else {
                         details = `Unexpected response from ${url}. Final URL: ${finalUrl}, Type: ${contentType}, Length: ${text.length} chars.`;
+                        suspectedQueue = text.length < 2000; // Suspect queue if response is unusually short
                     }
                 }
             } catch (e) {
                 console.error('Parallel check error:', e.message);
                 details = `Parallel check error: ${e.message}`;
+                suspectedQueue = true;
             }
+
             if (!success) {
+                consecFails++;
                 if (retries < maxRetries) {
                     window.QueueHunter.updateUI(`Retrying... (${retries + 1}/${maxRetries})`);
                     await new Promise(r => setTimeout(r, 1500 * Math.pow(1.5, retries)));
                     return window.QueueHunter.checkSite(isConsec, retries + 1);
                 }
-                details = `Max retries reached. No confirmed queue at ${urls[0]}. Likely routine block - no alert.`;
+                details = `Max retries reached. No confirmed queue at ${urls[0]}. Possible queue activity due to bot block or captcha.`;
                 detectedUrl = urls[0];
-                if (botBlock || captchaDetected) {
+                if (botBlock || captchaDetected || suspectedQueue) {
                     const alertType = captchaDetected ? 'Queue Likely' : 'Queue Imminent';
                     const color = captchaDetected ? 'orange' : 'purple';
                     const notificationKey = captchaDetected ? 'queueLikely' : 'queueImminent';
@@ -1039,14 +1102,14 @@
                         window.QueueHunter.playAlert();
                         const lightDetails = captchaDetected
                             ? `${details}\n\n**What this means**: A captcha was detected on the Pokémon Center website after multiple retries, indicating a queue is likely forming soon, possibly for a TCG restock. Captchas often appear before a queue is activated.\n**Action**: Visit ${detectedUrl} now to bypass the captcha and prepare for a potential queue!`
-                            : `${details}\n\n**What this means**: Bot protection (e.g., HTTP 403 errors or short responses) was detected on the Pokémon Center website after multiple retries, suggesting a queue may form soon, likely for a high-demand TCG restock.\n**Action**: Visit ${detectedUrl} immediately to monitor for a queue and be ready to act!`;
+                            : `${details}\n\n**What this means**: Bot protection or network issues detected on the Pokémon Center website after multiple retries, suggesting a queue may form soon, likely for a high-demand TCG restock.\n**Action**: Visit ${detectedUrl} immediately to monitor for a queue and be ready to act!`;
                         window.QueueHunter.sendDiscord(`${alertType}!`, lightDetails, captchaDetected ? 0xFFA500 : 0x9370DB);
                         window.QueueHunter.sendEmail(`${alertType}`, lightDetails);
                         if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
                             new Notification(`${alertType}!`, {
                                 body: captchaDetected
                                     ? `Captcha detected at ${detectedUrl}. A queue is likely starting. Check now!`
-                                    : `Bot protection at ${detectedUrl}. A queue may start soon. Check now!`
+                                    : `Bot protection or network issue at ${detectedUrl}. A queue may start soon. Check now!`
                             });
                         }
                         if (document.getElementById('autoOpen').checked) {
@@ -1056,24 +1119,26 @@
                         hasNotified = true;
                         window.QueueHunter.updateUI(`Notifications sent for ${alertType.toLowerCase()}`);
                     } else {
-                        window.QueueHunter.updateUI(`Block detected, but notifications ${window.QueueHunter.notificationSettings[notificationKey] ? 'already sent' : 'disabled for ' + alertType}`);
+                        window.QueueHunter.updateUI(`Block or network issue detected, but notifications ${window.QueueHunter.notificationSettings[notificationKey] ? 'already sent' : 'disabled for ' + alertType}`);
                     }
                     window.QueueHunter.logCheck(alertType, details, null);
-                    return { block: true, success: false, isFail: true };
+                    return { block: true, success: false, isFail: true, suspectedQueue: true };
                 } else {
                     window.QueueHunter.updateStatusBanner('No queue found', 'green');
-                    window.QueueHunter.updateUI(details + ' (Skipped alert)');
+                    window.QueueHunter.updateUI(details);
                     window.QueueHunter.logCheck('Success', details, null);
-                    return { success: true, isFail: false };
+                    return { success: true, isFail: false, suspectedQueue: false };
                 }
             }
             cleanChecks = success ? cleanChecks + 1 : 0;
-            return { success: true, isFail: false };
+            return { success: true, isFail: false, suspectedQueue: false };
         };
+
         window.QueueHunter.testNow = async function() {
             window.QueueHunter.updateUI('Manual test triggered');
             await window.QueueHunter.checkSite();
         };
+
         window.QueueHunter.startMonitoring = async function() {
             const startBtn = document.getElementById('startBtn');
             const stopBtn = document.getElementById('stopBtn');
@@ -1092,13 +1157,14 @@
                         window.QueueHunter.sendEmail('⚠️ Hunt Paused', `Too many consecutive fails (${consecFails}). Check setup or proxies.`);
                         window.QueueHunter.stopMonitoring();
                     } else {
-                        const nextFreq = window.QueueHunter.getDynamicFreq();
+                        const nextFreq = window.QueueHunter.getDynamicFreq(result.suspectedQueue);
                         setTimeout(runCheck, nextFreq);
                     }
                 });
             }
             runCheck();
         };
+
         window.QueueHunter.stopMonitoring = function() {
             const startBtn = document.getElementById('startBtn');
             const stopBtn = document.getElementById('stopBtn');
@@ -1112,6 +1178,7 @@
             window.QueueHunter.updateStatusBanner('Hunt stopped', 'gray');
             window.QueueHunter.updateUI('Hunt stopped. Ready for next round!');
         };
+
         window.QueueHunter.togglePush = async function() {
             const pushBtn = document.getElementById('pushBtn');
             if (pushEnabled) {
@@ -1137,6 +1204,7 @@
                 }
             }
         };
+
         window.QueueHunter.exportLog = function() {
             const blob = new Blob([logEntries.join('\n')], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
@@ -1147,6 +1215,7 @@
             URL.revokeObjectURL(url);
             window.QueueHunter.updateUI('Log exported');
         };
+
         let intervalId = null;
         let startTime = null;
         let consecFails = 0;
