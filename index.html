@@ -827,7 +827,9 @@
                 /verify you are human/i,
                 /checking your browser/i,
                 /please wait/i,
-                /captcha/i,
+                /captcha/i
+
+,
                 /under attack mode/i,
                 /access denied/i,
                 /cf-chl-bypass/i.test(headers.get('cf-chl-bypass') || ''),
@@ -933,9 +935,9 @@
                         captchaDetected = window.QueueHunter.detectCaptcha(text, res.headers, finalUrl);
                         if (botBlock || captchaDetected) {
                             if (captchaDetected) {
-                                details = `Captcha detected! Likely queue starting at ${url}. Check manually now!`;
+                                details = `Captcha detected at ${url}. Likely queue starting soon. Check manually now!`;
                             } else {
-                                details = `Bot protection active at ${url}. Queue imminent due to potential pre-queue bot protection. Check manually now!`;
+                                details = `Bot protection (e.g., HTTP 403 or short response) detected at ${url}. Queue imminent due to potential pre-queue activity. Check manually now!`;
                             }
                             detectedUrl = url;
                         } else {
@@ -951,12 +953,13 @@
                         if (!hasNotified) {
                             window.QueueHunter.playAlert();
                             window.QueueHunter.updateStatusBanner(`Queue Detected 🚨: Check Now`, 'red');
-                            window.QueueHunter.sendDiscord('🚨 Queue Alert!', details + '\nA queue has been confirmed on the site. Act now to secure your spot!', 0xFF0000);
-                            window.QueueHunter.sendEmail('🚨 Queue Detected', details + '\nA queue has been confirmed on the site. Act now to secure your spot!');
+                            const lightDetails = `${details}\n\n**What this means**: A queue has been confirmed on the Pokémon Center website, likely due to a high-demand TCG restock. Queue indicators (e.g., queue-it scripts or tokens) were detected.\n**Action**: Visit ${detectedUrl} immediately to join the queue and secure your items!`;
+                            window.QueueHunter.sendDiscord('🚨 Queue Detected!', lightDetails, 0xFF0000);
+                            window.QueueHunter.sendEmail('🚨 Queue Detected', lightDetails);
                             if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
-                                new Notification('Queue Detected!', { body: details });
+                                new Notification('Queue Detected!', { body: `A queue is active at ${detectedUrl}. Join now to secure your items!` });
                             }
-                            if (document.getElementById('autoOpen').checked) {
+                            if (documentgetElementById('autoOpen').checked) {
                                 window.open(detectedUrl, '_blank');
                                 window.QueueHunter.updateUI(`Opened queue in new window: ${detectedUrl}`);
                             }
@@ -974,11 +977,17 @@
                         window.QueueHunter.updateStatusBanner(`${alertType} 🚨: Check Now`, color);
                         if (window.QueueHunter.notificationSettings[notificationKey] && !hasNotified) {
                             window.QueueHunter.playAlert();
-                            const lightDetails = details + (captchaDetected ? '\nA captcha indicates a queue may be starting soon. Check the site immediately!' : '\nBot protection suggests a queue may form soon. Check the site immediately!');
+                            const lightDetails = captchaDetected
+                                ? `${details}\n\n**What this means**: A captcha was detected on the Pokémon Center website, indicating a queue is likely forming soon, possibly for a TCG restock. Captchas often appear before a queue is activated.\n**Action**: Visit ${detectedUrl} now to bypass the captcha and prepare for a potential queue!`
+                                : `${details}\n\n**What this means**: Bot protection (e.g., HTTP 403 errors or short responses) was detected on the Pokémon Center website, suggesting a queue may form soon, likely for a high-demand TCG restock.\n**Action**: Visit ${detectedUrl} immediately to monitor for a queue and be ready to act!`;
                             window.QueueHunter.sendDiscord(`${alertType}!`, lightDetails, captchaDetected ? 0xFFA500 : 0x9370DB);
                             window.QueueHunter.sendEmail(`${alertType}`, lightDetails);
                             if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
-                                new Notification(`${alertType}!`, { body: lightDetails });
+                                new Notification(`${alertType}!`, {
+                                    body: captchaDetected
+                                        ? `Captcha detected at ${detectedUrl}. A queue is likely starting. Check now!`
+                                        : `Bot protection at ${detectedUrl}. A queue may start soon. Check now!`
+                                });
                             }
                             if (document.getElementById('autoOpen').checked) {
                                 window.open(detectedUrl, '_blank');
@@ -1028,11 +1037,17 @@
                     window.QueueHunter.updateStatusBanner(`${alertType} 🚨: Check Now`, color);
                     if (window.QueueHunter.notificationSettings[notificationKey] && !hasNotified) {
                         window.QueueHunter.playAlert();
-                        const lightDetails = details + (captchaDetected ? '\nA captcha indicates a queue may be starting soon. Check the site immediately!' : '\nBot protection suggests a queue may form soon. Check the site immediately!');
+                        const lightDetails = captchaDetected
+                            ? `${details}\n\n**What this means**: A captcha was detected on the Pokémon Center website after multiple retries, indicating a queue is likely forming soon, possibly for a TCG restock. Captchas often appear before a queue is activated.\n**Action**: Visit ${detectedUrl} now to bypass the captcha and prepare for a potential queue!`
+                            : `${details}\n\n**What this means**: Bot protection (e.g., HTTP 403 errors or short responses) was detected on the Pokémon Center website after multiple retries, suggesting a queue may form soon, likely for a high-demand TCG restock.\n**Action**: Visit ${detectedUrl} immediately to monitor for a queue and be ready to act!`;
                         window.QueueHunter.sendDiscord(`${alertType}!`, lightDetails, captchaDetected ? 0xFFA500 : 0x9370DB);
                         window.QueueHunter.sendEmail(`${alertType}`, lightDetails);
                         if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
-                            new Notification(`${alertType}!`, { body: lightDetails });
+                            new Notification(`${alertType}!`, {
+                                body: captchaDetected
+                                    ? `Captcha detected at ${detectedUrl}. A queue is likely starting. Check now!`
+                                    : `Bot protection at ${detectedUrl}. A queue may start soon. Check now!`
+                            });
                         }
                         if (document.getElementById('autoOpen').checked) {
                             window.open(detectedUrl, '_blank');
