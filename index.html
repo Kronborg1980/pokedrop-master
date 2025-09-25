@@ -325,7 +325,7 @@
                     <label>Notification Toggle:</label>
                     <div class="button-group">
                         <button id="toggleQueueDetectedBtn" onclick="window.QueueHunter.toggleNotification('queueDetected')">🔔 Queue Detected: On</button>
-                        <button id="toggleQueueLikelyBtn" onclick="window.QueueHunter.toggleNotification('queueLikely')">🔔 High Possibility for Queue: On</button>
+                        <button id="toggleQueueSoonBtn" onclick="window.QueueHunter.toggleNotification('queueSoon')">🔔 Queue Soon or Active: On</button>
                         <button id="togglePossibleBotBlockBtn" onclick="window.QueueHunter.toggleNotification('possibleBotBlock')">🔔 Possible Queue (Bot Block): On</button>
                     </div>
                 </div>
@@ -390,7 +390,7 @@
         window.QueueHunter.emails = ['kronborgnielsen@gmail.com'];
         window.QueueHunter.notificationSettings = {
             queueDetected: true,
-            queueLikely: true,
+            queueSoon: true,
             possibleBotBlock: true
         };
         let pushEnabled = false;
@@ -450,13 +450,25 @@
 
         window.QueueHunter.toggleNotification = function(type) {
             window.QueueHunter.notificationSettings[type] = !window.QueueHunter.notificationSettings[type];
-            const btn = document.getElementById(`toggle${type.charAt(0).toUpperCase() + type.slice(1).replace(/([A-Z])/g, ' $1')}Btn`);
+            let btnId;
+            let btnText;
+            if (type === 'queueDetected') {
+                btnId = 'toggleQueueDetectedBtn';
+                btnText = 'Queue Detected';
+            } else if (type === 'queueSoon') {
+                btnId = 'toggleQueueSoonBtn';
+                btnText = 'Queue Soon or Active';
+            } else if (type === 'possibleBotBlock') {
+                btnId = 'togglePossibleBotBlockBtn';
+                btnText = 'Possible Queue (Bot Block)';
+            }
+            const btn = document.getElementById(btnId);
             if (btn) {
-                btn.textContent = `🔔 ${type === 'queueDetected' ? 'Queue Detected' : type === 'queueLikely' ? 'High Possibility for Queue' : 'Possible Queue (Bot Block)'}: ${window.QueueHunter.notificationSettings[type] ? 'On' : 'Off'}`;
+                btn.textContent = `🔔 ${btnText}: ${window.QueueHunter.notificationSettings[type] ? 'On' : 'Off'}`;
                 btn.style.background = window.QueueHunter.notificationSettings[type] ? 'linear-gradient(145deg, #FFD700, #FFB300)' : '#666';
                 btn.style.color = window.QueueHunter.notificationSettings[type] ? '#1A1A1A' : '#999';
             }
-            window.QueueHunter.updateUI(`${type === 'queueDetected' ? 'Queue Detected' : type === 'queueLikely' ? 'High Possibility for Queue' : 'Possible Queue (Bot Block)'} notifications ${window.QueueHunter.notificationSettings[type] ? 'enabled' : 'disabled'}`);
+            window.QueueHunter.updateUI(`${btnText} notifications ${window.QueueHunter.notificationSettings[type] ? 'enabled' : 'disabled'}`);
         };
 
         window.QueueHunter.addPokezonanWebhook = function() {
@@ -620,7 +632,7 @@
             const statusPokedex = document.getElementById('status-pokedex');
             if (statusPokedex) {
                 const bannerText = document.getElementById('statusBanner').textContent;
-                if (/queue detected|high possibility|possible queue/i.test(bannerText)) statusPokedex.classList.add('alert-zap');
+                if (/queue detected|queue soon or active|possible queue/i.test(bannerText)) statusPokedex.classList.add('alert-zap');
                 else statusPokedex.classList.remove('alert-zap');
             }
             window.QueueHunter.updateRuntime();
@@ -833,7 +845,7 @@
                 try {
                     await new Promise(r => setTimeout(r, Math.random() * 1000 + 500));
                     const ctrl = new AbortController();
-                    setTimeout(() => ctrl.abort(), 7000);
+                    setTimeout(() => ctrl.abort(), 10000);
                     const res = await fetch(p + encodeURIComponent(url), { signal: ctrl.signal, priority: 'high', headers: window.QueueHunter.getRandomHeaders() });
                     const text = p.includes('allorigins') ? (await res.json()).contents : await res.text();
                     if (res.ok && text.length > 1500) {
@@ -890,12 +902,16 @@
                 /queueit\.js/i,
                 /queue-it\.net/i,
                 /waiting room/i,
+                /waitingroom/i,
                 /queue position/i,
                 /queueid/i,
                 /queue-it-token/i,
+                /queue-it-challenge/i,
                 /redirect.*queue/i,
+                /queueit-redirect/i,
                 /x-queue-position/i,
                 /waiting-room/i,
+                /waiting-room-page/i,
                 /queue-fair/i,
                 /akamai/i.test(headers.get('server')) && /waiting|queue/i.test(text),
                 /cloudflare/i.test(headers.get('server')) && /waiting|queue/i.test(text)
@@ -903,9 +919,16 @@
             const posMatch = text.match(/pos["']?\s*[:=]\s*["']?(\d+)/i) || url.match(/pos=(\d+)/i);
             const queueItScript = queueIndicators.some(regex => regex.test(text));
             const queueItHeader = headers.get('x-queueit') || headers.get('x-queueit-redirect');
-            const queueItUrl = /queue-it\.net|waiting-room|queue/i.test(url);
-            if (posMatch) return posMatch[1];
-            if (queueItScript || queueItHeader || queueItUrl) return 'Unknown';
+            const queueItUrl = /queue-it\.net|waiting-room|waitingroom|queue/i.test(url);
+            if (posMatch) {
+                window.QueueHunter.updateUI(`Queue position detected: ${posMatch[1]}`);
+                return posMatch[1];
+            }
+            if (queueItScript || queueItHeader || queueItUrl) {
+                window.QueueHunter.updateUI('Queue indicators found in script, header, or URL');
+                return 'Unknown';
+            }
+            window.QueueHunter.updateUI('No queue indicators detected');
             return null;
         };
 
@@ -917,7 +940,7 @@
         };
 
         window.QueueHunter.scoreAnomaly = function(text) {
-            const knownQueueKeywords = ['queueit', 'waiting room', 'position', 'queue-id', 'cloudflare challenge', 'verify human', 'turnstile', 'akamai', 'queue'];
+            const knownQueueKeywords = ['queueit', 'waiting room', 'waitingroom', 'position', 'queue-id', 'cloudflare challenge', 'verify human', 'turnstile', 'akamai', 'queue'];
             let score = 0;
             knownQueueKeywords.forEach(kw => {
                 if (text.toLowerCase().includes(kw)) score += 1;
@@ -928,7 +951,7 @@
         window.QueueHunter.logCheck = function(status, details, queuePos) {
             const stockStatus = document.getElementById('stockStatus');
             if (stockStatus) {
-                stockStatus.textContent = status === 'Restock' ? 'In Stock' : status === 'Queue' ? 'Queue Detected' : status === 'Queue Likely' ? 'High Possibility for Queue' : status === 'Possible Queue (Bot Block)' ? 'Possible Queue (Bot Block)' : 'No Queue';
+                stockStatus.textContent = status === 'Restock' ? 'In Stock' : status === 'Queue' ? 'Queue Detected' : status === 'Queue Soon' ? 'Queue Soon or Active' : status === 'Possible Queue (Bot Block)' ? 'Possible Queue (Bot Block)' : 'No Queue';
             }
             console.log(`[${new Date().toISOString()}] Check: ${status} - ${details}`);
         };
@@ -956,7 +979,7 @@
                     }
                     try {
                         const ctrl = new AbortController();
-                        setTimeout(() => ctrl.abort(), 7000);
+                        setTimeout(() => ctrl.abort(), 10000);
                         const res = await fetch(fetchUrl, { headers, signal: ctrl.signal, priority: 'high' });
                         const finalUrl = proxy ? decodeURIComponent(res.url.replace(proxy, '')) : res.url;
                         const contentType = res.headers.get('content-type') || 'unknown';
@@ -994,23 +1017,27 @@
                     } else {
                         botBlock = window.QueueHunter.detectBotBlock(text, res.headers, finalUrl, status);
                         captchaDetected = window.QueueHunter.detectCaptcha(text, res.headers, finalUrl);
-                        if (botBlock || captchaDetected) {
-                            if (captchaDetected) {
-                                details = `High possibility for a queue coming at ${url}.`;
+                        queuePos = window.QueueHunter.extractQueue(text, finalUrl, res.headers);
+                        inStock = window.QueueHunter.extractStock(text);
+                        if (botBlock || captchaDetected || queuePos) {
+                            if (queuePos) {
+                                details = `Queue detected at ${url}. Position: ${queuePos}`;
+                                detectedUrl = url;
+                            } else if (captchaDetected) {
+                                details = `Either a queue will come soon, or a queue is already there at ${url}.`;
+                                detectedUrl = url;
+                                suspectedQueue = true;
                             } else {
                                 details = `Possible queue due to bot block at ${url}.`;
+                                detectedUrl = url;
+                                suspectedQueue = true;
                             }
-                            detectedUrl = url;
-                            suspectedQueue = true;
-                        } else {
-                            queuePos = window.QueueHunter.extractQueue(text, finalUrl, res.headers);
-                            inStock = window.QueueHunter.extractStock(text);
                         }
                     }
 
                     const anomalyScore = window.QueueHunter.scoreAnomaly(text);
-                    if (anomalyScore > 0.3 && !queuePos && !captchaDetected && !botBlock) {
-                        details = `High possibility for a queue coming at ${url}. Anomaly score: ${anomalyScore.toFixed(2)}.`;
+                    if (anomalyScore > 0.2 && !queuePos && !captchaDetected && !botBlock) {
+                        details = `Either a queue will come soon, or a queue is already there at ${url}. Anomaly score: ${anomalyScore.toFixed(2)}.`;
                         detectedUrl = url;
                         suspectedQueue = true;
                     }
@@ -1019,8 +1046,8 @@
                         if (!hasNotified) {
                             window.QueueHunter.playAlert();
                             window.QueueHunter.updateStatusBanner(`Queue Detected 🚨`, 'red');
-                            window.QueueHunter.sendDiscord('🚨 Queue Detected', detectedUrl || url, 0xFF0000);
-                            window.QueueHunter.sendEmail('🚨 Queue Detected', detectedUrl || url);
+                            window.QueueHunter.sendDiscord('🚨 Queue Detected', `Queue detected at ${detectedUrl || url}`, 0xFF0000);
+                            window.QueueHunter.sendEmail('🚨 Queue Detected', `Queue detected at ${detectedUrl || url}`);
                             if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
                                 new Notification('Queue Detected', { body: detectedUrl || url });
                             }
@@ -1034,17 +1061,17 @@
                             window.QueueHunter.updateUI('Queue detected, but notifications already sent');
                         }
                         window.QueueHunter.logCheck('Queue', details, queuePos);
-                        consecFails = 0; // Reset consecutive failures on confirmed queue
+                        consecFails = 0;
                         return { queue: true, success: false, isFail: true, suspectedQueue: true };
-                    } else if (botBlock || captchaDetected || anomalyScore > 0.3) {
-                        const alertType = captchaDetected || anomalyScore > 0.3 ? 'Queue Likely' : 'Possible Queue (Bot Block)';
-                        const color = captchaDetected || anomalyScore > 0.3 ? 'orange' : 'purple';
-                        const notificationKey = captchaDetected || anomalyScore > 0.3 ? 'queueLikely' : 'possibleBotBlock';
+                    } else if (botBlock || captchaDetected || anomalyScore > 0.2) {
+                        const alertType = captchaDetected || anomalyScore > 0.2 ? 'Queue Soon' : 'Possible Queue (Bot Block)';
+                        const color = captchaDetected || anomalyScore > 0.2 ? 'orange' : 'purple';
+                        const notificationKey = captchaDetected || anomalyScore > 0.2 ? 'queueSoon' : 'possibleBotBlock';
                         window.QueueHunter.updateStatusBanner(`${alertType} 🚨`, color);
                         if (window.QueueHunter.notificationSettings[notificationKey] && !hasNotified) {
                             window.QueueHunter.playAlert();
-                            const lightDetails = captchaDetected || anomalyScore > 0.3 ? `High possibility for a queue coming at ${detectedUrl || url}` : `Possible queue due to bot block at ${detectedUrl || url}`;
-                            window.QueueHunter.sendDiscord(`${alertType}!`, lightDetails, captchaDetected || anomalyScore > 0.3 ? 0xFFA500 : 0x9370DB);
+                            const lightDetails = captchaDetected || anomalyScore > 0.2 ? `Either a queue will come soon, or a queue is already there at ${detectedUrl || url}` : `Possible queue due to bot block at ${detectedUrl || url}`;
+                            window.QueueHunter.sendDiscord(`${alertType}!`, lightDetails, captchaDetected || anomalyScore > 0.2 ? 0xFFA500 : 0x9370DB);
                             window.QueueHunter.sendEmail(`${alertType}`, lightDetails);
                             if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
                                 new Notification(`${alertType}`, { body: detectedUrl || url });
@@ -1059,17 +1086,17 @@
                             window.QueueHunter.updateUI(`Block or anomaly detected, but notifications ${window.QueueHunter.notificationSettings[notificationKey] ? 'already sent' : 'disabled for ' + alertType}`);
                         }
                         window.QueueHunter.logCheck(alertType, details, null);
-                        consecFails = 0; // Reset consecutive failures on suspected queue
+                        consecFails = 0;
                         return { block: true, success: false, isFail: true, suspectedQueue: true };
                     } else if (/pokemoncenter\.com/i.test(finalUrl) && contentType.includes('html') && text.length > 2000) {
                         details = `No queue or restock at ${url}. Final URL: ${finalUrl}, Type: ${contentType}, Length: ${text.length} chars.`;
                         success = true;
                         consecFails = 0;
                         cleanChecks++;
-                        if (cleanChecks >= 5 && hasNotified) {
+                        if (cleanChecks >= 10 && hasNotified) {
                             hasNotified = false;
                             cleanChecks = 0;
-                            window.QueueHunter.updateUI('Five clean checks - notification state reset');
+                            window.QueueHunter.updateUI('Ten clean checks - notification state reset');
                         }
                         window.QueueHunter.stopAlert();
                         window.QueueHunter.updateStatusBanner('No queue found', 'green');
@@ -1096,14 +1123,14 @@
                 details = `Possible queue due to bot block at ${urls[0]}.`;
                 detectedUrl = urls[0];
                 if (botBlock || captchaDetected || suspectedQueue) {
-                    const alertType = captchaDetected || anomalyScore > 0.3 ? 'Queue Likely' : 'Possible Queue (Bot Block)';
-                    const color = captchaDetected || anomalyScore > 0.3 ? 'orange' : 'purple';
-                    const notificationKey = captchaDetected || anomalyScore > 0.3 ? 'queueLikely' : 'possibleBotBlock';
+                    const alertType = captchaDetected || anomalyScore > 0.2 ? 'Queue Soon' : 'Possible Queue (Bot Block)';
+                    const color = captchaDetected || anomalyScore > 0.2 ? 'orange' : 'purple';
+                    const notificationKey = captchaDetected || anomalyScore > 0.2 ? 'queueSoon' : 'possibleBotBlock';
                     window.QueueHunter.updateStatusBanner(`${alertType} 🚨`, color);
                     if (window.QueueHunter.notificationSettings[notificationKey] && !hasNotified) {
                         window.QueueHunter.playAlert();
-                        const lightDetails = captchaDetected || anomalyScore > 0.3 ? `High possibility for a queue coming at ${detectedUrl}` : `Possible queue due to bot block at ${detectedUrl}`;
-                        window.QueueHunter.sendDiscord(`${alertType}!`, lightDetails, captchaDetected || anomalyScore > 0.3 ? 0xFFA500 : 0x9370DB);
+                        const lightDetails = captchaDetected || anomalyScore > 0.2 ? `Either a queue will come soon, or a queue is already there at ${detectedUrl}` : `Possible queue due to bot block at ${detectedUrl}`;
+                        window.QueueHunter.sendDiscord(`${alertType}!`, lightDetails, captchaDetected || anomalyScore > 0.2 ? 0xFFA500 : 0x9370DB);
                         window.QueueHunter.sendEmail(`${alertType}`, lightDetails);
                         if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
                             new Notification(`${alertType}`, { body: detectedUrl });
@@ -1118,7 +1145,7 @@
                         window.QueueHunter.updateUI(`Block or network issue detected, but notifications ${window.QueueHunter.notificationSettings[notificationKey] ? 'already sent' : 'disabled for ' + alertType}`);
                     }
                     window.QueueHunter.logCheck(alertType, details, null);
-                    consecFails = 0; // Reset consecutive failures on suspected queue
+                    consecFails = 0;
                     return { block: true, success: false, isFail: true, suspectedQueue: true };
                 } else {
                     window.QueueHunter.updateStatusBanner('No queue found', 'green');
@@ -1149,17 +1176,7 @@
             window.QueueHunter.updateUI('Hunt started!');
             function runCheck() {
                 window.QueueHunter.checkSite(true).then(result => {
-                    if (consecFails >= failThresh && !result.suspectedQueue) {
-                        window.QueueHunter.updateStatusBanner('Too many fails!', 'red');
-                        window.QueueHunter.updateUI(`Too many consecutive fails (${consecFails}). Stopping hunt. Check setup or proxies.`);
-                        window.QueueHunter.stopMonitoring();
-                    } else if (result.suspectedQueue) {
-                        window.QueueHunter.updateUI(`Suspected queue detected, continuing hunt and resetting failures (was ${consecFails})`);
-                        consecFails = 0;
-                        setTimeout(runCheck, window.QueueHunter.getDynamicFreq(true));
-                    } else {
-                        setTimeout(runCheck, window.QueueHunter.getDynamicFreq(result.suspectedQueue));
-                    }
+                    setTimeout(runCheck, window.QueueHunter.getDynamicFreq(result.suspectedQueue));
                 });
             }
             runCheck();
@@ -1175,8 +1192,6 @@
             hasNotified = false;
             cleanChecks = 0;
             window.QueueHunter.stopAlert();
-            window.QueueHunter.updateStatusBanner('Hunt stopped', 'gray');
-            window.QueueHunter.updateUI('Hunt stopped. Ready for next round!');
         };
 
         window.QueueHunter.togglePush = async function() {
@@ -1245,7 +1260,7 @@
         ];
         let blacklisted = new Set();
         let logEntries = [];
-        const maxRetries = 5;
+        const maxRetries = 7;
         let alarmActive = false;
         let alertAudio = null;
         let vibrateInterval = null;
