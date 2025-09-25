@@ -326,7 +326,7 @@
                     <div class="button-group">
                         <button id="toggleQueueDetectedBtn" onclick="window.QueueHunter.toggleNotification('queueDetected')">🔔 Queue Detected: On</button>
                         <button id="toggleQueueSoonBtn" onclick="window.QueueHunter.toggleNotification('queueSoon')">🔔 Queue Soon or Active: On</button>
-                        <button id="togglePossibleBotBlockBtn" onclick="window.QueueHunter.toggleNotification('possibleBotBlock')">🔔 Possible Queue (Bot Block): On</button>
+                        <button id="togglePossibleBotBlockBtn" onclick="window.QueueHunter.toggleNotification('possibleBotBlock')">🔔 Possible Queue: On</button>
                     </div>
                 </div>
                 <div class="section">
@@ -460,7 +460,7 @@
                 btnText = 'Queue Soon or Active';
             } else if (type === 'possibleBotBlock') {
                 btnId = 'togglePossibleBotBlockBtn';
-                btnText = 'Possible Queue (Bot Block)';
+                btnText = 'Possible Queue';
             }
             const btn = document.getElementById(btnId);
             if (btn) {
@@ -968,7 +968,7 @@
         window.QueueHunter.logCheck = function(status, details, queuePos) {
             const stockStatus = document.getElementById('stockStatus');
             if (stockStatus) {
-                stockStatus.textContent = status === 'Restock' ? 'In Stock' : status === 'Queue' ? 'Queue Detected' : status === 'Queue Soon' ? 'Queue Soon or Active' : status === 'Possible Queue (Bot Block)' ? 'Possible Queue (Bot Block)' : 'No Queue';
+                stockStatus.textContent = status === 'Restock' ? 'In Stock' : status === 'Queue' ? 'Queue Detected' : status === 'Queue Soon' ? 'Queue Soon or Active' : status === 'Possible Queue' ? 'Possible Queue' : 'No Queue';
             }
             console.log(`[${new Date().toISOString()}] Check: ${status} - ${details}`);
         };
@@ -1013,7 +1013,7 @@
                         details = `Error on ${response.url}: ${response.error}`;
                         if (/aborted|timeout|network|failed to fetch/i.test(response.error)) {
                             botBlock = true;
-                            details = `Timeout or network error on ${response.url}: ${response.error}. Possible queue due to bot block.`;
+                            details = `High likelihood of a queue forming or already active at ${response.url} due to network issues: ${response.error}.`;
                             detectedUrl = response.url;
                             suspectedQueue = true;
                         }
@@ -1027,7 +1027,7 @@
                     if (!res.ok) {
                         botBlock = [403, 503].includes(status) || /error 15|error 17|access denied/i.test(text);
                         if (botBlock) {
-                            details = `Possible queue due to bot block at ${url} (Status: ${status}).`;
+                            details = `High likelihood of a queue forming or already active at ${url} due to restricted access (Status: ${status}).`;
                             detectedUrl = url;
                             suspectedQueue = true;
                         } else {
@@ -1043,11 +1043,11 @@
                                 details = `Queue detected at ${url}. Position: ${queuePos}`;
                                 detectedUrl = url;
                             } else if (captchaDetected) {
-                                details = `Either a queue will come soon, or a queue is already there at ${url}.`;
+                                details = `High likelihood of a queue forming or already active at ${url} due to verification challenge.`;
                                 detectedUrl = url;
                                 suspectedQueue = true;
                             } else {
-                                details = `Possible queue due to bot block at ${url} (Status: ${status}, Length: ${text.length}).`;
+                                details = `High likelihood of a queue forming or already active at ${url} due to restricted access (Status: ${status}, Length: ${text.length}).`;
                                 detectedUrl = url;
                                 suspectedQueue = true;
                             }
@@ -1056,7 +1056,7 @@
 
                     anomalyScore = window.QueueHunter.scoreAnomaly(text);
                     if (anomalyScore > 0.2 && !queuePos && !captchaDetected && !botBlock) {
-                        details = `Either a queue will come soon, or a queue is already there at ${url}. Anomaly score: ${anomalyScore.toFixed(2)}.`;
+                        details = `High likelihood of a queue forming or already active at ${url}. Anomaly score: ${anomalyScore.toFixed(2)}.`;
                         detectedUrl = url;
                         suspectedQueue = true;
                     }
@@ -1084,13 +1084,13 @@
                         cleanChecks = 0;
                         return { queue: true, success: false, isFail: true, suspectedQueue: true };
                     } else if (botBlock || captchaDetected || anomalyScore > 0.2) {
-                        const alertType = captchaDetected || anomalyScore > 0.2 ? 'Queue Soon' : 'Possible Queue (Bot Block)';
+                        const alertType = captchaDetected || anomalyScore > 0.2 ? 'Queue Soon' : 'Possible Queue';
                         const color = captchaDetected || anomalyScore > 0.2 ? 'orange' : 'purple';
                         const notificationKey = captchaDetected || anomalyScore > 0.2 ? 'queueSoon' : 'possibleBotBlock';
                         window.QueueHunter.updateStatusBanner(`${alertType} 🚨`, color);
                         if (window.QueueHunter.notificationSettings[notificationKey] && !hasNotified) {
                             window.QueueHunter.playAlert();
-                            const lightDetails = captchaDetected || anomalyScore > 0.2 ? `Either a queue will come soon, or a queue is already there at ${detectedUrl || url}` : `Possible queue due to bot block at ${detectedUrl || url}`;
+                            const lightDetails = `High likelihood of a queue forming or already active at ${detectedUrl || url}`;
                             window.QueueHunter.sendDiscord(`${alertType}!`, lightDetails, captchaDetected || anomalyScore > 0.2 ? 0xFFA500 : 0x9370DB);
                             window.QueueHunter.sendEmail(`${alertType}`, lightDetails);
                             if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
@@ -1141,28 +1141,28 @@
                     await new Promise(r => setTimeout(r, 1500 * Math.pow(1.5, retries)));
                     return window.QueueHunter.checkSite(isConsec, retries + 1);
                 }
-                details = `Max retries (${maxRetries}) reached. Possible queue due to bot block at ${urls[0]}.`;
+                details = `High likelihood of a queue forming or already active at ${urls[0]} after max retries (${maxRetries}).`;
                 detectedUrl = urls[0];
                 botBlock = true;
-                window.QueueHunter.updateStatusBanner('Possible Queue (Bot Block) 🚨', 'purple');
+                window.QueueHunter.updateStatusBanner('Possible Queue 🚨', 'purple');
                 if (window.QueueHunter.notificationSettings.possibleBotBlock && !hasNotified) {
                     window.QueueHunter.playAlert();
-                    const lightDetails = `Possible queue due to bot block at ${detectedUrl}`;
-                    window.QueueHunter.sendDiscord('Possible Queue (Bot Block)!', lightDetails, 0x9370DB);
-                    window.QueueHunter.sendEmail('Possible Queue (Bot Block)', lightDetails);
+                    const lightDetails = `High likelihood of a queue forming or already active at ${detectedUrl}`;
+                    window.QueueHunter.sendDiscord('Possible Queue!', lightDetails, 0x9370DB);
+                    window.QueueHunter.sendEmail('Possible Queue', lightDetails);
                     if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
-                        new Notification('Possible Queue (Bot Block)', { body: detectedUrl });
+                        new Notification('Possible Queue', { body: detectedUrl });
                     }
                     if (document.getElementById('autoOpen').checked) {
                         window.open(detectedUrl, '_blank');
-                        window.QueueHunter.updateUI(`Opened page for possible queue (bot block): ${detectedUrl}`);
+                        window.QueueHunter.updateUI(`Opened page for possible queue: ${detectedUrl}`);
                     }
                     hasNotified = true;
-                    window.QueueHunter.updateUI('Notifications sent for possible queue (bot block) after max retries');
+                    window.QueueHunter.updateUI('Notifications sent for possible queue after max retries');
                 } else {
-                    window.QueueHunter.updateUI(`Max retries reached, notifications ${window.QueueHunter.notificationSettings.possibleBotBlock ? 'already sent' : 'disabled for Possible Queue (Bot Block)'}`);
+                    window.QueueHunter.updateUI(`Max retries reached, notifications ${window.QueueHunter.notificationSettings.possibleBotBlock ? 'already sent' : 'disabled for Possible Queue'}`);
                 }
-                window.QueueHunter.logCheck('Possible Queue (Bot Block)', details, null);
+                window.QueueHunter.logCheck('Possible Queue', details, null);
                 consecFails = 0;
                 cleanChecks = 0;
                 return { block: true, success: false, isFail: true, suspectedQueue: true };
@@ -1240,7 +1240,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `queue_hunter_log_${new Date().toISOString().replace(/[:26:/.]/g, '-')}.txt`;
+            a.download = `queue_hunter_log_${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
             a.click();
             URL.revokeObjectURL(url);
             window.QueueHunter.updateUI('Log exported');
