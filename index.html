@@ -329,6 +329,7 @@
                         <button id="toggleQueueDetectedBtn" onclick="window.QueueHunter.toggleNotification('queueDetected')">🔔 Queue Detected: On</button>
                         <button id="toggleQueueSoonBtn" onclick="window.QueueHunter.toggleNotification('queueSoon')">🔔 Queue Soon or Active: On</button>
                         <button id="togglePossibleBotBlockBtn" onclick="window.QueueHunter.toggleNotification('possibleBotBlock')">🔔 Possible Queue: On</button>
+                        <button id="toggleCaptchaDetectedBtn" onclick="window.QueueHunter.toggleNotification('captchaDetected')">🔔 CAPTCHA Detected: On</button>
                     </div>
                 </div>
                 <div class="section">
@@ -394,7 +395,8 @@
             email: true,
             queueDetected: true,
             queueSoon: true,
-            possibleBotBlock: true
+            possibleBotBlock: true,
+            captchaDetected: true
         };
         let pushEnabled = false;
         let hasNotified = false;
@@ -433,11 +435,9 @@
         let alertAudio = null;
         let vibrateInterval = null;
         let isCheckingConsecutiveFailures = false;
-
         emailjs.init('8w7eu6mrg3lRl6ta3');
         window.QueueHunter.emailServiceId = 'service_ahqdaj5';
         window.QueueHunter.emailTemplateId = 'template_whhvnra';
-
         document.addEventListener('DOMContentLoaded', () => {
             const testBtn = document.getElementById('testDiscordBtn');
             const submitBtn = document.getElementById('submitWebhookBtn');
@@ -485,7 +485,6 @@
                 window.QueueHunter.updateUI('Add an email address to enable email notifications');
             }
         });
-
         window.QueueHunter.toggleNotification = function(type) {
             window.QueueHunter.notificationSettings[type] = !window.QueueHunter.notificationSettings[type];
             let btnId, btnText;
@@ -504,6 +503,9 @@
             } else if (type === 'possibleBotBlock') {
                 btnId = 'togglePossibleBotBlockBtn';
                 btnText = 'Possible Queue';
+            } else if (type === 'captchaDetected') {
+                btnId = 'toggleCaptchaDetectedBtn';
+                btnText = 'CAPTCHA Detected';
             }
             const btn = document.getElementById(btnId);
             if (btn) {
@@ -513,7 +515,6 @@
             }
             window.QueueHunter.updateUI(`${btnText} ${window.QueueHunter.notificationSettings[type] ? 'enabled' : 'disabled'}`);
         };
-
         window.QueueHunter.addPokezonanWebhook = function() {
             const webhookUrlInput = document.getElementById('discordWebhook');
             const testBtn = document.getElementById('testDiscordBtn');
@@ -534,7 +535,6 @@
             setTimeout(() => pokezonanBtn.textContent = '🎮 Add Pokezonan Webhook', 2000);
             window.QueueHunter.updateUI('Pokezonan webhook added and submitted');
         };
-
         window.QueueHunter.submitWebhook = function() {
             const webhookUrlInput = document.getElementById('discordWebhook');
             const testBtn = document.getElementById('testDiscordBtn');
@@ -557,7 +557,6 @@
                 window.QueueHunter.updateUI('Invalid Discord webhook URL');
             }
         };
-
         window.QueueHunter.clearWebhook = function() {
             const webhookUrlInput = document.getElementById('discordWebhook');
             const testBtn = document.getElementById('testDiscordBtn');
@@ -577,7 +576,6 @@
             setTimeout(() => clearBtn.textContent = 'Clear', 2000);
             window.QueueHunter.updateUI('Webhook cleared');
         };
-
         window.QueueHunter.testDiscord = async function() {
             if (!window.QueueHunter.isWebhookSubmitted) {
                 window.QueueHunter.updateUI('Cannot test: Webhook not submitted');
@@ -594,7 +592,6 @@
             await window.QueueHunter.sendDiscord('📬 Test Ping', 'Webhook online! Ready to catch queue alerts! ⚡');
             testBtn.textContent = '📬 Test Discord';
         };
-
         window.QueueHunter.getRandomHeaders = function() {
             const userAgents = [
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
@@ -618,7 +615,6 @@
             window.QueueHunter.updateUI(`Generated random headers: User-Agent=${headers['User-Agent'].substring(0, 30)}...`);
             return headers;
         };
-
         window.QueueHunter.isDropWindow = function() {
             const now = new Date();
             const day = now.getDay();
@@ -629,7 +625,6 @@
             window.QueueHunter.updateUI(`Checked drop window: ${isDrop ? 'Active (faster checks)' : 'Inactive (normal checks)'}`);
             return isDrop;
         };
-
         window.QueueHunter.getDynamicFreq = function(suspectedQueue = false) {
             if (suspectedQueue) {
                 window.QueueHunter.updateUI(`Scheduling next check in ${baseCheckFreq / 60000} minutes due to queue/block detection`);
@@ -642,7 +637,6 @@
             window.QueueHunter.updateUI(`Using user-defined check interval: ${baseCheckFreq / 60000} minutes`);
             return baseCheckFreq; // Default to user-defined frequency
         };
-
         window.QueueHunter.requestLock = async function() {
             if ('locks' in navigator) {
                 try {
@@ -659,7 +653,6 @@
                 window.QueueHunter.updateUI('Web Locks API not supported; keep browser open for continuous monitoring');
             }
         };
-
         window.QueueHunter.updateStatusBanner = function(text, colorClass) {
             const banner = document.getElementById('statusBanner');
             if (banner) {
@@ -668,7 +661,6 @@
                 window.QueueHunter.updateUI(`Updated status banner to: ${text} (${colorClass})`);
             }
         };
-
         window.QueueHunter.updateUI = function(logMessage) {
             const lastCheck = document.getElementById('lastCheck');
             if (lastCheck) lastCheck.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -684,21 +676,18 @@
             const statusPokedex = document.getElementById('status-pokedex');
             if (statusPokedex) {
                 const bannerText = document.getElementById('statusBanner').textContent;
-                if (/queue detected|queue soon or active|possible queue/i.test(bannerText)) statusPokedex.classList.add('alert-zap');
+                if (/queue detected|queue soon or active|possible queue|captcha detected/i.test(bannerText)) statusPokedex.classList.add('alert-zap');
                 else statusPokedex.classList.remove('alert-zap');
             }
             window.QueueHunter.updateRuntime();
         };
-
         window.QueueHunter.updateRuntime = function() {
             const runtime = document.getElementById('runtime');
             if (startTime && runtime) {
                 runtime.textContent = `${Math.floor((Date.now() - startTime) / 60000)}m ${Math.floor(((Date.now() - startTime) % 60000) / 1000)}s`;
             }
         };
-
         setInterval(window.QueueHunter.updateRuntime, 1000);
-
         window.QueueHunter.toggleAlarm = function() {
             alarmActive = !alarmActive;
             window.QueueHunter.stopAlert();
@@ -708,7 +697,6 @@
             }
             window.QueueHunter.updateUI(`Alarm ${alarmActive ? 'activated' : 'deactivated'}`);
         };
-
         window.QueueHunter.testAlarm = function() {
             try {
                 const audio = document.getElementById('alertTone');
@@ -730,7 +718,6 @@
                 window.QueueHunter.updateUI(`Test alarm error: ${e.message}`);
             }
         };
-
         window.QueueHunter.playAlert = function() {
             if (alarmActive && !alertAudio) {
                 try {
@@ -754,7 +741,6 @@
                 }
             }
         };
-
         window.QueueHunter.stopAlert = function() {
             if (alertAudio) {
                 alertAudio.pause();
@@ -769,7 +755,6 @@
                 window.QueueHunter.updateUI('Stopped vibration pattern');
             }
         };
-
         window.QueueHunter.sendDiscord = async function(title, desc, color = 0xFFD700) {
             if (!window.QueueHunter.notificationSettings.discord) {
                 window.QueueHunter.updateUI('Discord notification skipped: Disabled in settings');
@@ -798,7 +783,6 @@
                 window.QueueHunter.updateUI(`Discord notification error: ${e.message}`);
             }
         };
-
         window.QueueHunter.addEmail = function() {
             const emailInput = document.getElementById('emailInput');
             const email = emailInput.value.trim();
@@ -815,7 +799,6 @@
                 window.QueueHunter.updateUI('Invalid or duplicate email address');
             }
         };
-
         window.QueueHunter.removeEmail = function(email) {
             window.QueueHunter.emails = window.QueueHunter.emails.filter(e => e !== email);
             window.QueueHunter.renderEmailList();
@@ -825,7 +808,6 @@
                 window.QueueHunter.updateUI('No email addresses remain; add one to enable email notifications');
             }
         };
-
         window.QueueHunter.renderEmailList = function() {
             const emailList = document.getElementById('emailList');
             emailList.innerHTML = '';
@@ -840,7 +822,6 @@
             });
             window.QueueHunter.updateUI(`Updated email list: ${window.QueueHunter.emails.length} email(s)`);
         };
-
         window.QueueHunter.sendEmail = async function(status, details) {
             if (!window.QueueHunter.notificationSettings.email) {
                 window.QueueHunter.updateUI('Email notification skipped: Disabled in settings');
@@ -873,7 +854,6 @@
             }
             window.QueueHunter.updateUI(`Email notification result: ${successCount} successful, ${window.QueueHunter.emails.length - successCount} failed`);
         };
-
         window.QueueHunter.testEmail = async function() {
             if (!window.QueueHunter.notificationSettings.email) {
                 window.QueueHunter.updateUI('Test email skipped: Email notifications disabled');
@@ -907,7 +887,6 @@
             }
             window.QueueHunter.updateUI(`Test email result: ${successCount} successful, ${window.QueueHunter.emails.length - successCount} failed`);
         };
-
         window.QueueHunter.getHealthyProxy = async function(url) {
             window.QueueHunter.updateUI(`Searching for healthy proxy for URL: ${url}`);
             const shuffledProxies = proxies.sort(() => Math.random() - 0.5);
@@ -920,7 +899,7 @@
                     setTimeout(() => ctrl.abort(), 15000);
                     const res = await fetch(p + encodeURIComponent(url), { signal: ctrl.signal, priority: 'high', headers: window.QueueHunter.getRandomHeaders() });
                     const text = p.includes('allorigins') ? (await res.json()).contents : await res.text();
-                    if (res.ok && text.length > 1500) {
+                    if (res.ok && text.length > 500) {
                         window.QueueHunter.updateUI(`Proxy ${p} successful: Response length ${text.length} chars`);
                         return p;
                     } else {
@@ -942,7 +921,7 @@
                 setTimeout(() => ctrl.abort(), 20000);
                 const res = await fetch(url, { signal: ctrl.signal, priority: 'high', headers: window.QueueHunter.getRandomHeaders() });
                 const text = await res.text();
-                if (res.ok && text.length > 1500) {
+                if (res.ok && text.length > 500) {
                     window.QueueHunter.updateUI(`Direct fetch successful for ${url}: Response length ${text.length} chars`);
                     return null;
                 } else {
@@ -953,7 +932,6 @@
                 return null;
             }
         };
-
         window.QueueHunter.extractQueueLength = function(text) {
             const patterns = [
                 /(\d+)\s*users?\s*ahead/i,
@@ -972,7 +950,6 @@
             window.QueueHunter.updateUI('No queue length detected in response');
             return null;
         };
-
         window.QueueHunter.checkShopAccess = async function(isConsecutiveCheck = false) {
             const urlInput = document.getElementById('urlList')?.value || '';
             const urls = urlInput ? urlInput.split(',').map(u => u.trim()) : [
@@ -1031,8 +1008,21 @@
             const isQueue =
                 /queue-it\.net/i.test(finalUrl) ||
                 /waiting room|queue-it|waitingroom|virtual waiting|queue\s*position/i.test(text);
+            const isCaptcha =
+                /captcha|hcaptcha|h-captcha|verify you are not a bot|human verification|challenge|recaptcha|cloudflare|akamai/i.test(text) ||
+                /hcaptcha\.com|recaptcha\.net|cloudflare\.com|akamai\.com/i.test(finalUrl);
             window.QueueHunter.updateUI(`Queue detection: ${isQueue ? 'Queue indicators found' : 'No queue indicators'}`);
-            if (isQueue) {
+            window.QueueHunter.updateUI(`CAPTCHA detection: ${isCaptcha ? 'CAPTCHA indicators found' : 'No CAPTCHA indicators'}`);
+            if (isCaptcha) {
+                const status = 'CAPTCHA Detected';
+                const details = `CAPTCHA challenge detected at ${finalUrl} (checked ${urlUsed}). Manual intervention required.`;
+                if (!isConsecutiveCheck && document.getElementById('autoOpen').checked) {
+                    window.open('https://www.pokemoncenter.com/', '_blank');
+                    window.QueueHunter.updateUI(`Auto-opened page for CAPTCHA: https://www.pokemoncenter.com/`);
+                }
+                window.QueueHunter.updateUI(`CAPTCHA detection confirmed: ${details}`);
+                return { status, details, isFailure: true, url: finalUrl };
+            } else if (isQueue) {
                 const queueLength = window.QueueHunter.extractQueueLength(text);
                 const status = 'Queue Detected';
                 const details = `Queue detected at ${finalUrl} (checked ${urlUsed}). Queue length: ${queueLength || 'unknown'}.`;
@@ -1065,15 +1055,15 @@
                 return { status, details, isFailure: true, url: finalUrl };
             }
         };
-
         window.QueueHunter.performConsecutiveChecks = async function(currentFailureCount, maxFailures, status, details, url, queueLength = null) {
             window.QueueHunter.updateUI(`Starting consecutive check ${currentFailureCount}/${maxFailures} for status: ${status}`);
             if (currentFailureCount >= maxFailures) {
                 const stockStatus = document.getElementById('stockStatus');
                 if (stockStatus) stockStatus.textContent = status;
-                window.QueueHunter.updateStatusBanner(status === 'Queue Detected' ? 'Queue Detected 🚨' : status, status === 'Queue Detected' ? 'red' : status === 'Queue Soon or Active' ? 'orange' : 'purple');
+                const colorClass = status === 'Queue Detected' ? 'red' : status === 'Queue Soon or Active' ? 'orange' : status === 'CAPTCHA Detected' ? 'purple' : 'purple';
+                window.QueueHunter.updateStatusBanner(status === 'Queue Detected' ? 'Queue Detected 🚨' : status === 'Queue Soon or Active' ? 'Queue Soon or Active' : status === 'CAPTCHA Detected' ? 'CAPTCHA Detected 🚨' : status, colorClass);
                 window.QueueHunter.updateUI(`Confirmed ${status}: ${details}`);
-                if (window.QueueHunter.notificationSettings[status === 'Queue Detected' ? 'queueDetected' : status === 'Queue Soon or Active' ? 'queueSoon' : 'possibleBotBlock'] && !hasNotified) {
+                if (window.QueueHunter.notificationSettings[status === 'Queue Detected' ? 'queueDetected' : status === 'Queue Soon or Active' ? 'queueSoon' : status === 'CAPTCHA Detected' ? 'captchaDetected' : 'possibleBotBlock'] && !hasNotified) {
                     window.QueueHunter.updateUI('Triggering notifications for confirmed status');
                     window.QueueHunter.playAlert();
                     window.QueueHunter.sendDiscord(`${status} 🚨`, details, status === 'Queue Detected' ? 0xFF0000 : status === 'Queue Soon or Active' ? 0xFFA500 : 0x9370DB);
@@ -1111,7 +1101,6 @@
             }
             return await window.QueueHunter.performConsecutiveChecks(currentFailureCount + 1, maxFailures, result.status, result.details, result.url, result.queueLength);
         };
-
         window.QueueHunter.checkSite = async function(isConsec = false) {
             const currentEmails = window.QueueHunter.emails.filter(email => /\S+@\S+\.\S+/.test(email));
             if (currentEmails.length === 0) {
@@ -1150,18 +1139,17 @@
                 } else {
                     const stockStatus = document.getElementById('stockStatus');
                     if (stockStatus) stockStatus.textContent = result.status;
-                    window.QueueHunter.updateStatusBanner(result.status, result.status === 'Queue Detected' ? 'red' : result.status === 'Queue Soon or Active' ? 'orange' : 'purple');
+                    const colorClass = result.status === 'Queue Detected' ? 'red' : result.status === 'Queue Soon or Active' ? 'orange' : result.status === 'CAPTCHA Detected' ? 'purple' : 'purple';
+                    window.QueueHunter.updateStatusBanner(result.status, colorClass);
                     window.QueueHunter.updateUI(`Site check failed: ${result.details}`);
                     return { success: false, isFail: true, suspectedQueue: true };
                 }
             }
         };
-
         window.QueueHunter.testNow = async function() {
             window.QueueHunter.updateUI('Manual test triggered');
             await window.QueueHunter.checkSite();
         };
-
         window.QueueHunter.startMonitoring = async function() {
             const startBtn = document.getElementById('startBtn');
             const stopBtn = document.getElementById('stopBtn');
@@ -1196,7 +1184,6 @@
             }
             runCheck();
         };
-
         window.QueueHunter.stopMonitoring = function() {
             const startBtn = document.getElementById('startBtn');
             const stopBtn = document.getElementById('stopBtn');
@@ -1216,7 +1203,6 @@
             window.QueueHunter.updateStatusBanner('Stopped', 'gray');
             window.QueueHunter.updateUI('Monitoring stopped');
         };
-
         window.QueueHunter.togglePush = async function() {
             const pushBtn = document.getElementById('pushBtn');
             if (pushEnabled) {
@@ -1243,7 +1229,6 @@
                 }
             }
         };
-
         window.QueueHunter.exportLog = function() {
             window.QueueHunter.updateUI('Exporting log file');
             const blob = new Blob([logEntries.join('\n')], { type: 'text/plain' });
