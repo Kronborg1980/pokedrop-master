@@ -24,9 +24,9 @@
         button:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4); }
         button:disabled { background: #666; color: #999; cursor: not-allowed; }
         .status-banner { padding: 1rem; background: rgba(0, 0, 0, 0.7); border: 2px solid #FFD700; border-radius: 10px; text-align: center; font-family: 'Orbitron', sans-serif; font-size: 1.5rem; }
-        .status-pokedex { background: linear-gradient(145deg, #3F51B5, #1A237E); padding: 1.2rem; border-radius: 10px; border: 1px solid #FFD700; max-height: 250px; overflow-y: auto; }
+        .status-pokedex { background: linear-gradient(145deg, #3F51B5, #1A237E); padding: 1.2rem; border-radius: 10px; border: 1px solid #FFD700; max-height: 300px; overflow-y: auto; }
         .status-pokedex p { margin: 0.4rem 0; font-size: 0.8rem; }
-        .log-container { max-height: 150px; overflow-y: auto; font-size: 0.75rem; background: rgba(255, 255, 255, 0.05); padding: 0.7rem; border-radius: 8px; margin-top: 0.7rem; border: 1px solid #FFD700; }
+        .log-container, .server-log-container { max-height: 150px; overflow-y: auto; font-size: 0.75rem; background: rgba(255, 255, 255, 0.05); padding: 0.7rem; border-radius: 8px; margin-top: 0.7rem; border: 1px solid #FFD700; }
         .status-banner.green { color: #00FF00; border-color: #00FF00; }
         .status-banner.red { color: #FF0000; border-color: #FF0000; }
         .status-banner.yellow { color: #FFD700; border-color: #FFD700; }
@@ -104,7 +104,7 @@
                     <label>Notification Settings:</label>
                     <div class="button-group">
                         <button id="toggleDiscordBtn" onclick="window.QueueHunter.toggleNotification('discord')">Discord Notifications: On</button>
-                        <button id="toggleEmailBtn" onclick="window.QueueHunter.toggleNotification('email')">Email Notifications: On</button>
+                        <button id="toggleEmailBtn" onclick="window.QueueHunter.toggleNotification('email')">Email narratives: On</button>
                     </div>
                     <div class="checkbox-group">
                         <label><input type="checkbox" id="notifyQueueDetected" checked> Notify on Queue Detected</label>
@@ -148,8 +148,10 @@
                     <p>Runtime: <span id="runtime">0m 0s</span></p>
                     <p>Consecutive Fails: <span id="consec">0</span></p>
                     <p>Stock Status: <span id="stockStatus">Unknown</span></p>
-                    <p>Log / Details:</p>
+                    <p>Client Log / Details:</p>
                     <div class="log-container" id="details"></div>
+                    <p>Server-Side Status:</p>
+                    <div class="server-log-container" id="workerStatus">Loading...</div>
                 </div>
             </div>
         </div>
@@ -159,6 +161,8 @@
     </audio>
     <script>
         const ACCESS_CODE = "skaplask";
+        const WORKER_URL = 'YOUR_WORKER_URL'; // Replace with https://queue-hunter.your-subdomain.workers.dev
+
         function checkAccessCode() {
             const enteredCode = document.getElementById('accessCode').value;
             const passwordOverlay = document.getElementById('password-overlay');
@@ -167,10 +171,36 @@
             if (enteredCode === ACCESS_CODE) {
                 passwordOverlay.style.display = 'none';
                 content.classList.remove('hidden');
+                fetchWorkerStatus(); // Load server status on unlock
             } else {
                 errorMessage.style.display = 'block';
             }
         }
+
+        async function fetchWorkerStatus() {
+            try {
+                const statusRes = await fetch(`${WORKER_URL}/status?key=${ACCESS_CODE}`);
+                const status = await statusRes.json();
+                if (status.error) throw new Error(status.error);
+                const logsRes = await fetch(`${WORKER_URL}/logs?key=${ACCESS_CODE}`);
+                const logs = await logsRes.json();
+                if (logs.error) throw new Error(logs.error);
+                document.getElementById('workerStatus').innerHTML = `
+                    <p>Server Running: ${status.running ? 'Yes' : 'No'}</p>
+                    <p>Last Check: ${new Date(status.lastCheck).toLocaleTimeString()}</p>
+                    <p>Server Logs:</p>
+                    <ul>${logs.logs.map(log => `<li>${log}</li>`).join('')}</ul>
+                `;
+                window.QueueHunter.updateUI('Fetched server status');
+            } catch (e) {
+                document.getElementById('workerStatus').innerHTML = `<p>Error fetching server status: ${e.message}</p>`;
+                window.QueueHunter.updateUI(`Server status error: ${e.message}`);
+            }
+        }
+
+        // Check server status every 30 seconds
+        setInterval(fetchWorkerStatus, 30000);
+
         window.QueueHunter = window.QueueHunter || {};
         window.QueueHunter.isWebhookSubmitted = false;
         window.QueueHunter.emails = ['kronborgnielsen@gmail.com'];
