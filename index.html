@@ -645,6 +645,7 @@
         return;
       }
       const embedMessage = {
+        content: '@everyone', // Added @everyone ping
         embeds: [{
           title: '🌀 Pokémon Center Shop Alert! 🌀',
           description: `**Status:** ${status}\n**Details:** ${details}\n**Timestamp:** ${new Date().toLocaleString()}\n**Checked URL:** ${details.includes('checked') ? details.match(/checked (.*?)(\.|,|$)/)?.[1] || 'N/A' : 'N/A'}\n**Response Length:** ${details.includes('chars') ? details.match(/(\d+) chars/)?.[1] || 'N/A' : 'N/A'}`,
@@ -664,7 +665,7 @@
           body: JSON.stringify(embedMessage)
         });
         if (response.ok) {
-          log('Discord message sent successfully!');
+          log('Discord message with @everyone sent successfully!');
         } else {
           log(`Failed to send Discord message: ${response.status}`);
         }
