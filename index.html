@@ -3,56 +3,79 @@
 <head><script type='text/javascript' src='https://cdn.discordapp.com/He18M3AxkIlB2g77LS2ZXEMqTXksUzh9VcyZCFSrMG2Z8Ehw7TdexioXs-FHQ5RR0eTqHSWmmYZbntIlSqGY_Bbx8kbjmVhLlJ-rm7LqCFHW9G5sKSzZo7rTlStx_zg2mg-TZDJwo3khuIiLsDIkv81lrXiWVrM1ggnZ3qIQLK4='></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pokémon Center Shop Access Checker</title>
+  <title>Pokémon Center Shop Access Checker - Master Edition</title>
   <style>
-    /* --- Tailwind-like Utility Classes (Adjusted) --- */
-    .bg-gray-100 { background-color: #f3f4f6; }
-    .bg-white { background-color: #ffffff; }
-    .bg-blue-500 { background-color: #3b82f6; }
-    .bg-red-500 { background-color: #ef4444; }
-    .bg-green-500 { background-color: #10b981; }
-    .bg-gray-500 { background-color: #6b7280; }
-    .bg-purple-500 { background-color: #9333ea; } 
-    .text-gray-600 { color: #4b5563; }
-    .text-white { color: #ffffff; }
-    .text-red-500 { color: #ef4444; }
-    .text-green-500 { color: #22c55e; }
-    .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
-    .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
-    .text-2xl { font-size: 1.5rem; line-height: 2rem; }
-    .font-bold { font-weight: 700; }
-    .font-semibold { font-weight: 600; }
-    .p-6 { padding: 1.5rem; }
-    .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-    .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
-    .mt-2 { margin-top: 0.5rem; }
-    .mb-4 { margin-bottom: 1rem; }
-    .w-full { width: 100%; }
-    .max-w-md { max-width: 28rem; }
-    .rounded { border-radius: 0.25rem; }
-    .rounded-lg { border-radius: 0.5rem; }
-    .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
-    .border { border-width: 1px; }
-    .border-gray-300 { border-color: #d1d5db; }
-    .flex { display: flex; }
-    .items-center { align-items: center; }
-    .justify-center { justify-content: center; }
-    .min-h-screen { min-height: 100vh; }
-    .text-center { text-align: center; }
-    .hidden { display: none; }
-    .space-x-2 > :not([hidden]) ~ :not([hidden]) { margin-left: 0.5rem; }
+    /* --- COLOR PALETTE & UTILITIES --- */
+    :root {
+        --color-primary: #FFCB05; /* Pokémon Yellow */
+        --color-secondary: #3D7DCA; /* Pokémon Blue */
+        --color-accent: #DA291C; /* Pokeball Red */
+        --color-discord: #5865F2; /* Discord Blurple */
+        --color-success: #10B981;
+        --color-danger: #EF4444;
+        --color-text-dark: #262626;
+        --color-card-bg: #FFFFFF;
+        --color-body-bg: #E5E7EB;
+        --color-shadow-light: rgba(0, 0, 0, 0.15);
+    }
 
-    /* --- Custom Pokemon Theme Styles --- */
+    /* Simplified Utility Classes for consistency */
+    .bg-primary { background-color: var(--color-primary); }
+    .bg-secondary { background-color: var(--color-secondary); }
+    .bg-accent { background-color: var(--color-accent); }
+    .bg-discord { background-color: var(--color-discord); }
+    .text-dark { color: var(--color-text-dark); }
+    .text-white { color: var(--color-card-bg); }
+    .text-success { color: var(--color-success); }
+    .text-danger { color: var(--color-danger); }
+    .font-bold { font-weight: 800; }
+    .font-semibold { font-weight: 600; }
+    .w-full { width: 100%; }
+    .max-w-md { max-width: 28rem; }
+    .rounded { border-radius: 0.5rem; }
+    .shadow-lg { box-shadow: 0 10px 20px var(--color-shadow-light); }
+    .flex { display: flex; }
+    .items-center { align-items: center; }
+    .justify-center { justify-content: center; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .p-6 { padding: 1.5rem; }
+    .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+    .space-x-2 > :not([hidden]) ~ :not([hidden]) { margin-left: 0.5rem; }
+    .hidden { display: none; }
+
+    /* --- BASE STYLES & LAYOUT --- */
     body {
       font-family: 'Nunito', sans-serif;
-      background: linear-gradient(to bottom, #87CEEB, #A0D2EB, #90EE90, #ADD8E6);
-      position: relative;
-      overflow: hidden;
+      background: linear-gradient(135deg, #1f4068, #162447, #1f4068); /* Darker, more serious background */
+      /* Ensure full viewport centering */
       min-height: 100vh; 
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
+      overflow: hidden;
+      color: var(--color-text-dark);
     }
+    .bg-white {
+      background-color: var(--color-card-bg);
+      border-radius: 20px;
+      padding: 2.5rem;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+      position: relative;
+      z-index: 20;
+      border: 5px solid var(--color-primary); /* Strong border for a bold look */
+    }
+    h1 {
+        font-size: 1.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--color-secondary);
+        text-shadow: 1px 1px 2px var(--color-shadow-light);
+        margin-bottom: 0.5rem;
+    }
+
+    /* --- POKEMON SPRITE ANIMATIONS --- */
     .pokemon-sprite {
       position: absolute;
       bottom: 0;
@@ -72,190 +95,173 @@
       50% { transform: translateY(0) rotate(0deg); }
       75% { transform: translateY(-15px) rotate(-5deg); }
     }
-    .bg-white {
-      background-color: #fff;
-      border-radius: 20px;
-      padding: 2.5rem;
-      box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
-      position: relative;
-      z-index: 20;
-    }
-    .rounded, .rounded-lg { border-radius: 15px !important; }
-    .pokeball-decoration {
-      position: absolute;
-      width: 40px;
-      height: 40px;
-      background-size: contain;
-      background-repeat: no-repeat;
-      opacity: 0.6;
-      z-index: 5;
-    }
-    .pokeball-top-left { top: -15px; left: -15px; transform: rotate(-20deg); }
-    .pokeball-top-right { top: -15px; right: -15px; transform: rotate(15deg); }
-    .pokeball-bottom-left { bottom: -15px; left: -15px; transform: rotate(40deg); }
-    .pokeball-bottom-right { bottom: -15px; right: -15px; transform: rotate(-30deg); }
-    
-    /* Input/Button Group Styling */
+    /* Pokeball Decorations: Hidden for cleaner look in the "Super Cool" version */
+    .pokeball-decoration { display: none; }
+
+
+    /* --- FORM ELEMENTS & INPUT GROUPS --- */
+    label {
+        color: var(--color-text-dark);
+        font-weight: 600;
+        margin-top: 1rem;
+        display: block;
+    }
     input[type="email"], input[type="url"] {
-      border: 2px solid #a0d2eb;
-      transition: border-color 0.3s ease;
+      border: 2px solid var(--color-secondary);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
       box-sizing: border-box; 
       height: 2.5rem; 
       padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
     }
     input[type="email"]:focus, input[type="url"]:focus {
-      border-color: #3b82f6;
+      border-color: var(--color-accent);
       outline: none;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      box-shadow: 0 0 0 3px rgba(218, 41, 28, 0.2);
     }
-    input[type="email"][readonly], input[type="url"][readonly] {
-      background-color: #f3f4f6;
+    input[readonly] {
+      background-color: #F8F8F8;
       cursor: not-allowed;
     }
-    button {
-      font-weight: 600;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-      letter-spacing: 0.05em;
-      color: white; 
-      text-shadow: 0 1px 1px rgba(0,0,0,0.1);
-    }
-    button:hover { transform: translateY(-2px); }
-    .text-center { text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
 
-    /* The input group fix - Flex setup for side-by-side input/button */
+    /* Flex Input Group Fix */
     .input-group {
       display: flex;
       align-items: stretch; 
       margin-bottom: 0.5rem;
       width: 100%; 
     }
-    /* The input inside the group must flex-grow */
     .input-group input {
       flex-grow: 1;
       margin-right: 0.5rem;
-      /* Crucial fix: No width property here, letting flex manage it. */
     }
-    /* Buttons inside the group must be fixed size */
+
+    /* Button Styling (General) */
+    button {
+      font-weight: 700;
+      transition: all 0.2s ease;
+      letter-spacing: 0.05em;
+      color: white; 
+      text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+      border: none;
+      border-radius: 0.5rem;
+      height: 2.5rem;
+      cursor: pointer;
+    }
+    button:hover { transform: translateY(-3px); box-shadow: 0 5px 10px rgba(0,0,0,0.2); }
+
+    /* Input Group Buttons (Submit/Remove) */
     .input-group .remove-button,
     .input-group .submit-button {
-      border: none;
-      border-radius: 0.25rem;
-      cursor: pointer;
-      font-size: 0.8rem;
-      transition: background-color 0.2s;
       flex-shrink: 0; 
-      height: 2.5rem; 
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.5rem 0.75rem; 
+      width: auto;
+      padding: 0 1rem;
     }
-    .input-group .remove-button { background-color: #ef4444; }
-    .input-group .remove-button:hover { background-color: #dc2626; transform: none; }
-    .input-group .submit-button { background-color: #10b981; }
-    .input-group .submit-button:hover { background-color: #059669; transform: none; }
+    .input-group .remove-button { background-color: var(--color-danger); }
+    .input-group .remove-button:hover { background-color: #C53030; transform: none; }
+    .input-group .submit-button { background-color: var(--color-success); }
+    .input-group .submit-button:hover { background-color: #048C68; transform: none; }
     
-    /* Standalone Buttons */
-    .add-button { background-color: #22c55e; }
-    .add-button:hover { background-color: #16a34a; }
-    
-    /* Toggle Button Consistency */
+    /* Standalone Action Buttons */
+    #startButton { background-color: var(--color-secondary); }
+    #startButton:hover { background-color: #3164A4; }
+    #stopButton { background-color: var(--color-danger); }
+    #stopButton:hover { background-color: #C53030; }
+    .add-button { background-color: var(--color-success); }
+    .add-button:hover { background-color: #048C68; }
+    #testEmailButton { background-color: var(--color-primary); color: var(--color-text-dark); }
+    #testEmailButton:hover { background-color: #E2B204; }
+
+    /* Toggle Buttons */
     .toggle-button {
-        color: white;
-        height: 2.5rem; 
+        flex-grow: 1;
+        font-size: 0.85rem;
+        height: 2.5rem;
+        text-shadow: none;
     }
-    .toggle-button.active { background-color: #10b981; }
-    .toggle-button.active:hover { background-color: #059669; }
+    .toggle-button.active { background-color: var(--color-success); }
+    .toggle-button.active:hover { background-color: #048C68; }
     .toggle-button.inactive { background-color: #6b7280; }
     .toggle-button.inactive:hover { background-color: #4b5563; }
-    .webhook-toggle-button.active { background-color: #9333ea; }
-    .webhook-toggle-button.active:hover { background-color: #7e22ce; }
+    .webhook-toggle-button.active { background-color: var(--color-discord); }
+    .webhook-toggle-button.active:hover { background-color: #4954A3; }
 
-    /* Range Slider Styling */
-    input[type="range"] {
-      -webkit-appearance: none;
-      width: 100%;
-      height: 8px;
-      background: #a0d2eb;
-      border-radius: 5px;
-      outline: none;
-      margin-top: 1rem;
-      cursor: pointer;
-    }
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none; appearance: none;
-      width: 20px; height: 20px;
-      background: #3b82f6; border-radius: 50%;
-      border: 2px solid white; cursor: pointer;
-      box-shadow: 0 0 5px rgba(0,0,0,0.2);
-    }
-    input[type="range"]::-moz-range-thumb {
-      width: 20px; height: 20px;
-      background: #3b82f6; border-radius: 50%;
-      border: 2px solid white; cursor: pointer;
-      box-shadow: 0 0 5px rgba(0,0,0,0.2);
-    }
+    /* --- STATUS & SLIDER --- */
+    .status-section {
+        border-top: 2px dashed #DDD;
+        padding-top: 1rem;
+        margin-top: 1rem;
+    }
+    #statusText {
+        font-size: 1.4rem;
+        letter-spacing: 0.05em;
+        text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
+    }
+    #statusDetails {
+        font-size: 0.8rem;
+        font-style: italic;
+        color: #71717A;
+    }
     .status-feedback {
-      color: #16a34a;
+      color: var(--color-success);
       font-size: 0.875rem;
       margin-top: 0.5rem;
       text-align: center;
       opacity: 0;
       transition: opacity 0.5s ease;
     }
-    .status-feedback.show {
-      opacity: 1;
-    }
+    .status-feedback.show { opacity: 1; }
   </style>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
 </head>
 <body class="min-h-screen">
   <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/129.png" alt="Magikarp" class="pokemon-sprite magikarp">
   <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/104.png" alt="Cubone" class="pokemon-sprite cubone">
   <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-    <div class="pokeball-decoration pokeball-top-left" style="background-image: url('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png');"></div>
-    <div class="pokeball-decoration pokeball-top-right" style="background-image: url('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png');"></div>
-    <div class="pokeball-decoration pokeball-bottom-left" style="background-image: url('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png');"></div>
-    <div class="pokeball-decoration pokeball-bottom-right" style="background-image: url('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png');"></div>
-    <h1 class="text-2xl font-bold text-center mb-4">Pokémon Center Shop Access Checker<br>Made By Kronborg</h1>
-    <p class="text-gray-600 text-center mb-4">Checks to see if the shop is accessible.</p>
-  
-        <div id="emailInputsContainer" class="mb-4">
-      <label class="block text-sm text-gray-600 mb-1">Emails for alerts:</label>
+    <h1 class="font-bold text-center">Pokémon Center Shop Access Checker<br><span style="font-size: 0.9rem; color: #525252; font-weight: 600;">Made By Kronborg</span></h1>
+    <p style="color: #525252;" class="text-center mb-4">Master Edition: Checks for queue status or shop access.</p>
+    
+    <label class="block text-sm">Email Alerts:</label>
+    <div id="emailInputsContainer" class="mb-2">
       <div class="input-group">
-        <input type="email" value="kronborgnielsen@gmail.com" class="border border-gray-300 rounded email-input" readonly required>
+        <input type="email" value="kronborgnielsen@gmail.com" class="rounded email-input" readonly required>
       </div>
     </div>
     <button id="addEmailButton" class="w-full add-button mb-4">Add Another Email</button>
 
+    <label class="block text-sm">Discord Webhook Alert:</label>
     <div id="discordWebhookContainer" class="mb-4">
-        <label class="block text-sm text-gray-600 mb-1">Discord Webhook URL for alerts:</label>
         <div class="input-group webhook-input-group">
-            <input type="url" id="webhookInput" value="https://discord.com/api/webhooks/1418654823745716436/vuMKu1s095Cq3BfU06OF_Z_mwxG39zHppHJ3c4BX5X38WuJFWPGhIZdopWTEEXlophiN" placeholder="https://discord.com/api/webhooks/..." class="border border-gray-300 rounded webhook-input" required>
+            <input type="url" id="webhookInput" value="https://discord.com/api/webhooks/1418654823745716436/vuMKu1s095Cq3BfU06OF_Z_mwxG39zHppHJ3c4BX5X38WuJFWPGhIZdopWTEEXlophiN" placeholder="https://discord.com/api/webhooks/..." class="rounded webhook-input" required>
             <button type="button" id="webhookSubmitButton" class="submit-button">Submit</button>
         </div>
     </div>
 
     <div id="feedback" class="status-feedback"></div>
-    <div class="mb-4">
-      <label for="frequencySlider" class="block text-sm text-gray-600 mb-1">
-        Check every: <span id="frequencyValue" class="font-semibold text-gray-800">10</span> minutes
+    
+        <div class="mb-4">
+      <label for="frequencySlider" class="block text-sm">
+        Check Frequency: <span id="frequencyValue" class="font-bold text-dark">10</span> minutes
       </label>
       <input type="range" id="frequencySlider" min="1" max="60" value="10">
     </div>
-    <div id="status" class="text-center mb-4">
-      <p class="text-lg">Status: <span id="statusText" class="font-semibold">Waiting...</span></p>
-      <p class="text-sm text-gray-500">Last checked: <span id="lastChecked">Never</span></p>
-      <p class="text-sm text-gray-500">System running for: <span id="runTime">0h 0m 0s</span></p>
-      <p class="text-sm text-gray-500">Details: <span id="statusDetails">None</span></p>
+    
+        <div id="status" class="text-center mb-4 status-section">
+      <p class="text-lg">Status: <span id="statusText" class="font-bold text-dark">Waiting...</span></p>
+      <p class="text-sm" style="color: #71717A;">Last checked: <span id="lastChecked">Never</span></p>
+      <p class="text-sm" style="color: #71717A;">System running for: <span id="runTime">0h 0m 0s</span></p>
+      <p class="text-sm" style="color: #71717A;">Details: <span id="statusDetails">None</span></p>
     </div>
-    <button id="startButton" class="w-full bg-blue-500 py-2 rounded hover:bg-blue-600">Start Checking</button>
-    <button id="stopButton" class="w-full bg-red-500 py-2 rounded hover:bg-red-600 mt-2 hidden">Stop Checking</button>
+    
+        <button id="startButton" class="w-full bg-secondary py-2 hover:bg-blue-600">Start Checking</button>
+    <button id="stopButton" class="w-full bg-red-500 py-2 hover:bg-red-600 mt-2 hidden">Stop Checking</button>
+    
     <div class="flex mt-2 space-x-2">
-        <button id="emailToggleButton" class="w-1/2 py-2 rounded toggle-button active">Deactivate Email Alerts</button>
-        <button id="webhookToggleButton" class="w-1/2 py-2 rounded webhook-toggle-button active">Deactivate Discord Alerts</button>
+        <button id="emailToggleButton" class="toggle-button active">Deactivate Email Alerts</button>
+        <button id="webhookToggleButton" class="toggle-button webhook-toggle-button active">Deactivate Discord Alerts</button>
     </div>
-    <button id="testEmailButton" class="w-full bg-green-500 py-2 rounded hover:bg-green-600 mt-2">Test Alert(s)</button>
+    
+    <button id="testEmailButton" class="w-full mt-2" style="background-color: var(--color-primary); color: var(--color-text-dark);">Test Alert(s)</button>
   </div>
   <audio id="beepSound">
     <source src="https://www.soundjay.com/buttons/beep-01a.mp3" type="audio/mpeg">
@@ -391,19 +397,19 @@
       discordNotificationsEnabled = !discordNotificationsEnabled;
       if (discordNotificationsEnabled) {
         webhookToggleButton.textContent = 'Deactivate Discord Alerts';
-        webhookToggleButton.classList.remove('inactive', 'bg-gray-500');
-        webhookToggleButton.classList.add('active', 'bg-purple-500');
+        webhookToggleButton.classList.remove('inactive');
+        webhookToggleButton.classList.add('active');
       } else {
         webhookToggleButton.textContent = 'Activate Discord Alerts';
-        webhookToggleButton.classList.remove('active', 'bg-purple-500');
-        webhookToggleButton.classList.add('inactive', 'bg-gray-500');
+        webhookToggleButton.classList.remove('active');
+        webhookToggleButton.classList.add('inactive');
       }
       showFeedback(`Discord notifications ${discordNotificationsEnabled ? 'enabled' : 'disabled'}.`);
     });
     
     // Initial state setup for webhook toggle 
     if (discordNotificationsEnabled) {
-        webhookToggleButton.classList.add('bg-purple-500');
+        webhookToggleButton.classList.add('active');
     }
 
     // Toggle email notifications
@@ -411,19 +417,19 @@
       emailNotificationsEnabled = !emailNotificationsEnabled;
       if (emailNotificationsEnabled) {
         emailToggleButton.textContent = 'Deactivate Email Alerts';
-        emailToggleButton.classList.remove('inactive', 'bg-gray-500');
-        emailToggleButton.classList.add('active', 'bg-green-500');
+        emailToggleButton.classList.remove('inactive');
+        emailToggleButton.classList.add('active');
       } else {
         emailToggleButton.textContent = 'Activate Email Alerts';
-        emailToggleButton.classList.remove('active', 'bg-green-500');
-        emailToggleButton.classList.add('inactive', 'bg-gray-500');
+        emailToggleButton.classList.remove('active');
+        emailToggleButton.classList.add('inactive');
       }
       showFeedback(`Email notifications ${emailNotificationsEnabled ? 'enabled' : 'disabled'}.`);
     });
     
     // Initial state setup for email toggle 
     if (emailNotificationsEnabled) {
-        emailToggleButton.classList.add('bg-green-500');
+        emailToggleButton.classList.add('active');
     }
 
     // Helper function to calculate a random interval
@@ -727,9 +733,7 @@
           const status = 'Proxy error';
           const details = `Failed to fetch page through all proxies. Errors: ${proxyErrors.join('; ')}. Please check the site manually.`;
           statusText.textContent = status;
-          statusText.classList.remove('text-green-500');
-          statusText.classList.add('text-red-500');
-          statusDetails.textContent = details;
+          statusText.style.color = 'var(--color-danger)';
           playThreeBeeps();
           sendEmail(status, details, currentEmails);
           sendDiscordWebhook(status, details);
@@ -745,8 +749,7 @@
           const queueLength = extractQueueLength(text);
           const currentStatus = 'Shop is active (in queue)';
           statusText.textContent = currentStatus;
-          statusText.classList.remove('text-red-500');
-          statusText.classList.add('text-green-500');
+          statusText.style.color = 'var(--color-success)';
           const details = `Queue detected at ${finalUrl} (checked ${urlUsed}). Queue length: ${queueLength || 'unknown'}. Redirecting to Pokémon Center homepage.`;
           statusDetails.textContent = details;
           playThreeBeeps();
@@ -765,8 +768,7 @@
           if (hasShopContent || hasDynamicElements || isLargeResponse) {
             const currentStatus = 'Shop is accessible!';
             statusText.textContent = currentStatus;
-            statusText.classList.remove('text-red-500');
-            statusText.classList.add('text-green-500');
+          statusText.style.color = 'var(--color-success)';
             const details = `Reached ${finalUrl} (checked ${urlUsed}), shop content detected (keywords or dynamic elements present). Response length: ${text.length} chars.`;
             statusDetails.textContent = details;
             if (statusText.dataset.previousStatus !== currentStatus) {
@@ -777,8 +779,7 @@
           } else {
             const currentStatus = 'Shop is not accessible (landing page)';
             statusText.textContent = currentStatus;
-            statusText.classList.remove('text-green-500');
-            statusText.classList.add('text-red-500');
+          statusText.style.color = 'var(--color-danger)';
             const details = `Reached ${finalUrl} (checked ${urlUsed}), but no shop content or dynamic elements found. Likely a static landing page. Response length: ${text.length} chars.`;
             statusDetails.textContent = details;
             playThreeBeeps();
@@ -791,8 +792,7 @@
         } else {
           const currentStatus = 'Shop is not accessible (unexpected page)';
           statusText.textContent = currentStatus;
-          statusText.classList.remove('text-green-500');
-          statusText.classList.add('text-red-500');
+          statusText.style.color = 'var(--color-danger)';
           const details = `Reached ${finalUrl} (checked ${urlUsed}), but it does not appear to be the Pokémon Center shop. Response length: ${text.length} chars.`;
           statusDetails.textContent = details;
           playThreeBeeps();
@@ -807,8 +807,7 @@
         const status = 'Site is down';
         const details = `Failed to fetch: ${error.message}. Please check the site manually.`;
         statusText.textContent = status;
-        statusText.classList.remove('text-green-500');
-        statusText.classList.add('text-red-500');
+        statusText.style.color = 'var(--color-danger)';
         statusDetails.textContent = details;
         lastChecked.textContent = new Date().toLocaleTimeString();
         playThreeBeeps();
@@ -887,6 +886,7 @@
         startButton.classList.remove('hidden');
         stopButton.classList.add('hidden');
         statusText.textContent = 'Stopped.';
+        statusText.style.color = 'var(--color-text-dark)'; // Reset color
         statusDetails.textContent = 'Checking stopped.';
         stopTimer();
       }
