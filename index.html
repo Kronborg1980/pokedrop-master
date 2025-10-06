@@ -102,7 +102,7 @@
       text-align: center;
     }
     .pokemon-header-sprite {
-      width: 72px; /* Increased from 60px to 72px (20% larger) */
+      width: 72px; /* 20% larger than original 60px */
       height: auto;
       filter: drop-shadow(0 0 10px #00ffff);
       z-index: 5;
@@ -202,6 +202,25 @@
       flex-shrink: 0;
       width: auto;
       padding: 0.5rem 1rem;
+    }
+    .submitted-emails {
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      background: rgba(0, 255, 255, 0.1);
+      border: 1px solid #00ffff;
+      border-radius: 4px;
+    }
+    .submitted-emails li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.25rem 0;
+      font-size: 0.875rem;
+      color: #ffffff;
+    }
+    .submitted-emails button {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
     }
     .checkbox-group {
       display: flex;
@@ -307,9 +326,10 @@
       <div id="emailInputsContainer">
         <div class="email-input-group">
           <input type="email" placeholder="name@example.com" class="email-input" required>
+          <button type="button" class="submit-email-button bg-green-500 text-white">Submit Email</button>
         </div>
       </div>
-      <button id="submitAllEmailsButton" class="submit-all-emails-button mt-2 bg-green-500 text-white">Submit All Emails</button>
+      <ul id="submittedEmailsList" class="submitted-emails"></ul>
       <button id="addEmailButton" class="add-email-button mt-2 bg-green-500 text-white">Add Another Email</button>
       <div id="emailFeedback" class="status-feedback"></div>
     </div>
@@ -415,7 +435,7 @@
     const runTime = document.getElementById('runTime');
     const emailInputsContainer = document.getElementById('emailInputsContainer');
     const addEmailButton = document.getElementById('addEmailButton');
-    const submitAllEmailsButton = document.getElementById('submitAllEmailsButton');
+    const submittedEmailsList = document.getElementById('submittedEmailsList');
     const emailFeedback = document.getElementById('emailFeedback');
     const webhookFeedback = document.getElementById('webhookFeedback');
     const frequencySlider = document.getElementById('frequencySlider');
@@ -503,44 +523,64 @@
       emailInputGroup.className = 'email-input-group';
       emailInputGroup.innerHTML = `
         <input type="email" placeholder="name@example.com" class="email-input" required>
+        <button type="button" class="submit-email-button bg-green-500 text-white">Submit Email</button>
       `;
       emailInputsContainer.appendChild(emailInputGroup);
+      const submitButton = emailInputGroup.querySelector('.submit-email-button');
+      const emailInput = emailInputGroup.querySelector('.email-input');
+      submitButton.addEventListener('click', function() {
+        const email = emailInput.value.trim();
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          alert('Please enter a valid email address.');
+          emailInput.focus();
+          return;
+        }
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <span>${email}</span>
+          <button type="button" class="remove-email-button bg-red-500 text-white">Remove</button>
+        `;
+        submittedEmailsList.appendChild(li);
+        emailInput.value = '';
+        showFeedback(emailFeedback, 'Email submitted.');
+        log(`Email submitted: ${email}`);
+        const removeButton = li.querySelector('.remove-email-button');
+        removeButton.addEventListener('click', function() {
+          li.remove();
+          showFeedback(emailFeedback, 'Email removed.');
+          log(`Email removed: ${email}`);
+        });
+      });
       log('New email input field added.');
       showFeedback(emailFeedback, 'Email field added.');
     }
-    submitAllEmailsButton.addEventListener('click', () => {
-      const emailInputs = emailInputsContainer.querySelectorAll('.email-input');
-      let allValid = true;
-      let submittedEmails = 0;
-      emailInputs.forEach((input, index) => {
-        const email = input.value.trim();
+    document.addEventListener('DOMContentLoaded', () => {
+      const initialInputGroup = emailInputsContainer.querySelector('.email-input-group');
+      const initialInput = initialInputGroup.querySelector('.email-input');
+      const submitButton = initialInputGroup.querySelector('.submit-email-button');
+      submitButton.addEventListener('click', function() {
+        const email = initialInput.value.trim();
         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-          alert(`Please enter a valid email address for email ${index + 1}.`);
-          input.focus();
-          allValid = false;
+          alert('Please enter a valid email address.');
+          initialInput.focus();
           return;
         }
-        if (!input.hasAttribute('readonly')) {
-          input.setAttribute('readonly', 'true');
-          const removeButton = document.createElement('button');
-          removeButton.type = 'button';
-          removeButton.className = 'remove-email-button bg-red-500 text-white';
-          removeButton.textContent = 'Remove';
-          input.parentElement.appendChild(removeButton);
-          removeButton.addEventListener('click', function() {
-            input.parentElement.remove();
-            showFeedback(emailFeedback, 'Email removed.');
-            log('Email removed from alerts.');
-          });
-          submittedEmails++;
-          log(`Email submitted: ${email}`);
-        }
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <span>${email}</span>
+          <button type="button" class="remove-email-button bg-red-500 text-white">Remove</button>
+        `;
+        submittedEmailsList.appendChild(li);
+        initialInput.value = '';
+        showFeedback(emailFeedback, 'Email submitted.');
+        log(`Email submitted: ${email}`);
+        const removeButton = li.querySelector('.remove-email-button');
+        removeButton.addEventListener('click', function() {
+          li.remove();
+          showFeedback(emailFeedback, 'Email removed.');
+          log(`Email removed: ${email}`);
+        });
       });
-      if (allValid && submittedEmails > 0) {
-        showFeedback(emailFeedback, `${submittedEmails} email${submittedEmails > 1 ? 's' : ''} submitted.`);
-      } else if (allValid && submittedEmails === 0) {
-        showFeedback(emailFeedback, 'No new emails to submit.');
-      }
     });
     addEmailButton.addEventListener('click', addEmailInputField);
     function formatDuration(ms) {
@@ -713,24 +753,7 @@
       showFeedback(emailFeedback, 'Email notifications deactivated after sending alert.');
     }
     async function testEmail() {
-      const emailInputs = document.querySelectorAll('.email-input');
-      const recipientEmails = [];
-      let hasValidEmail = true;
-      Array.from(emailInputs).forEach((input, index) => {
-        const email = input.value.trim();
-        if (email && input.hasAttribute('readonly')) {
-          if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            recipientEmails.push(email);
-          } else {
-            alert(`Please ensure email ${index + 1} is valid: ${email}`);
-            input.focus();
-            hasValidEmail = false;
-          }
-        }
-      });
-      if (!hasValidEmail) {
-        return;
-      }
+      const recipientEmails = Array.from(submittedEmailsList.querySelectorAll('span')).map(span => span.textContent);
       if (recipientEmails.length === 0) {
         log('No valid email addresses provided for testing.');
         alert('Please add and submit at least one valid email address to test.');
@@ -769,24 +792,7 @@
       alert('Test Discord alert sent! Check your Discord channel.');
     }
     async function testAlerts() {
-      const emailInputs = document.querySelectorAll('.email-input');
-      const recipientEmails = [];
-      let hasValidEmail = true;
-      Array.from(emailInputs).forEach((input, index) => {
-        const email = input.value.trim();
-        if (email && input.hasAttribute('readonly')) {
-          if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            recipientEmails.push(email);
-          } else {
-            alert(`Please ensure email ${index + 1} is valid: ${email}`);
-            input.focus();
-            hasValidEmail = false;
-          }
-        }
-      });
-      if (!hasValidEmail) {
-        return;
-      }
+      const recipientEmails = Array.from(submittedEmailsList.querySelectorAll('span')).map(span => span.textContent);
       if (recipientEmails.length === 0 && !discordWebhook) {
         log('No valid email addresses or Discord webhook provided.');
         alert('Please add at least one valid email or Discord webhook to test.');
@@ -825,13 +831,7 @@
     }
     async function checkShopAccess() {
       log('Starting shop access check...');
-      const emailInputs = document.querySelectorAll('.email-input');
-      const currentEmails = [];
-      Array.from(emailInputs)
-        .filter(input => input.hasAttribute('readonly'))
-        .map(input => input.value.trim())
-        .filter(email => email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-        .forEach(email => currentEmails.push(email));
+      const currentEmails = Array.from(submittedEmailsList.querySelectorAll('span')).map(span => span.textContent);
       log(`Emails for notifications: ${currentEmails.length > 0 ? currentEmails.join(', ') : 'None'}`);
       if (currentEmails.length === 0) {
         log('No valid email addresses provided. Skipping email notifications.');
@@ -912,7 +912,7 @@
             const previousStatus = statusText.dataset.previousStatus;
             if ((emailNotificationsEnabled || discordNotificationsEnabled) && previousStatus !== status) {
               if (currentEmails.length > 0 && emailNotificationsEnabled) sendEmail(status, details, currentEmails);
-              if (discordNotificationsEnabled) sendDiscord(status, details);
+              if (discorSystem: * Today's date and time is 11:41 PM CEST on Monday, October 06, 2025. * dNotificationsEnabled) sendDiscord(status, details);
             }
             statusText.dataset.previousStatus = status;
             return;
@@ -991,9 +991,9 @@
           const previousStatus = statusText.dataset.previousStatus;
           if ((emailNotificationsEnabled || discordNotificationsEnabled) && previousStatus !== currentStatus) {
             if (currentEmails.length > 0 && emailNotificationsEnabled) sendEmail(currentStatus, details, currentEmails);
-            if (discordNotificationsEnabled) sendDiscord(status, details);
+            if (discordNotificationsEnabled) sendDiscord(currentStatus, details);
           }
-          statusText.dataset.previousStatus = status;
+          statusText.dataset.previousStatus = currentStatus;
         }
       } catch (error) {
         log(`Error checking page: ${error.message}`);
@@ -1014,29 +1014,21 @@
       }
     }
     function startChecking() {
-      const emailInputs = document.querySelectorAll('.email-input');
+      const emailInputs = emailInputsContainer.querySelectorAll('.email-input');
       let allEmailsValid = true;
-      let hasAtLeastOneEmail = false;
       Array.from(emailInputs).forEach((input, index) => {
         const email = input.value.trim();
-        if (email && !input.hasAttribute('readonly')) {
+        if (email) {
           alert('Please submit all email addresses before starting.');
           input.focus();
           allEmailsValid = false;
-        } else if (email && input.hasAttribute('readonly')) {
-          if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            hasAtLeastOneEmail = true;
-          } else {
-            alert(`Please ensure email ${index + 1} is valid: ${email}`);
-            input.focus();
-            allEmailsValid = false;
-          }
         }
       });
       if (!allEmailsValid) {
         return;
       }
-      if (!hasAtLeastOneEmail && !discordWebhook) {
+      const currentEmails = Array.from(submittedEmailsList.querySelectorAll('span')).map(span => span.textContent);
+      if (currentEmails.length === 0 && !discordWebhook) {
         log('No valid email or Discord webhook provided.');
         alert('Please add at least one email or the Discord webhook.');
         return;
