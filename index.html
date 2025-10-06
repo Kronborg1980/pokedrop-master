@@ -116,7 +116,7 @@
       font-weight: 600;
       transition: background-color 0.3s ease, transform 0.2s ease;
       letter-spacing: 0.05em;
-      color: white; /* Ensure all main buttons have white text */
+      color: white; 
       text-shadow: 0 1px 1px rgba(0,0,0,0.1);
     }
     button:hover { transform: translateY(-2px); }
@@ -133,7 +133,7 @@
     .input-group input {
       flex-grow: 1;
       margin-right: 0.5rem;
-      /* Removed w-full class from HTML, letting flex handle width */
+      /* Crucial fix: No width property here, letting flex manage it. */
     }
     /* Buttons inside the group must be fixed size */
     .input-group .remove-button,
@@ -148,7 +148,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 0.5rem 0.75rem; /* Set button padding */
+      padding: 0.5rem 0.75rem; 
     }
     .input-group .remove-button { background-color: #ef4444; }
     .input-group .remove-button:hover { background-color: #dc2626; transform: none; }
@@ -162,7 +162,7 @@
     /* Toggle Button Consistency */
     .toggle-button {
         color: white;
-        height: 2.5rem; /* Fixed height for consistency */
+        height: 2.5rem; 
     }
     .toggle-button.active { background-color: #10b981; }
     .toggle-button.active:hover { background-color: #059669; }
@@ -224,7 +224,7 @@
       <label class="block text-sm text-gray-600 mb-1">Emails for alerts:</label>
       <div class="input-group">
         <input type="email" value="kronborgnielsen@gmail.com" class="border border-gray-300 rounded email-input" readonly required>
-              </div>
+      </div>
     </div>
     <button id="addEmailButton" class="w-full add-button mb-4">Add Another Email</button>
 
