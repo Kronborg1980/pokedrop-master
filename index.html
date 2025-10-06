@@ -206,42 +206,48 @@
     .submitted-emails {
       margin-top: 0.5rem;
       padding: 1rem;
-      background: rgba(0, 255, 255, 0.1);
-      border: 1px solid #00ffff;
+      background: rgba(0, 255, 255, 0.15); /* Slightly brighter background for visibility */
+      border: 2px solid #00ffff; /* Stronger border */
       border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.4); /* Stronger glow */
+      min-height: 100px; /* Ensure container is visible even when empty */
     }
     .submitted-emails-header {
-      font-size: 0.875rem;
+      font-size: 1rem; /* Slightly larger for prominence */
       font-weight: 600;
       color: #00ffff;
       text-shadow: 0 0 5px #00ffff;
       margin-bottom: 0.75rem;
       text-align: left;
     }
+    .submitted-emails ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
     .submitted-emails li {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.5rem 1rem;
+      padding: 0.75rem 1rem; /* Increased padding */
       margin-bottom: 0.5rem;
-      background: rgba(26, 26, 46, 0.7);
+      background: rgba(26, 26, 46, 0.8); /* Slightly more opaque background */
       border-radius: 6px;
-      box-shadow: 0 0 5px rgba(0, 255, 255, 0.2);
-      font-size: 0.9rem; /* Increased font size for better visibility */
+      box-shadow: 0 0 8px rgba(0, 255, 255, 0.3); /* Enhanced glow */
+      font-size: 0.95rem; /* Larger font for better readability */
       color: #ffffff;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
       animation: fadeIn 0.3s ease-in;
+      word-break: break-word; /* Allow long emails to wrap */
     }
     .submitted-emails li:hover {
       transform: translateY(-2px);
-      box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+      box-shadow: 0 0 12px rgba(0, 255, 255, 0.6);
     }
     .submitted-emails li span {
       flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      color: #e0ffff; /* Lighter color for better contrast */
+      margin-right: 0.5rem; /* Space between email and button */
     }
     .submitted-emails button {
       padding: 0.25rem 0.75rem;
@@ -263,6 +269,10 @@
       background: rgba(0, 255, 255, 0.1);
       border-radius: 4px;
       box-shadow: 0 0 5px rgba(0, 255, 255, 0.2);
+      display: none; /* Hidden by default */
+    }
+    .no-emails-message.show {
+      display: block; /* Show when no emails */
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
@@ -378,8 +388,8 @@
       <div class="submitted-emails">
         <div class="submitted-emails-header">Submitted Emails</div>
         <ul id="submittedEmailsList"></ul>
+        <div id="noEmailsMessage" class="no-emails-message show">No emails submitted</div>
       </div>
-      <button id="addEmailButton" class="add-email-button mt-2 bg-green-500 text-white">Add Another Email</button>
       <div id="emailFeedback" class="status-feedback"></div>
     </div>
     <div class="section">
@@ -483,7 +493,6 @@
     const beepSound = document.getElementById('beepSound');
     const runTime = document.getElementById('runTime');
     const emailInputsContainer = document.getElementById('emailInputsContainer');
-    const addEmailButton = document.getElementById('addEmailButton');
     const submittedEmailsList = document.getElementById('submittedEmailsList');
     const emailFeedback = document.getElementById('emailFeedback');
     const webhookFeedback = document.getElementById('webhookFeedback');
@@ -491,6 +500,7 @@
     const frequencyValue = document.getElementById('frequencyValue');
     const liveLog = document.getElementById('liveLog');
     const autoRedirectCheckbox = document.getElementById('autoRedirect');
+    const noEmailsMessage = document.getElementById('noEmailsMessage');
     let intervalId = null;
     let startTime = null;
     let timerInterval = null;
@@ -508,6 +518,9 @@
       console.log(message);
     }
     log('System initialized - Ready for Pokémon Center monitoring!');
+    function updateNoEmailsMessage() {
+      noEmailsMessage.classList.toggle('show', submittedEmailsList.children.length === 0);
+    }
     emailToggleButton.addEventListener('click', () => {
       emailNotificationsEnabled = !emailNotificationsEnabled;
       if (emailNotificationsEnabled) {
@@ -567,42 +580,6 @@
         feedbackElement.classList.remove('show');
       }, 2000);
     }
-    function addEmailInputField() {
-      const emailInputGroup = document.createElement('div');
-      emailInputGroup.className = 'email-input-group';
-      emailInputGroup.innerHTML = `
-        <input type="email" placeholder="name@example.com" class="email-input" required>
-        <button type="button" class="submit-email-button bg-green-500 text-white">Submit Email</button>
-      `;
-      emailInputsContainer.appendChild(emailInputGroup);
-      const submitButton = emailInputGroup.querySelector('.submit-email-button');
-      const emailInput = emailInputGroup.querySelector('.email-input');
-      submitButton.addEventListener('click', function() {
-        const email = emailInput.value.trim();
-        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-          alert('Please enter a valid email address.');
-          emailInput.focus();
-          return;
-        }
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <span>${email}</span>
-          <button type="button" class="remove-email-button bg-red-500 text-white">Remove</button>
-        `;
-        submittedEmailsList.appendChild(li);
-        emailInput.value = '';
-        showFeedback(emailFeedback, 'Email submitted.');
-        log(`Email submitted: ${email}`);
-        const removeButton = li.querySelector('.remove-email-button');
-        removeButton.addEventListener('click', function() {
-          li.remove();
-          showFeedback(emailFeedback, 'Email removed.');
-          log(`Email removed: ${email}`);
-        });
-      });
-      log('New email input field added.');
-      showFeedback(emailFeedback, 'Email field added.');
-    }
     document.addEventListener('DOMContentLoaded', () => {
       const initialInputGroup = emailInputsContainer.querySelector('.email-input-group');
       const initialInput = initialInputGroup.querySelector('.email-input');
@@ -621,17 +598,19 @@
         `;
         submittedEmailsList.appendChild(li);
         initialInput.value = '';
+        noEmailsMessage.classList.remove('show');
         showFeedback(emailFeedback, 'Email submitted.');
         log(`Email submitted: ${email}`);
         const removeButton = li.querySelector('.remove-email-button');
         removeButton.addEventListener('click', function() {
           li.remove();
+          updateNoEmailsMessage();
           showFeedback(emailFeedback, 'Email removed.');
           log(`Email removed: ${email}`);
         });
       });
+      updateNoEmailsMessage();
     });
-    addEmailButton.addEventListener('click', addEmailInputField);
     function formatDuration(ms) {
       const seconds = Math.floor(ms / 1000);
       const hours = Math.floor(seconds / 3600);
