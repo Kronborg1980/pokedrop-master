@@ -252,6 +252,16 @@
     .status-feedback.show {
       opacity: 1;
     }
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .button-group button {
+      flex: 1;
+      min-width: 120px;
+    }
     @media (max-height: 600px) {
       .main-container {
         min-height: 90vh;
@@ -319,18 +329,22 @@
         <label for="autoRedirect" class="text-sm">Yes, redirect to Pokémon Center if queue detected</label>
       </div>
     </div>
+    <div class="button-group">
+      <button id="testButton" class="test-button bg-yellow-500 text-black">Test Single Check</button>
+      <button id="startButton" class="bg-blue-500 text-white">Start Checking</button>
+      <button id="stopButton" class="bg-red-500 text-white hidden">Stop Checking</button>
+      <button id="emailToggleButton" class="email-toggle-button active bg-green-500 text-white">Deactivate Email Alerts</button>
+      <button id="webhookToggleButton" class="webhook-toggle-button inactive bg-gray-500 text-white hidden">Activate Discord Alerts</button>
+      <button id="testEmailButton" class="bg-green-500 text-white">Test Email</button>
+      <button id="testDiscordButton" class="bg-purple-500 text-white">Test Discord</button>
+      <button id="testAlertsButton" class="bg-green-500 text-white">Test All Alerts</button>
+    </div>
     <div class="status-display">
       <p><strong>Status:</strong> <span id="statusText">Waiting...</span></p>
       <p><strong>Last checked:</strong> <span id="lastChecked">Never</span></p>
       <p><strong>Running for:</strong> <span id="runTime">0h 0m 0s</span></p>
       <p><strong>Details:</strong> <span id="statusDetails">None</span></p>
     </div>
-    <button id="testButton" class="test-button mb-2 bg-yellow-500 text-black">Test Single Check</button>
-    <button id="startButton" class="bg-blue-500 text-white mb-2">Start Checking</button>
-    <button id="stopButton" class="bg-red-500 text-white mb-2 hidden">Stop Checking</button>
-    <button id="emailToggleButton" class="email-toggle-button active bg-green-500 text-white mb-2">Deactivate Email Alerts</button>
-    <button id="webhookToggleButton" class="webhook-toggle-button inactive bg-gray-500 text-white mb-2 hidden">Activate Discord Alerts</button>
-    <button id="testAlertsButton" class="bg-green-500 text-white">Test Alerts</button>
     <div id="liveLog" class="live-log">
       <p>[Startup] Pokémon Center Shop Access Checker initialized! 🚀</p>
     </div>
@@ -389,6 +403,8 @@
     const startButton = document.getElementById('startButton');
     const stopButton = document.getElementById('stopButton');
     const testButton = document.getElementById('testButton');
+    const testEmailButton = document.getElementById('testEmailButton');
+    const testDiscordButton = document.getElementById('testDiscordButton');
     const testAlertsButton = document.getElementById('testAlertsButton');
     const emailToggleButton = document.getElementById('emailToggleButton');
     const webhookToggleButton = document.getElementById('webhookToggleButton');
@@ -645,7 +661,7 @@
         return;
       }
       const embedMessage = {
-        content: '@everyone', // Added @everyone ping
+        content: '@everyone', // Ensure @everyone ping
         embeds: [{
           title: '🌀 Pokémon Center Shop Alert! 🌀',
           description: `**Status:** ${status}\n**Details:** ${details}\n**Timestamp:** ${new Date().toLocaleString()}\n**Checked URL:** ${details.includes('checked') ? details.match(/checked (.*?)(\.|,|$)/)?.[1] || 'N/A' : 'N/A'}\n**Response Length:** ${details.includes('chars') ? details.match(/(\d+) chars/)?.[1] || 'N/A' : 'N/A'}`,
@@ -712,7 +728,7 @@
       emailToggleButton.classList.add('inactive');
       showFeedback(emailFeedback, 'Email notifications deactivated after sending alert.');
     }
-    async function testAlerts() {
+    async function testEmail() {
       const emailInputs = document.querySelectorAll('.email-input');
       const recipientEmails = [];
       let hasValidEmail = true;
@@ -732,10 +748,65 @@
         return;
       }
       if (recipientEmails.length === 0) {
-        log('No valid email addresses provided.');
+        log('No valid email addresses provided for testing.');
+        alert('Please add and submit at least one valid email address to test.');
+        return;
       }
+      if (!emailNotificationsEnabled) {
+        log('Email notifications are disabled.');
+        alert('Please activate email notifications to test.');
+        return;
+      }
+      if (typeof emailjs === 'undefined') {
+        alert('Email functionality is unavailable. Please check your network connection and try again.');
+        return;
+      }
+      const testStatus = 'Test Email Alert';
+      const testDetails = 'This is a test email alert from Pokémon Center Shop Access Checker. 🚀';
+      log('Sending test email alert...');
+      sendEmail(testStatus, testDetails, recipientEmails);
+      alert('Test email(s) sent! Check your inbox(es) or spam/junk folder.');
+    }
+    async function testDiscord() {
       if (!discordWebhook) {
         log('No Discord webhook added.');
+        alert('Please add a Discord webhook to test.');
+        return;
+      }
+      if (!discordNotificationsEnabled) {
+        log('Discord notifications are disabled.');
+        alert('Please activate Discord notifications to test.');
+        return;
+      }
+      const testStatus = 'Test Discord Alert';
+      const testDetails = 'This is a test Discord alert from Pokémon Center Shop Access Checker. 🚀';
+      log('Sending test Discord alert...');
+      await sendDiscord(testStatus, testDetails);
+      alert('Test Discord alert sent! Check your Discord channel.');
+    }
+    async function testAlerts() {
+      const emailInputs = document.querySelectorAll('.email-input');
+      const recipientEmails = [];
+      let hasValidEmail = true;
+      Array.from(emailInputs).forEach((input, index) => {
+        const email = input.value.trim();
+        if (email && input.hasAttribute('readonly')) {
+          if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            recipientEmails.push(email);
+          } else {
+            alert(`Please ensure email ${index + 1} is valid: ${email}`);
+            input.focus();
+            hasValidEmail = false;
+          }
+        }
+      });
+      if (!hasValidEmail) {
+        return;
+      }
+      if (recipientEmails.length === 0 && !discordWebhook) {
+        log('No valid email addresses or Discord webhook provided.');
+        alert('Please add at least one valid email or Discord webhook to test.');
+        return;
       }
       if (!emailNotificationsEnabled && !discordNotificationsEnabled) {
         alert('Both email and Discord notifications are disabled. Please activate at least one to test.');
@@ -1025,6 +1096,8 @@
       log('Manual single check initiated!');
       checkShopAccess();
     });
+    testEmailButton.addEventListener('click', testEmail);
+    testDiscordButton.addEventListener('click', testDiscord);
     testAlertsButton.addEventListener('click', testAlerts);
   </script>
 </body>
