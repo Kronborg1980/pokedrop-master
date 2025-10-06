@@ -1,10 +1,11 @@
-const BROWSERLESS_TOKEN = '2TBee3s4m5MFrBQd32cf338178a9cb1981d3fd9f4f7e405ef'; // Your magical browser key
+const ZENROWS_API_KEY = '28ac6cbce58a2db5577fbfdd3b3325c6a01d198b'; // Your ZenRows API key
 const DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1418654823745716436/vuMKu1s095Cq3BfU06OF_Z_mwxG39zHppHJ3c4BX5X38WuJFWPGhIZdopWTEEXlophiN'; // Chatot’s singing spot
 const EMAILJS_USER_ID = '8w7eu6mrg3lRl6ta3'; // Delibird’s ID
 const EMAILJS_SERVICE_ID = 'service_ahqdaj5'; // Delibird’s service
 const EMAILJS_TEMPLATE_ID = 'template_whhvnra'; // Delibird’s letter template
 const CAPSOLVER_KEY = 'CAP-E20E90A1238FE858B9CCCFC6F53DC436C385BF7089101FD86F5EEA47FC43CA95'; // Machamp’s punching power
-const CHECK_URLS = ['https://www.pokemoncenter.com/', 'https://www.pokemoncenter.com/category/trading-card-game']; // Places to check for queues
+const CHECK_URLS = ['https://www.pokemoncenter.com/', 'https://www.pokemoncenter.com/category/trading-card-game']; // Places to check
+const ZENROWS_ENDPOINT = 'https://api.zenrows.com/v1/'; // ZenRows API
 const NOTIFICATION_SETTINGS = {
     queueDetected: true, // Alert for queues
     queueSoon: true, // Alert for possible queues
@@ -18,7 +19,7 @@ const SECRET_KEY = 'skaplask'; // Secret code for Pikachu’s diary
 
 // Special headers to stop Team Rocket (CORS errors)
 const corsHeaders = {
-    'Access-Control-Allow-Origin': 'https://kronborg1980.github.io', // Only let your Pokédex talk to Pikachu
+    'Access-Control-Allow-Origin': 'https://kronborg1980.github.io', // Only let your Pokédex talk
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Cache-Control',
     'Access-Control-Max-Age': '86400'
@@ -44,11 +45,12 @@ async function sendDiscordNotification(title, message, color = 0xFFD700) {
         return;
     }
     try {
-        await fetch(DISCORD_WEBHOOK, {
+        const response = await fetch(DISCORD_WEBHOOK, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ embeds: [{ title, description: message, color, footer: { text: 'Queue Hunter Pro' } }] })
         });
+        if (!response.ok) throw new Error(`Discord webhook failed: ${response.statusText}`);
         addLog(`Chatot sang: ${title}`);
     } catch (e) {
         addLog(`Chatot error: ${e.message}`);
@@ -65,7 +67,7 @@ async function sendEmailNotification(status, details) {
     let successCount = 0;
     for (const email of EMAILS) {
         try {
-            await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+            const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -75,231 +77,11 @@ async function sendEmailNotification(status, details) {
                     template_params: { status, details: fancyDetails, timestamp, to_email: email }
                 })
             });
+            if (!response.ok) throw new Error(`EmailJS failed: ${response.statusText}`);
             successCount++;
             addLog(`Delibird delivered to ${email}`);
         } catch (e) {
             addLog(`Delibird error for ${email}: ${e.message}`);
         }
     }
-    addLog(`Delibird result: ${successCount}/${EMAILS.length} sent`);
-}
-
-async function solveCaptcha(sessionId, url) {
-    try {
-        const response = await fetch('https://api.capsolver.com/createTask', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                clientKey: CAPSOLVER_KEY,
-                task: { type: 'HCaptchaTaskProxyLess', websiteURL: url, websiteKey: '00000000-0000-0000-0000-000000000000' }
-            })
-        });
-        const { taskId } = await response.json();
-        let solution;
-        while (!solution) {
-            await new Promise(resolve => setTimeout(resolve, 5000));
-            const status = await fetch('https://api.capsolver.com/getTaskResult', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ clientKey: CAPSOLVER_KEY, taskId })
-            });
-            const result = await status.json();
-            if (result.status === 'ready') solution = result.solution.gRecaptchaResponse;
-        }
-        await fetch(`https://chrome.browserless.io/webdriver?token=${BROWSERLESS_TOKEN}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                sessionId,
-                cmd: 'Runtime.evaluate',
-                params: { expression: `document.querySelector('[data-hcaptcha-response]').value = "${solution}"; document.querySelector('form').submit();` }
-            })
-        });
-        addLog('Machamp punched CAPTCHA!');
-        return true;
-    } catch (e) {
-        addLog(`Machamp missed: ${e.message}`);
-        return false;
-    }
-}
-
-async function handleStatus(request) {
-    const url = new URL(request.url);
-    const key = url.searchParams.get('key');
-    if (key !== SECRET_KEY) {
-        return new Response(JSON.stringify({ error: 'Wrong secret code!' }), {
-            status: 403,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-    }
-    return new Response(JSON.stringify({
-        running: true,
-        lastCheck: lastCheck || new Date().toISOString(),
-        status: 'Pikachu is battling!'
-    }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-}
-
-async function handleLogs(request) {
-    const url = new URL(request.url);
-    const key = url.searchParams.get('key');
-    if (key !== SECRET_KEY) {
-        return new Response(JSON.stringify({ error: 'Wrong secret code!' }), {
-            status: 403,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-    }
-    return new Response(JSON.stringify({ logs: workerLogs }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-}
-
-addEventListener('fetch', event => {
-    const request = event.request;
-    const url = new URL(request.url);
-    if (request.method === 'OPTIONS') {
-        event.respondWith(handleOptions());
-        return;
-    }
-    if (url.pathname === '/status') {
-        event.respondWith(handleStatus(request));
-    } else if (url.pathname === '/logs') {
-        event.respondWith(handleLogs(request));
-    } else {
-        event.respondWith(new Response('Queue Hunter is running! Pikachu says hi!', {
-            status: 200,
-            headers: { ...corsHeaders, 'Content-Type': 'text/plain' }
-        }));
-    }
-});
-
-addEventListener('scheduled', event => {
-    event.waitUntil(checkSite());
-});
-
-async function checkSite() {
-    try {
-        lastCheck = new Date().toISOString();
-        addLog('Pikachu is checking the Pokémon Center!');
-        const browserlessUrl = `wss://chrome.browserless.io?token=${BROWSERLESS_TOKEN}`;
-        const response = await fetch('https://chrome.browserless.io/webdriver', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                cmd: 'session.create',
-                params: {
-                    capabilities: {
-                        browserName: 'chrome',
-                        'b:puppeteer': { headless: true }
-                    }
-                }
-            })
-        });
-        const { sessionId } = await response.json();
-        const ws = new WebSocket(browserlessUrl);
-        await new Promise(resolve => ws.on('open', resolve));
-
-        for (const url of CHECK_URLS) {
-            await ws.send(JSON.stringify({
-                id: 1,
-                method: 'Page.navigate',
-                params: { url }
-            }));
-            await new Promise(resolve => setTimeout(resolve, 10000));
-            const contentResponse = await fetch(`https://chrome.browserless.io/content?token=${BROWSERLESS_TOKEN}&sessionId=${sessionId}`);
-            const text = await contentResponse.text();
-            let status, details;
-            if (/hcaptcha|captcha|verify you are not a bot/i.test(text) && !/add to cart|shop now/i.test(text)) {
-                status = 'CAPTCHA Detected';
-                details = `CAPTCHA found at ${url}! Machamp is punching...`;
-                addLog(`${status}: ${details}`);
-                if (NOTIFICATION_SETTINGS.captchaDetected) {
-                    await sendDiscordNotification(status, details, 0x9370DB);
-                    await sendEmailNotification(status, details);
-                }
-                const solved = await solveCaptcha(sessionId, url);
-                if (solved) {
-                    await new Promise(resolve => setTimeout(resolve, 5000));
-                    const newContent = await fetch(`https://chrome.browserless.io/content?token=${BROWSERLESS_TOKEN}&sessionId=${sessionId}`);
-                    const newText = await newContent.text();
-                    if (!/hcaptcha|captcha/i.test(newText)) {
-                        status = 'CAPTCHA Solved';
-                        details = `Machamp won at ${url}! Checking again...`;
-                        addLog(`${status}: ${details}`);
-                        await sendDiscordNotification(status, details, 0x00FF00);
-                        await sendEmailNotification(status, details);
-                        if (/queue-it|waiting room|queue\s*position/i.test(newText)) {
-                            const queueLength = newText.match(/(\d+)\s*users?\s*ahead|queue\s*position\s*[:=]?\s*(\d+)|(\d+)\s*in\s*queue/i)?.[1] || 'unknown';
-                            status = 'Queue Detected';
-                            details = `Queue at ${url}! Length: ${queueLength}.`;
-                            if (NOTIFICATION_SETTINGS.queueDetected) {
-                                await sendDiscordNotification(status, details, 0xFF0000);
-                                await sendEmailNotification(status, details);
-                            }
-                        } else if (/pokemoncenter\.com(\/|$|\/category\/)/i.test(url)) {
-                            if (/add to cart|shop|products/i.test(newText)) {
-                                status = 'Shop Accessible';
-                                details = `Reached shop at ${url}!`;
-                            } else {
-                                status = 'Queue Soon or Active';
-                                details = `At ${url}, but no shop yet.`;
-                                if (NOTIFICATION_SETTINGS.queueSoon) {
-                                    await sendDiscordNotification(status, details, 0xFFA500);
-                                    await sendEmailNotification(status, details);
-                                }
-                            }
-                            addLog(`${status}: ${details}`);
-                        } else {
-                            status = 'Possible Queue';
-                            details = `Weird page at ${url}.`;
-                            if (NOTIFICATION_SETTINGS.possibleBotBlock) {
-                                await sendDiscordNotification(status, details, 0x9370DB);
-                                await sendEmailNotification(status, details);
-                            }
-                            addLog(`${status}: ${details}`);
-                        }
-                    }
-                } else {
-                    status = 'CAPTCHA Failed';
-                    details = `Machamp missed at ${url}! Manual help needed.`;
-                    addLog(`${status}: ${details}`);
-                    await sendDiscordNotification(status, details, 0x9370DB);
-                    await sendEmailNotification(status, details);
-                }
-            } else if (/queue-it|waiting room|queue\s*position/i.test(text)) {
-                const queueLength = text.match(/(\d+)\s*users?\s*ahead|queue\s*position\s*[:=]?\s*(\d+)|(\d+)\s*in\s*queue/i)?.[1] || 'unknown';
-                status = 'Queue Detected';
-                details = `Queue at ${url}! Length: ${queueLength}.`;
-                addLog(`${status}: ${details}`);
-                if (NOTIFICATION_SETTINGS.queueDetected) {
-                    await sendDiscordNotification(status, details, 0xFF0000);
-                    await sendEmailNotification(status, details);
-                }
-            } else if (/pokemoncenter\.com(\/|$|\/category\/)/i.test(url)) {
-                if (/add to cart|shop|products/i.test(text)) {
-                    status = 'Shop Accessible';
-                    details = `Reached shop at ${url}!`;
-                } else {
-                    status = 'Queue Soon or Active';
-                    details = `At ${url}, but no shop yet.`;
-                    if (NOTIFICATION_SETTINGS.queueSoon) {
-                        await sendDiscordNotification(status, details, 0xFFA500);
-                        await sendEmailNotification(status, details);
-                    }
-                }
-                addLog(`${status}: ${details}`);
-            } else {
-                status = 'Possible Queue';
-                details = `Weird page at ${url}.`;
-                if (NOTIFICATION_SETTINGS.possibleBotBlock) {
-                    await sendDiscordNotification(status, details, 0x9370DB);
-                    await sendEmailNotification(status, details);
-                }
-                addLog(`${status}: ${details}`);
-            }
-        }
-        await fetch(`https://chrome.browserless.io/session/${sessionId}?token=${BROWSERLESS_TOKEN}`, { method: 'DELETE' });
-        ws.close();
-    } catch (error) {
-        addLog(`Pikachu fainted: ${error.message}`);
-        await sendDiscordNotification('Check Error', `Pikachu failed: ${error.message}`, 0xFF0000);
-        await sendEmailNotification('Check Error', `Pikachu failed: ${error.message}`);
-    }
-}
+    addLog(`Delibird result: ${successCount}/${EMAILS
