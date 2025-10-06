@@ -3,251 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Queue Hunter Pro – Ultimate Pokémon Center Tracker</title>
+    <title>Queue Hunter Pro – Pokémon Center</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #1e1e2f, #0d0d15);
-            color: #fff;
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            box-sizing: border-box;
-            position: relative;
-            overflow: auto;
-        }
-        .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            max-width: 450px;
-            position: relative;
-            z-index: 10;
-        }
-        .pokedex {
-            background: linear-gradient(145deg, rgba(30, 30, 50, 0.9), rgba(0, 0, 20, 0.9));
-            border: 3px solid #FFD700;
-            border-radius: 15px;
-            padding: 2rem;
-            width: 100%;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(8px);
-            z-index: 10;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-        .header img {
-            width: 100px;
-            filter: drop-shadow(0 0 12px #FFD700);
-            margin-bottom: 0.5rem;
-        }
-        .header h1 {
-            font-family: 'Orbitron', sans-serif;
-            color: #FFD700;
-            font-size: 1.8rem;
-            text-shadow: 1px 1px 3px #000;
-            margin: 0;
-        }
-        .header p {
-            color: #fff;
-            font-size: 0.9rem;
-            text-shadow: 1px 1px 2px #000;
-            margin: 0.5rem 0 0;
-        }
-        .section {
-            margin-bottom: 1.2rem;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            border: 1px solid #FFD700;
-            backdrop-filter: blur(5px);
-        }
-        .section label {
-            display: block;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.8rem;
-            color: #fff;
-            margin-bottom: 0.5rem;
-        }
-        input, textarea {
-            border: 1px solid #FFD700;
-            border-radius: 8px;
-            padding: 0.6rem;
-            width: 100%;
-            box-sizing: border-box;
-            font-size: 0.8rem;
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            font-family: 'Roboto', sans-serif;
-            transition: all 0.3s;
-        }
-        input:focus, textarea:focus {
-            border-color: #FFB300;
-            box-shadow: 0 0 8px #FFD700;
-            outline: none;
-        }
-        .button-group {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-top: 0.75rem;
-        }
-        .input-with-button {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-        .input-with-button input {
-            flex-grow: 1;
-        }
-        button {
-            background: linear-gradient(145deg, #FFD700, #FFB300);
-            color: #1A1A1A;
-            border: 1px solid #1A1A1A;
-            padding: 0.8rem 1.5rem;
-            border-radius: 20px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-        button:active {
-            transform: translateY(1px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-        }
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
-        }
-        button:disabled {
-            background: #666;
-            color: #999;
-            cursor: not-allowed;
-        }
-        .status-banner {
-            margin-bottom: 1.2rem;
-            padding: 1rem;
-            width: 100%;
-            box-sizing: border-box;
-            background: rgba(0, 0, 0, 0.7);
-            border: 2px solid #FFD700;
-            border-radius: 10px;
-            text-align: center;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-shadow: 0 0 8px #FFD700;
-        }
-        .status-pokedex {
-            background: linear-gradient(145deg, #3F51B5, #1A237E);
-            color: #FFF;
-            padding: 1.2rem;
-            border-radius: 10px;
-            text-shadow: 1px 1px 2px #000;
-            text-align: left;
-            border: 1px solid #FFD700;
-            max-height: 250px;
-            overflow-y: auto;
-        }
-        .status-pokedex p {
-            margin: 0.4rem 0;
-            font-size: 0.8rem;
-        }
+        body { font-family: 'Roboto', sans-serif; background: linear-gradient(135deg, #1e1e2f, #0d0d15); color: #fff; margin: 0; padding: 1rem; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
+        .pokedex { background: rgba(30, 30, 50, 0.9); border: 3px solid #FFD700; border-radius: 15px; padding: 2rem; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); }
+        .header { text-align: center; margin-bottom: 1.5rem; }
+        .header img { width: 100px; filter: drop-shadow(0 0 12px #FFD700); }
+        .header h1 { font-family: 'Orbitron', sans-serif; color: #FFD700; font-size: 1.8rem; }
+        .header p { font-size: 0.9rem; }
+        .section { margin-bottom: 1.2rem; padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 10px; border: 1px solid #FFD700; }
+        label { font-family: 'Orbitron', sans-serif; font-size: 0.8rem; margin-bottom: 0.5rem; display: block; }
+        input, textarea { border: 1px solid #FFD700; border-radius: 8px; padding: 0.6rem; width: 100%; background: rgba(255, 255, 255, 0.1); color: #fff; }
+        input:focus, textarea:focus { border-color: #FFB300; box-shadow: 0 0 8px #FFD700; outline: none; }
+        .button-group { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; margin-top: 0.75rem; }
+        .input-with-button { display: flex; gap: 0.5rem; align-items: center; }
+        button { background: linear-gradient(145deg, #FFD700, #FFB300); color: #1A1A1A; border: 1px solid #1A1A1A; padding: 0.8rem 1.5rem; border-radius: 20px; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; cursor: pointer; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4); }
+        button:disabled { background: #666; color: #999; cursor: not-allowed; }
+        .status-banner { padding: 1rem; background: rgba(0, 0, 0, 0.7); border: 2px solid #FFD700; border-radius: 10px; text-align: center; font-family: 'Orbitron', sans-serif; font-size: 1.5rem; }
+        .status-pokedex { background: linear-gradient(145deg, #3F51B5, #1A237E); padding: 1.2rem; border-radius: 10px; border: 1px solid #FFD700; max-height: 250px; overflow-y: auto; }
+        .status-pokedex p { margin: 0.4rem 0; font-size: 0.8rem; }
+        .log-container { max-height: 150px; overflow-y: auto; font-size: 0.75rem; background: rgba(255, 255, 255, 0.05); padding: 0.7rem; border-radius: 8px; margin-top: 0.7rem; border: 1px solid #FFD700; }
         .status-banner.green { color: #00FF00; border-color: #00FF00; }
         .status-banner.red { color: #FF0000; border-color: #FF0000; }
         .status-banner.yellow { color: #FFD700; border-color: #FFD700; }
         .status-banner.gray { color: #999; border-color: #999; }
         .status-banner.orange { color: #FFA500; border-color: #FFA500; }
         .status-banner.purple { color: #9370DB; border-color: #9370DB; }
-        .log-container {
-            max-height: 150px;
-            overflow-y: auto;
-            font-size: 0.75rem;
-            text-align: left;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 0.7rem;
-            border-radius: 8px;
-            margin-top: 0.7rem;
-            border: 1px solid #FFD700;
-            color: #FFF;
-        }
-        .alert-zap {
-            animation: zap 0.3s ease infinite;
-        }
-        @keyframes zap {
-            0%, 100% { border-color: #FFD700; box-shadow: 0 0 20px #FFD700; }
-            50% { border-color: #FFB300; box-shadow: 0 0 30px #FFB300; }
-        }
+        .alert-zap { animation: zap 0.3s ease infinite; }
+        @keyframes zap { 0%, 100% { border-color: #FFD700; box-shadow: 0 0 20px #FFD700; } 50% { border-color: #FFB300; box-shadow: 0 0 30px #FFB300; } }
         .hidden { display: none; }
         .grayed-out { background: #666 !important; color: #999 !important; border-color: #555 !important; cursor: not-allowed; }
-        .pokemon-decoration {
-            position: absolute;
-            width: 80px;
-            opacity: 0.3;
-            pointer-events: none;
-            z-index: 5;
-            filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.5));
-        }
+        .pokemon-decoration { position: absolute; width: 80px; opacity: 0.3; pointer-events: none; filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.5)); }
         #cubone { top: 10%; left: 5%; }
         #pinsir { top: 20%; right: 5%; }
         #gardevoir { bottom: 15%; left: 10%; }
         #suicune { bottom: 25%; right: 10%; }
         #charizard { top: 30%; left: 15%; }
         #vaporeon { bottom: 10%; right: 15%; }
-        .email-list {
-            margin-top: 0.5rem;
-            list-style: none;
-            padding: 0;
-        }
-        .email-list li {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 0.5rem;
-            border-radius: 5px;
-            margin-bottom: 0.5rem;
-        }
-        .email-list li button {
-            padding: 0.3rem 0.6rem;
-            font-size: 0.7rem;
-            background: linear-gradient(145deg, #FF4500, #FF0000);
-        }
-        .checkbox-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        .checkbox-group label {
-            display: flex;
-            align-items: center;
-            font-size: 0.8rem;
-        }
-        .checkbox-group input[type="checkbox"] {
-            width: auto;
-            margin-right: 0.5rem;
-        }
+        .email-list { margin-top: 0.5rem; list-style: none; padding: 0; }
+        .email-list li { display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.1); padding: 0.5rem; border-radius: 5px; margin-bottom: 0.5rem; }
+        .email-list li button { padding: 0.3rem 0.6rem; font-size: 0.7rem; background: linear-gradient(145deg, #FF4500, #FF0000); }
+        .checkbox-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .checkbox-group label { display: flex; align-items: center; font-size: 0.8rem; }
+        .checkbox-group input[type="checkbox"] { width: auto; margin-right: 0.5rem; }
     </style>
 </head>
 <body>
-    <div id="password-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e1e2f; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100;">
+    <div id="password-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e1e2f; display: flex; flex-direction: column; justify-content: center; align-items: center;">
         <div class="pokedex" style="text-align: center; padding: 2rem;">
             <h1>Enter Code</h1>
-            <p>You must enter the correct code to continue.</p>
-            <input type="password" id="accessCode" placeholder="Enter code" style="width: 80%; max-width: 300px; margin-top: 1rem;">
+            <p>Enter the code to unlock the tool.</p>
+            <input type="password" id="accessCode" placeholder="Enter code">
             <button onclick="checkAccessCode()">Unlock</button>
-            <p id="error-message" style="color: #FF0000; margin-top: 1rem; display: none;">Incorrect code. Please try again.</p>
+            <p id="error-message" style="color: #FF0000; margin-top: 1rem; display: none;">Wrong code. Try again.</p>
         </div>
     </div>
     <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/104.png" alt="Cubone" id="cubone" class="pokemon-decoration">
@@ -262,7 +74,7 @@
                 <div class="header">
                     <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/129.png" alt="Magikarp">
                     <h1>Queue Hunter Pro</h1>
-                    <p>Ultimate restock & queue hunter! Catch every restock, maximize profits.</p>
+                    <p>Catch Pokémon Center restocks!</p>
                 </div>
                 <div class="section">
                     <label>Discord Webhook URL:</label>
@@ -302,7 +114,7 @@
                     </div>
                 </div>
                 <div class="section">
-                    <label>Queue/Restock Alert Sound / Vibration:</label>
+                    <label>Alert Sound / Vibration:</label>
                     <div class="button-group">
                         <button id="alarmBtn" onclick="window.QueueHunter.toggleAlarm()">Activate Alarm</button>
                         <button onclick="window.QueueHunter.testAlarm()">Test Alarm</button>
@@ -313,7 +125,7 @@
                     <input type="range" id="freqSlider" min="0.1" max="30" step="0.1" value="5">
                     <label>Alert After: <span id="threshVal">2</span> fails</label>
                     <input type="range" id="threshSlider" min="1" max="5" value="2">
-                    <label>Monitor URLs (comma-separated, optional):</label>
+                    <label>Monitor URLs (optional, comma-separated):</label>
                     <textarea id="urlList" placeholder="https://www.pokemoncenter.com/product/..., https://www.pokemoncenter.com/..."></textarea>
                 </div>
                 <div class="section">
@@ -381,9 +193,7 @@
         let proxies = [
             'https://api.allorigins.win/get?url=',
             'https://corsproxy.io/?',
-            'https://thingproxy.freeboard.io/fetch/',
-            'https://cors.bridged.cc/',
-            'https://yacdn.org/proxy/'
+            'https://thingproxy.freeboard.io/fetch/'
         ];
         let blacklisted = new Set();
         let logEntries = [];
