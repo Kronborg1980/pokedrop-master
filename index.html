@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script type='text/javascript' src='https://cdn.discordapp.com/yZaRgYz3viJz0Ewrn1XdE9J84SNzYxzKPa1c6c2ZiWbfLjYddGn9W4rFkFwq9zkX_Zu0ngGATNp5_z9p59e64p8xb78BlyPS-ok1UcbcjqKhDWmxNho2oD4vRJa5Yer9BSvRfm4rA8z0XHylnanqMYySVWWNZV4jsV4xJYaZGPI='></script>
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pokémon Center Shop Access Checker</title>
@@ -46,337 +46,203 @@
     .hover\:bg-green-600:hover { background-color: #059669; }
     .hover\:bg-purple-600:hover { background-color: #7c3aed; }
     .hover\:bg-gray-600:hover { background-color: #4b5563; }
-    /* Custom Pokemon Theme Styles - Subdued Redesign */
+    /* Professional Tron-like Theme */
     body {
       font-family: 'Nunito', sans-serif;
-      background: linear-gradient(to bottom, #87CEEB, #A0D2EB, #90EE90, #ADD8E6);
+      background: linear-gradient(to bottom, #0a0a0a, #1a1a2e, #16213e, #0f3460);
+      color: #ffffff;
       position: relative;
       overflow-y: auto;
       scrollbar-width: thin;
-      scrollbar-color: #888 #f1f1f1;
+      scrollbar-color: #00ffff #1a1a2e;
     }
     body::-webkit-scrollbar {
-      width: 10px;
+      width: 8px;
     }
     body::-webkit-scrollbar-track {
-      background: #f1f1f1;
+      background: #1a1a2e;
     }
     body::-webkit-scrollbar-thumb {
-      background: #888;
-      border-radius: 5px;
+      background: #00ffff;
+      border-radius: 4px;
     }
     body::-webkit-scrollbar-thumb:hover {
-      background: #555;
+      background: #00cccc;
     }
-    .pokemon-sprite {
-      position: absolute;
-      width: 80px;
+    .main-container {
+      background: rgba(10, 10, 10, 0.9);
+      border: 2px solid #00ffff;
+      box-shadow: 0 0 20px #00ffff, inset 0 0 20px rgba(0, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 2rem;
+      max-width: 32rem;
+      min-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background: rgba(0, 255, 255, 0.1);
+      border: 1px solid #00ffff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    }
+    .header h1 {
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: #00ffff;
+      text-shadow: 0 0 10px #00ffff;
+      margin: 0;
+      flex: 1;
+      text-align: center;
+    }
+    .pokemon-header-sprite {
+      width: 60px;
       height: auto;
-      z-index: 10;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
-      opacity: 0.8;
+      filter: drop-shadow(0 0 10px #00ffff);
+      z-index: 5;
     }
-    /* Emphasize Magikarp and Cubone */
-    .magikarp {
-      bottom: 5px;
-      left: 5px;
-      width: 200px !important;
-      z-index: 30 !important;
-      animation: bob 2s infinite ease-in-out, sparkle 3s infinite;
-      filter: drop-shadow(0 0 20px #87CEEB) !important;
+    .magikarp-header {
+      animation: bob 2s infinite ease-in-out;
     }
-    .cubone {
-      bottom: 5px;
-      right: 5px;
-      width: 200px !important;
-      z-index: 30 !important;
-      animation: hop 3s infinite ease-in-out, sparkle 4s infinite reverse;
-      filter: drop-shadow(0 0 20px #8B4513) !important;
+    .cubone-header {
+      animation: hop 3s infinite ease-in-out;
     }
     @keyframes bob {
-      0%, 100% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(-20px) scale(1.1); }
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
     }
     @keyframes hop {
-      0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
-      25% { transform: translateY(-25px) rotate(10deg) scale(1.05); }
-      50% { transform: translateY(0) rotate(0deg) scale(1); }
-      75% { transform: translateY(-25px) rotate(-10deg) scale(1.05); }
-    }
-    @keyframes sparkle {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; transform: scale(1.1); }
-    }
-    /* Other Pokémon - Subdued */
-    .gardevoir {
-      top: 10px;
-      left: 10px;
-      animation: psychicFloat 5s infinite ease-in-out;
-      filter: drop-shadow(0 0 10px #9370DB);
-      width: 70px;
-    }
-    @keyframes psychicFloat {
       0%, 100% { transform: translateY(0) rotate(0deg); }
-      50% { transform: translateY(-20px) rotate(3deg); }
+      50% { transform: translateY(-15px) rotate(5deg); }
     }
-    .suicune {
-      top: 10px;
-      right: 10px;
-      animation: legendaryRun 6s infinite linear;
-      filter: drop-shadow(0 0 10px #00BFFF);
-      width: 70px;
+    .section {
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background: rgba(26, 26, 46, 0.5);
+      border: 1px solid #00ffff;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0, 255, 255, 0.2);
     }
-    @keyframes legendaryRun {
-      0% { transform: translateX(-100px); }
-      100% { transform: translateX(100px); }
+    .section label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #00ffff;
+      margin-bottom: 0.5rem;
     }
-    .pinsir {
-      bottom: 60px;
-      left: 50%;
-      transform: translateX(-50%);
-      animation: clamp 4s infinite ease-in-out;
-      width: 90px;
-    }
-    @keyframes clamp {
-      0%, 100% { transform: translateX(-50%) rotate(0deg); }
-      50% { transform: translateX(-50%) rotate(10deg) scale(1.05); }
-    }
-    .charizard {
-      top: 40%;
-      right: -40px;
-      animation: fireFly 8s infinite ease-in-out;
-      filter: drop-shadow(0 0 15px #FF4500);
-      width: 100px;
-    }
-    @keyframes fireFly {
-      0% { transform: translateX(0) rotate(0deg); }
-      50% { transform: translateX(-150px) rotate(8deg); }
-      100% { transform: translateX(0) rotate(0deg); }
-    }
-    .vaporeon {
-      bottom: 120px;
-      left: -40px;
-      animation: waterWave 5s infinite ease-in-out;
-      filter: drop-shadow(0 0 10px #00BFFF);
-      width: 90px;
-    }
-    @keyframes waterWave {
-      0%, 100% { transform: translateX(0) scale(1); }
-      50% { transform: translateX(150px) scale(1.05); }
-    }
-    .bg-white {
-      background-color: rgba(255, 255, 255, 0.98);
-      border-radius: 20px;
-      padding: 1.5rem;
-      box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2), inset 0 0 20px rgba(255, 255, 255, 0.5);
-      position: relative;
-      z-index: 20;
-      border: 3px solid #FFD700;
-      animation: subtleGlow 3s infinite alternate;
-    }
-    @keyframes subtleGlow {
-      from { box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2), inset 0 0 20px rgba(255, 255, 255, 0.5), 0 0 20px #FFD700; }
-      to { box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2), inset 0 0 20px rgba(255, 255, 255, 0.5), 0 0 30px #87CEEB; }
-    }
-    .rounded, .rounded-lg {
-      border-radius: 15px !important;
-    }
-    .pokeball-decoration {
-      position: absolute;
-      width: 50px;
-      height: 50px;
-      background-size: contain;
-      background-repeat: no-repeat;
-      opacity: 0.6;
-      z-index: 5;
-      animation: floatPokeball 6s infinite ease-in-out;
-    }
-    @keyframes floatPokeball {
-      0%, 100% { transform: translateY(0) rotate(0deg); }
-      50% { transform: translateY(-10px) rotate(180deg); }
-    }
-    .pokeball-top-left { top: -20px; left: -20px; transform: rotate(-20deg); }
-    .pokeball-top-right { top: -20px; right: -20px; transform: rotate(15deg); }
-    .pokeball-bottom-left { bottom: -20px; left: -20px; transform: rotate(40deg); }
-    .pokeball-bottom-right { bottom: -20px; right: -20px; transform: rotate(-30deg); }
-    input[type="email"] {
-      border: 2px solid #a0d2eb;
-      padding: 0.6rem 1rem;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    input[type="email"], input[type="range"] {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #00ffff;
+      border-radius: 4px;
+      background: rgba(10, 10, 10, 0.8);
+      color: #ffffff;
+      box-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+      transition: box-shadow 0.3s ease;
     }
     input[type="email"]:focus {
-      border-color: #3b82f6;
       outline: none;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2), 0 0 10px #3b82f6;
+      box-shadow: 0 0 10px #00ffff;
     }
-    input[type="email"][readonly] {
-      background-color: #f3f4f6;
-      cursor: not-allowed;
+    input[type="range"] {
+      height: 6px;
+      background: rgba(0, 255, 255, 0.2);
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: #00ffff;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 5px #00ffff;
     }
     button {
-      font-weight: 600;
-      transition: all 0.3s ease;
-      letter-spacing: 0.05em;
-      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-      position: relative;
-      overflow: hidden;
-      padding: 0.75rem 1rem;
-      white-space: normal;
-      min-height: 2.5rem;
-    }
-    button::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
       width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-      transition: left 0.5s;
-    }
-    button:hover::before {
-      left: 100%;
+      padding: 1rem;
+      border: none;
+      border-radius: 4px;
+      background: linear-gradient(45deg, #00ffff, #0080ff);
+      color: #000;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+      transition: all 0.3s ease;
+      white-space: normal;
+      text-align: center;
     }
     button:hover {
-      transform: translateY(-2px) scale(1.02);
-      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+      transform: translateY(-2px);
     }
-    .text-center {
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    button.active {
+      background: linear-gradient(45deg, #10b981, #059669);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+    }
+    button.inactive {
+      background: #6b7280;
+      box-shadow: 0 0 10px rgba(107, 114, 128, 0.5);
     }
     .email-input-group {
       display: flex;
       align-items: center;
-      margin-bottom: 0.5rem;
+      gap: 0.5rem;
     }
-    .email-input-group input[type="email"] {
-      flex-grow: 1;
-      margin-right: 0.5rem;
+    .email-input-group input {
+      flex: 1;
     }
-    .email-input-group .remove-email-button {
-      background-color: #ef4444;
-      color: white;
-      border: none;
-      padding: 0.5rem 0.75rem;
-      border-radius: 0.25rem;
-      cursor: pointer;
-      font-size: 0.8rem;
-      transition: all 0.2s;
+    .email-input-group button {
+      flex-shrink: 0;
+      width: auto;
+      padding: 0.5rem 1rem;
     }
-    .email-input-group .remove-email-button:hover {
-      background-color: #dc2626;
-      transform: none;
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
-    .email-input-group .submit-email-button {
-      background-color: #10b981;
-      color: white;
-      border: none;
-      padding: 0.5rem 0.75rem;
-      border-radius: 0.25rem;
-      cursor: pointer;
-      font-size: 0.8rem;
-      transition: all 0.2s;
+    .checkbox-group input[type="checkbox"] {
+      width: auto;
+      accent-color: #00ffff;
     }
-    .email-input-group .submit-email-button:hover {
-      background-color: #059669;
-      transform: none;
+    .status-display {
+      background: rgba(26, 26, 46, 0.5);
+      border: 1px solid #00ffff;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 0 5px rgba(0, 255, 255, 0.2);
     }
-    .email-toggle-button.active {
-      background-color: #10b981;
+    .status-display p {
+      margin: 0.25rem 0;
+      font-size: 0.875rem;
     }
-    .email-toggle-button.active:hover {
-      background-color: #059669;
+    .live-log {
+      flex: 1;
+      overflow-y: auto;
+      background: rgba(10, 10, 10, 0.8);
+      border: 1px solid #00ffff;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: auto;
+      font-size: 0.75rem;
+      font-family: 'Courier New', monospace;
+      box-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+      min-height: 150px;
     }
-    .email-toggle-button.inactive {
-      background-color: #6b7280;
-    }
-    .email-toggle-button.inactive:hover {
-      background-color: #4b5563;
-    }
-    .webhook-toggle-button.active {
-      background-color: #8b5cf6;
-    }
-    .webhook-toggle-button.active:hover {
-      background-color: #7c3aed;
-    }
-    .webhook-toggle-button.inactive {
-      background-color: #6b7280;
-    }
-    .webhook-toggle-button.inactive:hover {
-      background-color: #4b5563;
-    }
-    .add-email-button {
-      background-color: #22c55e;
-      color: white;
-      border: none;
-      border-radius: 0.25rem;
-      cursor: pointer;
-      font-weight: 600;
-      margin-top: 0.5rem;
-      transition: all 0.2s, transform 0.2s;
-    }
-    .add-email-button:hover {
-      background-color: #16a34a;
-    }
-    .add-webhook-button {
-      background-color: #8b5cf6;
-      color: white;
-      border: none;
-      border-radius: 0.25rem;
-      cursor: pointer;
-      font-weight: 600;
-      margin-top: 0.5rem;
-      transition: all 0.2s, transform 0.2s;
-    }
-    .add-webhook-button:hover {
-      background-color: #7c3aed;
-    }
-    .test-button {
-      background-color: #FFD700;
-      color: #000;
-      border: none;
-      border-radius: 0.25rem;
-      cursor: pointer;
-      font-weight: 600;
-      margin-top: 0.5rem;
-      transition: all 0.2s, transform 0.2s;
-    }
-    .test-button:hover {
-      background-color: #FFA500;
-      transform: translateY(-2px);
-    }
-    input[type="range"] {
-      -webkit-appearance: none;
-      width: 100%;
-      height: 8px;
-      background: #a0d2eb;
-      border-radius: 5px;
-      outline: none;
-      margin-top: 0.5rem;
-      cursor: pointer;
-    }
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 20px;
-      height: 20px;
-      background: #3b82f6;
-      border-radius: 50%;
-      border: 2px solid white;
-      cursor: pointer;
-      box-shadow: 0 0 5px rgba(0,0,0,0.2);
-    }
-    input[type="range"]::-moz-range-thumb {
-      width: 20px;
-      height: 20px;
-      background: #3b82f6;
-      border-radius: 50%;
-      border: 2px solid white;
-      cursor: pointer;
-      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    .live-log p {
+      margin: 0.25rem 0;
+      word-wrap: break-word;
+      color: #ffffff;
     }
     .status-feedback {
-      color: #16a34a;
+      color: #00ff00;
       font-size: 0.875rem;
       margin-top: 0.5rem;
       text-align: center;
@@ -385,71 +251,14 @@
     }
     .status-feedback.show {
       opacity: 1;
-      animation: bounce 0.5s ease;
-    }
-    @keyframes bounce {
-      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-      40% { transform: translateY(-5px); }
-      60% { transform: translateY(-3px); }
-    }
-    /* Live Log Styles */
-    .live-log {
-      height: 200px;
-      overflow-y: auto;
-      background: rgba(240, 240, 240, 0.9);
-      padding: 10px;
-      border-radius: 10px;
-      font-size: 0.75rem;
-      font-family: 'Courier New', monospace;
-      border: 1px solid #ddd;
-      margin-top: 1rem;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .live-log p {
-      margin: 2px 0;
-      padding: 0;
-      word-wrap: break-word;
-    }
-    .live-log::-webkit-scrollbar {
-      width: 6px;
-    }
-    .live-log::-webkit-scrollbar-thumb {
-      background: #888;
-      border-radius: 3px;
     }
     @media (max-height: 600px) {
-      .pokemon-sprite {
-        width: 60px;
-      }
-      .magikarp, .cubone {
-        width: 150px !important;
-      }
-      .bg-white {
-        padding: 1rem;
-      }
-      .text-2xl {
-        font-size: 1.25rem;
-        line-height: 1.75rem;
-      }
-      .p-6 {
+      .main-container {
+        min-height: 90vh;
         padding: 1rem;
       }
       .live-log {
-        height: 150px;
-      }
-    }
-    @media (max-height: 400px) {
-      .pokemon-sprite:not(.magikarp):not(.cubone) {
-        display: none;
-      }
-      .pokeball-decoration {
-        display: none;
-      }
-      .live-log {
-        height: 100px;
-      }
-      .magikarp, .cubone {
-        width: 120px !important;
+        min-height: 100px;
       }
     }
     /* Success explosion animation */
@@ -475,61 +284,58 @@
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/129.png" alt="Magikarp" class="pokemon-sprite magikarp">
-  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/104.png" alt="Cubone" class="pokemon-sprite cubone">
-  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/282.png" alt="Gardevoir" class="pokemon-sprite gardevoir">
-  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/245.png" alt="Suicune" class="pokemon-sprite suicune">
-  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/127.png" alt="Pinsir" class="pokemon-sprite pinsir">
-  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png" alt="Charizard" class="pokemon-sprite charizard">
-  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/134.png" alt="Vaporeon" class="pokemon-sprite vaporeon">
-  <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-    <div class="pokeball-decoration pokeball-top-left" style="background-image: url('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png');"></div>
-    <div class="pokeball-decoration pokeball-top-right" style="background-image: url('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png');"></div>
-    <div class="pokeball-decoration pokeball-bottom-left" style="background-image: url('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png');"></div>
-    <div class="pokeball-decoration pokeball-bottom-right" style="background-image: url('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png');"></div>
-    <h1 class="text-2xl font-bold text-center mb-2">Pokémon Center Shop Access Checker<br>Made By Kronborg</h1>
-    <p class="text-gray-600 text-center mb-2">Checks to see if the shop is accessible.</p>
-    <div id="emailInputsContainer" class="mb-2">
-      <label class="block text-sm text-gray-600 mb-1">Emails for alerts:</label>
-      <div class="email-input-group">
-        <input type="email" placeholder="name@example.com" class="w-full border border-gray-300 rounded px-3 py-2 email-input" required>
-        <button type="button" class="submit-email-button">Submit</button>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+  <div class="main-container">
+    <div class="header">
+      <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/129.png" alt="Magikarp" class="pokemon-header-sprite magikarp-header">
+      <h1>Pokémon Center Shop Access Checker<br>Made By Kronborg</h1>
+      <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/104.png" alt="Cubone" class="pokemon-header-sprite cubone-header">
+    </div>
+    <div class="section">
+      <label>Emails for alerts:</label>
+      <div id="emailInputsContainer">
+        <div class="email-input-group">
+          <input type="email" placeholder="name@example.com" class="email-input" required>
+          <button type="button" class="submit-email-button bg-green-500 text-white">Submit</button>
+        </div>
       </div>
+      <button id="addEmailButton" class="add-email-button mt-2 bg-green-500 text-white">Add Another Email</button>
+      <div id="emailFeedback" class="status-feedback"></div>
     </div>
-    <button id="addEmailButton" class="w-full add-email-button mb-2">Add Another Email</button>
-    <div id="emailFeedback" class="status-feedback"></div>
-    <div id="webhookSection" class="mb-2">
-      <label class="block text-sm text-gray-600 mb-1">Discord Alerts:</label>
-      <button id="addWebhookButton" class="w-full add-webhook-button">Add Discord Webhook</button>
-      <div id="webhookStatus" class="text-sm text-gray-500 mt-1 hidden">Webhook added! Ready for alerts.</div>
+    <div class="section">
+      <label>Discord Alerts:</label>
+      <button id="addWebhookButton" class="add-webhook-button bg-purple-500 text-white">Add Discord Webhook</button>
+      <div id="webhookStatus" class="text-sm mt-1 hidden text-green-500">Webhook added! Ready for alerts.</div>
+      <div id="webhookFeedback" class="status-feedback"></div>
     </div>
-    <div id="webhookFeedback" class="status-feedback"></div>
-    <div class="mb-2">
-      <label for="frequencySlider" class="block text-sm text-gray-600 mb-1">
-        Check every: <span id="frequencyValue" class="font-semibold text-gray-800">10</span> minutes
-      </label>
+    <div class="section">
+      <label>Check every: <span id="frequencyValue" class="font-semibold">10</span> minutes</label>
       <input type="range" id="frequencySlider" min="1" max="60" value="10">
     </div>
-    <div id="status" class="text-center mb-2">
-      <p class="text-lg">Status: <span id="statusText" class="font-semibold">Waiting...</span></p>
-      <p class="text-sm text-gray-500">Last checked: <span id="lastChecked">Never</span></p>
-      <p class="text-sm text-gray-500">System running for: <span id="runTime">0h 0m 0s</span></p>
-      <p class="text-sm text-gray-500">Details: <span id="statusDetails">None</span></p>
+    <div class="section">
+      <label>Auto-redirect on queue?</label>
+      <div class="checkbox-group">
+        <input type="checkbox" id="autoRedirect" checked>
+        <label for="autoRedirect" class="text-sm">Yes, redirect to Pokémon Center if queue detected</label>
+      </div>
     </div>
+    <div class="status-display">
+      <p><strong>Status:</strong> <span id="statusText">Waiting...</span></p>
+      <p><strong>Last checked:</strong> <span id="lastChecked">Never</span></p>
+      <p><strong>Running for:</strong> <span id="runTime">0h 0m 0s</span></p>
+      <p><strong>Details:</strong> <span id="statusDetails">None</span></p>
+    </div>
+    <button id="testButton" class="test-button mb-2 bg-yellow-500 text-black">Test Single Check</button>
+    <button id="startButton" class="bg-blue-500 text-white mb-2">Start Checking</button>
+    <button id="stopButton" class="bg-red-500 text-white mb-2 hidden">Stop Checking</button>
+    <button id="emailToggleButton" class="email-toggle-button active bg-green-500 text-white mb-2">Deactivate Email Alerts</button>
+    <button id="webhookToggleButton" class="webhook-toggle-button inactive bg-gray-500 text-white mb-2 hidden">Activate Discord Alerts</button>
+    <button id="testAlertsButton" class="bg-green-500 text-white">Test Alerts</button>
     <div id="liveLog" class="live-log">
       <p>[Startup] Pokémon Center Shop Access Checker initialized! 🚀</p>
     </div>
-    <button id="testButton" class="w-full test-button mb-2">Test Single Check</button>
-    <button id="startButton" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Start Checking</button>
-    <button id="stopButton" class="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600 mt-2 hidden">Stop Checking</button>
-    <button id="emailToggleButton" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 mt-2 email-toggle-button active">Deactivate Email Alerts</button>
-    <button id="webhookToggleButton" class="w-full bg-purple-500 text-white py-2 rounded hover:bg-purple-600 mt-2 webhook-toggle-button inactive hidden">Deactivate Discord Alerts</button>
-    <button id="testAlertsButton" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 mt-2">Test Alerts</button>
   </div>
-  <div id="successExplosion" class="success-explosion hidden">
-    <!-- Crazy confetti-like elements would go here, but for simplicity, use CSS animation -->
-  </div>
+  <div id="successExplosion" class="success-explosion hidden"></div>
   <audio id="beepSound">
     <source src="https://www.soundjay.com/buttons/beep-01a.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
@@ -588,7 +394,6 @@
     const webhookToggleButton = document.getElementById('webhookToggleButton');
     const webhookStatus = document.getElementById('webhookStatus');
     const addWebhookButton = document.getElementById('addWebhookButton');
-    const webhookSection = document.getElementById('webhookSection');
     const beepSound = document.getElementById('beepSound');
     const runTime = document.getElementById('runTime');
     const emailInputsContainer = document.getElementById('emailInputsContainer');
@@ -598,6 +403,7 @@
     const frequencySlider = document.getElementById('frequencySlider');
     const frequencyValue = document.getElementById('frequencyValue');
     const liveLog = document.getElementById('liveLog');
+    const autoRedirectCheckbox = document.getElementById('autoRedirect');
     let intervalId = null;
     let startTime = null;
     let timerInterval = null;
@@ -619,12 +425,12 @@
       emailNotificationsEnabled = !emailNotificationsEnabled;
       if (emailNotificationsEnabled) {
         emailToggleButton.textContent = 'Deactivate Email Alerts';
-        emailToggleButton.classList.remove('inactive', 'bg-gray-500');
-        emailToggleButton.classList.add('active', 'bg-green-500');
+        emailToggleButton.classList.remove('inactive');
+        emailToggleButton.classList.add('active');
       } else {
         emailToggleButton.textContent = 'Activate Email Alerts';
-        emailToggleButton.classList.remove('active', 'bg-green-500');
-        emailToggleButton.classList.add('inactive', 'bg-gray-500');
+        emailToggleButton.classList.remove('active');
+        emailToggleButton.classList.add('inactive');
       }
       showFeedback(emailFeedback, `Email notifications ${emailNotificationsEnabled ? 'enabled' : 'disabled'}.`);
       log(`Email notifications ${emailNotificationsEnabled ? 'enabled' : 'disabled'}.`);
@@ -636,8 +442,8 @@
       webhookToggleButton.classList.remove('hidden');
       discordNotificationsEnabled = true;
       webhookToggleButton.textContent = 'Deactivate Discord Alerts';
-      webhookToggleButton.classList.remove('inactive', 'bg-gray-500');
-      webhookToggleButton.classList.add('active', 'bg-purple-500');
+      webhookToggleButton.classList.remove('inactive');
+      webhookToggleButton.classList.add('active');
       showFeedback(webhookFeedback, 'Discord webhook added!');
       log('Discord webhook added successfully! Alerts ready.');
     });
@@ -645,12 +451,12 @@
       discordNotificationsEnabled = !discordNotificationsEnabled;
       if (discordNotificationsEnabled) {
         webhookToggleButton.textContent = 'Deactivate Discord Alerts';
-        webhookToggleButton.classList.remove('inactive', 'bg-gray-500');
-        webhookToggleButton.classList.add('active', 'bg-purple-500');
+        webhookToggleButton.classList.remove('inactive');
+        webhookToggleButton.classList.add('active');
       } else {
         webhookToggleButton.textContent = 'Activate Discord Alerts';
-        webhookToggleButton.classList.remove('active', 'bg-purple-500');
-        webhookToggleButton.classList.add('inactive', 'bg-gray-500');
+        webhookToggleButton.classList.remove('active');
+        webhookToggleButton.classList.add('inactive');
       }
       showFeedback(webhookFeedback, `Discord notifications ${discordNotificationsEnabled ? 'enabled' : 'disabled'}.`);
       log(`Discord notifications ${discordNotificationsEnabled ? 'enabled' : 'disabled'}.`);
@@ -678,8 +484,8 @@
       const emailInputGroup = document.createElement('div');
       emailInputGroup.className = 'email-input-group';
       emailInputGroup.innerHTML = `
-        <input type="email" placeholder="name@example.com" class="w-full border border-gray-300 rounded px-3 py-2 email-input" required>
-        <button type="button" class="submit-email-button">Submit</button>
+        <input type="email" placeholder="name@example.com" class="email-input" required>
+        <button type="button" class="submit-email-button bg-green-500 text-white">Submit</button>
       `;
       emailInputsContainer.appendChild(emailInputGroup);
       const submitButton = emailInputGroup.querySelector('.submit-email-button');
@@ -695,7 +501,7 @@
         submitButton.remove();
         const removeButton = document.createElement('button');
         removeButton.type = 'button';
-        removeButton.className = 'remove-email-button';
+        removeButton.className = 'remove-email-button bg-red-500 text-white';
         removeButton.textContent = 'Remove';
         emailInputGroup.appendChild(removeButton);
         removeButton.addEventListener('click', function() {
@@ -724,7 +530,7 @@
         submitButton.remove();
         const removeButton = document.createElement('button');
         removeButton.type = 'button';
-        removeButton.className = 'remove-email-button';
+        removeButton.className = 'remove-email-button bg-red-500 text-white';
         removeButton.textContent = 'Remove';
         initialInputGroup.appendChild(removeButton);
         removeButton.addEventListener('click', function() {
@@ -793,7 +599,6 @@
         websiteKey: sitekey
       };
       try {
-        // Create task
         const createResponse = await fetch('https://api.capsolver.com/createTask', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -809,9 +614,8 @@
         }
         const taskId = createData.taskId;
         log(`Task created, ID: ${taskId}. Polling for solution...`);
-        // Poll for result
         while (true) {
-          await new Promise(resolve => setTimeout(resolve, 2000)); // Poll every 2s
+          await new Promise(resolve => setTimeout(resolve, 2000));
           const resultResponse = await fetch('https://api.capsolver.com/getTaskResult', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -869,8 +673,8 @@
       }
       discordNotificationsEnabled = false;
       webhookToggleButton.textContent = 'Activate Discord Alerts';
-      webhookToggleButton.classList.remove('active', 'bg-purple-500');
-      webhookToggleButton.classList.add('inactive', 'bg-gray-500');
+      webhookToggleButton.classList.remove('active');
+      webhookToggleButton.classList.add('inactive');
       showFeedback(webhookFeedback, 'Discord notifications deactivated after sending alert.');
     }
     function sendEmail(status, details, recipientEmails) {
@@ -903,8 +707,8 @@
       });
       emailNotificationsEnabled = false;
       emailToggleButton.textContent = 'Activate Email Alerts';
-      emailToggleButton.classList.remove('active', 'bg-green-500');
-      emailToggleButton.classList.add('inactive', 'bg-gray-500');
+      emailToggleButton.classList.remove('active');
+      emailToggleButton.classList.add('inactive');
       showFeedback(emailFeedback, 'Email notifications deactivated after sending alert.');
     }
     async function testAlerts() {
@@ -1034,14 +838,11 @@
         }
         let text = await response.text();
         log(`Fetched ${urlUsed} (${text.length} chars)`);
-        // Check for CAPTCHA
         if (text.includes('g-recaptcha') || text.includes('recaptcha')) {
           log('reCAPTCHA detected in response.');
           const token = await solveCaptchaWithCapSolver(text, urlUsed);
           if (token) {
-            log('CAPTCHA solved! Assuming access granted after bypass. (Note: Full integration may require token submission via POST for complete bypass.)');
-            // Here, you could implement a POST request with the token if the form endpoint is known.
-            // For now, treat as accessible and continue with analysis.
+            log('CAPTCHA solved! Assuming access granted after bypass.');
             statusText.textContent = 'CAPTCHA Bypassed - Checking Content';
             statusText.classList.add('text-green-500');
           } else {
@@ -1071,17 +872,24 @@
           statusText.textContent = currentStatus;
           statusText.classList.remove('text-red-500');
           statusText.classList.add('text-green-500');
-          const details = `Queue detected at ${finalUrl} (checked ${urlUsed}). Queue length: ${queueLength || 'unknown'}. Redirecting to Pokémon Center homepage.`;
+          const details = `Queue detected at ${finalUrl} (checked ${urlUsed}). Queue length: ${queueLength || 'unknown'}.`;
           statusDetails.textContent = details;
           log(`Status: ${currentStatus} - ${details}`);
           playThreeBeeps();
+          const previousStatus = statusText.dataset.previousStatus;
+          if ((emailNotificationsEnabled || discordNotificationsEnabled) && previousStatus !== currentStatus) {
+            if (currentEmails.length > 0 && emailNotificationsEnabled) sendEmail(currentStatus, details, currentEmails);
+            if (discordNotificationsEnabled) sendDiscord(currentStatus, details);
+          }
           statusText.dataset.previousStatus = currentStatus;
+          if (autoRedirectCheckbox.checked) {
+            log('Auto-redirect enabled. Redirecting to Pokémon Center...');
+            document.getElementById('successExplosion').classList.add('show');
+            setTimeout(() => {
+              window.location.href = 'https://www.pokemoncenter.com/';
+            }, 1000);
+          }
           stopChecking();
-          // Trigger crazy success animation before redirect
-          document.getElementById('successExplosion').classList.add('show');
-          setTimeout(() => {
-            window.location.href = 'https://www.pokemoncenter.com/';
-          }, 1000);
           return;
         } else if (/pokemoncenter\.com(\/|$|\/category\/trading-card-game)/i.test(finalUrl)) {
           const hasShopContent = /shop|products|category|store|cart|new releases|all products|add to cart|merchandise|collectibles|plush|trading card|Pokémon/i.test(text);
@@ -1095,7 +903,6 @@
             statusDetails.textContent = `Reached ${finalUrl} (checked ${urlUsed}), shop content detected (keywords or dynamic elements present). Response length: ${text.length} chars.`;
             log(`Status: ${currentStatus} - ${statusDetails.textContent}`);
             statusText.dataset.previousStatus = currentStatus;
-            // Trigger crazy success animation
             document.getElementById('successExplosion').classList.add('show');
             setTimeout(() => {
               document.getElementById('successExplosion').classList.remove('show');
