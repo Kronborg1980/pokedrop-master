@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Queue Hunter Pro – Ultimate Pokémon Center Tracker (Rewritten)</title>
+    <title>Queue Hunter Pro – Ultimate Pokémon Center Tracker</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
     <style>
@@ -182,7 +182,6 @@
         .status-banner.gray { color: #999; border-color: #999; text-shadow: 0 0 8px #999; }
         .status-banner.orange { color: #FFA500; border-color: #FFA500; text-shadow: 0 0 8px #FFA500; animation: pulse 1s ease infinite; }
         .status-banner.purple { color: #9370DB; border-color: #9370DB; text-shadow: 0 0 8px #9370DB; animation: pulse 2s ease infinite; }
-        .status-banner.dark-red { color: #8B0000; border-color: #8B0000; text-shadow: 0 0 8px #8B0000; animation: zap 0.3s ease infinite; }
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.7; }
@@ -288,8 +287,8 @@
             <div class="pokedex">
                 <div class="header">
                     <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/129.png" alt="Magikarp">
-                    <h1>Queue Hunter Pro (API)</h1>
-                    <p>Uses external API for advanced anti-bot evasion.</p>
+                    <h1>Queue Hunter Pro</h1>
+                    <p>Ultimate restock & queue hunter! ? Catch every restock, maximize profits.</p>
                 </div>
                 <div class="section">
                     <label>Discord Webhook URL:</label>
@@ -329,18 +328,17 @@
                         <button id="toggleEmailBtn" onclick="window.QueueHunter.toggleNotification('email')">?? Email Notifications: On</button>
                         <button id="toggleQueueDetectedBtn" onclick="window.QueueHunter.toggleNotification('queueDetected')">?? Queue Detected: On</button>
                         <button id="toggleQueueSoonBtn" onclick="window.QueueHunter.toggleNotification('queueSoon')">?? Queue Soon or Active: On</button>
-                        <button id="togglePossibleBotBlockBtn" onclick="window.QueueHunter.toggleNotification('possibleBotBlock')">?? Possible Block: On</button>
+                        <button id="togglePossibleBotBlockBtn" onclick="window.QueueHunter.toggleNotification('possibleBotBlock')">?? Possible Queue: On</button>
                         <button id="toggleCaptchaDetectedBtn" onclick="window.QueueHunter.toggleNotification('captchaDetected')">?? CAPTCHA Detected: On</button>
                     </div>
                 </div>
                 <div class="section">
-                    <label>Check Frequency: <span id="freqVal">5</span> mins (API Call Rate)</label>
+                    <label>Check Frequency: <span id="freqVal">5</span> mins</label>
                     <input type="range" id="freqSlider" min="0.1" max="30" step="0.1" value="5">
-                    <label>Alert After: <span id="threshVal">2</span> API Fails</label>
+                    <label>Alert After: <span id="threshVal">2</span> fails</label>
                     <input type="range" id="threshSlider" min="1" max="5" value="2">
                     <label>Monitor URLs (comma-separated, optional):</label>
                     <textarea id="urlList" placeholder="https://www.pokemoncenter.com/product/..., https://www.pokemoncenter.com/..."></textarea>
-                    <p style="color: #9370DB; font-size: 0.7rem; margin-top: 0.5rem;">Note: URL checks are performed by the Hunter API Server.</p>
                 </div>
                 <div class="section">
                     <label>Auto-Open Page on Detection:</label>
@@ -352,18 +350,18 @@
                 </div>
                 <div class="section">
                     <div class="button-group">
-                        <button id="startBtn" onclick="window.QueueHunter.startMonitoring()">?? Start API Hunt</button>
-                        <button id="stopBtn" class="hidden" onclick="window.QueueHunter.stopMonitoring()">?? Stop API Hunt</button>
+                        <button id="startBtn" onclick="window.QueueHunter.startMonitoring()">?? Start Hunt</button>
+                        <button id="stopBtn" class="hidden" onclick="window.QueueHunter.stopMonitoring()">?? Stop Hunt</button>
                         <button id="testNowBtn" onclick="window.QueueHunter.testNow()">?? Test Now</button>
                         <button onclick="window.QueueHunter.exportLog()">?? Export Log</button>
                     </div>
                 </div>
-                <div class="status-banner" id="statusBanner">Ready to hunt (API Mode)</div>
+                <div class="status-banner" id="statusBanner">Ready to hunt</div>
                 <div class="status-pokedex" id="status-pokedex">
                     <p>Last Check: <span id="lastCheck">Never</span></p>
                     <p>Runtime: <span id="runtime">0m 0s</span></p>
-                    <p>Consecutive API Fails: <span id="consec">0</span></p>
-                    <p>API Status: <span id="stockStatus">Unknown</span></p>
+                    <p>Consecutive Fails: <span id="consec">0</span></p>
+                    <p>Stock Status: <span id="stockStatus">Unknown</span></p>
                     <p>Log / Details:</p>
                     <div class="log-container" id="details"></div>
                 </div>
@@ -397,7 +395,7 @@
             email: true,
             queueDetected: true,
             queueSoon: true,
-            possibleBotBlock: true, // Renamed from possibleBotBlock to cover general API/Block errors
+            possibleBotBlock: true,
             captchaDetected: true
         };
         let pushEnabled = false;
@@ -408,18 +406,39 @@
         let consecFails = 0;
         let failThresh = 2;
         let baseCheckFreq = 5 * 60 * 1000;
-        
-        // ** DELETED: Proxy list, proxy blacklisting, and proxy logic are removed (Server-Side Logic) **
-
+        let proxies = [
+            'https://corsproxy.io/?',
+            'https://api.allorigins.win/get?url=',
+            'https://thingproxy.freeboard.io/fetch/',
+            'https://corsproxy.org/?',
+            'https://proxy.cors.sh/',
+            'https://cors-anywhere.herokuapp.com/',
+            'https://cors.codetabs.com/',
+            'https://cors.x2u.in/',
+            'https://cors-anywhere.io/',
+            'https://thebugging.com/cors/',
+            'https://cors-anywhere.azurewebsites.net/',
+            'https://corsproxy.github.io/',
+            'https://cors.bridged.cc/',
+            'https://cors.now.sh/',
+            'https://cors.eu.org/',
+            'https://cors.io/',
+            'https://yacdn.org/proxy/',
+            'https://allow-any-origin.appspot.com/',
+            'https://corsproxy.com/',
+            'https://crossorigin.me/'
+        ];
+        let blacklisted = new Set();
         let logEntries = [];
+        const maxRetries = 4;
+        let alarmActive = false;
+        let alertAudio = null;
+        let vibrateInterval = null;
         let isCheckingConsecutiveFailures = false;
-        
         emailjs.init('8w7eu6mrg3lRl6ta3');
         window.QueueHunter.emailServiceId = 'service_ahqdaj5';
         window.QueueHunter.emailTemplateId = 'template_whhvnra';
-
         document.addEventListener('DOMContentLoaded', () => {
-            // ... (DOM event listeners and setup - mostly unchanged)
             const testBtn = document.getElementById('testDiscordBtn');
             const submitBtn = document.getElementById('submitWebhookBtn');
             const clearBtn = document.getElementById('clearWebhookBtn');
@@ -454,20 +473,18 @@
             document.getElementById('freqSlider').addEventListener('input', function() {
                 baseCheckFreq = this.value * 60 * 1000;
                 document.getElementById('freqVal').textContent = this.value;
-                window.QueueHunter.updateUI(`API Call Frequency updated to ${this.value} minutes`);
+                window.QueueHunter.updateUI(`Check frequency updated to ${this.value} minutes`);
             });
             document.getElementById('threshSlider').addEventListener('input', function() {
                 failThresh = parseInt(this.value);
                 document.getElementById('threshVal').textContent = this.value;
-                window.QueueHunter.updateUI(`Alert threshold updated to ${this.value} consecutive API fails`);
+                window.QueueHunter.updateUI(`Alert threshold updated to ${this.value} consecutive fails`);
             });
             window.QueueHunter.renderEmailList();
             if (window.QueueHunter.emails.length === 0) {
                 window.QueueHunter.updateUI('Add an email address to enable email notifications');
             }
         });
-
-        // Toggle and Setup functions (Unchanged, cited for completeness)
         window.QueueHunter.toggleNotification = function(type) {
             window.QueueHunter.notificationSettings[type] = !window.QueueHunter.notificationSettings[type];
             let btnId, btnText;
@@ -485,7 +502,7 @@
                 btnText = 'Queue Soon or Active';
             } else if (type === 'possibleBotBlock') {
                 btnId = 'togglePossibleBotBlockBtn';
-                btnText = 'Possible Block';
+                btnText = 'Possible Queue';
             } else if (type === 'captchaDetected') {
                 btnId = 'toggleCaptchaDetectedBtn';
                 btnText = 'CAPTCHA Detected';
@@ -575,8 +592,29 @@
             await window.QueueHunter.sendDiscord('?? Test Ping', 'Webhook online! Ready to catch queue alerts! ?');
             testBtn.textContent = '?? Test Discord';
         };
-        // ** DELETED: getRandomHeaders is removed **
-
+        window.QueueHunter.getRandomHeaders = function() {
+            const userAgents = [
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
+                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0) Gecko/20100101 Firefox/130.0',
+                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:130.0) Gecko/20100101 Firefox/130.0',
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Edg/129.0.0.0',
+                'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
+            ];
+            const headers = {
+                'User-Agent': userAgents[Math.floor(Math.random() * userAgents.length)],
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'none',
+                'Sec-Fetch-User': '?1',
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            };
+            window.QueueHunter.updateUI(`Generated random headers: User-Agent=${headers['User-Agent'].substring(0, 30)}...`);
+            return headers;
+        };
         window.QueueHunter.isDropWindow = function() {
             const now = new Date();
             const day = now.getDay();
@@ -588,20 +626,16 @@
             return isDrop;
         };
         window.QueueHunter.getDynamicFreq = function(suspectedQueue = false) {
-            // Note: Server-side check frequency should be much faster (e.g., 2s)
-            // Client-side API call frequency can remain user-defined or faster if needed for immediate status updates
-            const dropFreq = 30000; // 30 seconds during a drop window for client API calls
             if (suspectedQueue) {
-                // If a queue/block is suspected, speed up the API calls to quickly confirm
-                window.QueueHunter.updateUI('Queue/Block suspected, speeding up client API calls to 10 seconds');
-                return 10000; 
+                window.QueueHunter.updateUI(`Scheduling next check in ${baseCheckFreq / 60000} minutes due to queue/block detection`);
+                return baseCheckFreq;
             }
             if (window.QueueHunter.isDropWindow()) {
-                window.QueueHunter.updateUI(`Drop window detected, using ${dropFreq / 1000} second API call interval`);
-                return dropFreq;
+                window.QueueHunter.updateUI('Drop window detected, using 2-second check interval');
+                return 2000; // 2 seconds during drop windows
             }
-            window.QueueHunter.updateUI(`Using user-defined API call interval: ${baseCheckFreq / 60000} minutes`);
-            return baseCheckFreq;
+            window.QueueHunter.updateUI(`Using user-defined check interval: ${baseCheckFreq / 60000} minutes`);
+            return baseCheckFreq; // Default to user-defined frequency
         };
         window.QueueHunter.requestLock = async function() {
             if ('locks' in navigator) {
@@ -642,7 +676,7 @@
             const statusPokedex = document.getElementById('status-pokedex');
             if (statusPokedex) {
                 const bannerText = document.getElementById('statusBanner').textContent;
-                if (/queue detected|queue soon or active|possible queue|captcha detected|possible block|api offline/i.test(bannerText)) statusPokedex.classList.add('alert-zap');
+                if (/queue detected|queue soon or active|possible queue|captcha detected/i.test(bannerText)) statusPokedex.classList.add('alert-zap');
                 else statusPokedex.classList.remove('alert-zap');
             }
             window.QueueHunter.updateRuntime();
@@ -685,7 +719,6 @@
             }
         };
         window.QueueHunter.playAlert = function() {
-            // ... (Alert logic - unchanged)
             if (alarmActive && !alertAudio) {
                 try {
                     alertAudio = document.getElementById('alertTone');
@@ -709,7 +742,6 @@
             }
         };
         window.QueueHunter.stopAlert = function() {
-            // ... (Stop alert logic - unchanged)
             if (alertAudio) {
                 alertAudio.pause();
                 alertAudio.currentTime = 0;
@@ -724,7 +756,6 @@
             }
         };
         window.QueueHunter.sendDiscord = async function(title, desc, color = 0xFFD700) {
-            // ... (Discord logic - unchanged)
             if (!window.QueueHunter.notificationSettings.discord) {
                 window.QueueHunter.updateUI('Discord notification skipped: Disabled in settings');
                 return;
@@ -753,7 +784,6 @@
             }
         };
         window.QueueHunter.addEmail = function() {
-            // ... (Add email logic - unchanged)
             const emailInput = document.getElementById('emailInput');
             const email = emailInput.value.trim();
             if (email && !window.QueueHunter.emails.includes(email) && /\S+@\S+\.\S+/.test(email)) {
@@ -770,7 +800,6 @@
             }
         };
         window.QueueHunter.removeEmail = function(email) {
-            // ... (Remove email logic - unchanged)
             window.QueueHunter.emails = window.QueueHunter.emails.filter(e => e !== email);
             window.QueueHunter.renderEmailList();
             document.getElementById('testEmailBtn').disabled = window.QueueHunter.emails.length === 0;
@@ -780,7 +809,6 @@
             }
         };
         window.QueueHunter.renderEmailList = function() {
-            // ... (Render email list logic - unchanged)
             const emailList = document.getElementById('emailList');
             emailList.innerHTML = '';
             window.QueueHunter.emails.forEach(email => {
@@ -795,7 +823,6 @@
             window.QueueHunter.updateUI(`Updated email list: ${window.QueueHunter.emails.length} email(s)`);
         };
         window.QueueHunter.sendEmail = async function(status, details) {
-            // ... (Send email logic - unchanged)
             if (!window.QueueHunter.notificationSettings.email) {
                 window.QueueHunter.updateUI('Email notification skipped: Disabled in settings');
                 return;
@@ -828,7 +855,6 @@
             window.QueueHunter.updateUI(`Email notification result: ${successCount} successful, ${window.QueueHunter.emails.length - successCount} failed`);
         };
         window.QueueHunter.testEmail = async function() {
-            // ... (Test email logic - unchanged)
             if (!window.QueueHunter.notificationSettings.email) {
                 window.QueueHunter.updateUI('Test email skipped: Email notifications disabled');
                 return;
@@ -861,102 +887,186 @@
             }
             window.QueueHunter.updateUI(`Test email result: ${successCount} successful, ${window.QueueHunter.emails.length - successCount} failed`);
         };
-
-        // ** DELETED: getHealthyProxy and extractQueueLength are removed (Server-Side Logic) **
-
-        /**
-         * REWRITTEN: This function now exclusively calls an external Hunter API
-         * to perform the anti-bot evasion and site access check, thus
-         * eliminating client-side CAPTCHA/bot-blocking issues.
-         */
+        window.QueueHunter.getHealthyProxy = async function(url) {
+            window.QueueHunter.updateUI(`Searching for healthy proxy for URL: ${url}`);
+            const shuffledProxies = proxies.sort(() => Math.random() - 0.5);
+            for (let p of shuffledProxies.filter(pr => !blacklisted.has(pr))) {
+                window.QueueHunter.updateStatusBanner('Checking proxies...', 'yellow');
+                window.QueueHunter.updateUI(`Attempting proxy: ${p}`);
+                try {
+                    await new Promise(r => setTimeout(r, Math.random() * 1000 + 500));
+                    const ctrl = new AbortController();
+                    setTimeout(() => ctrl.abort(), 15000);
+                    const res = await fetch(p + encodeURIComponent(url), { signal: ctrl.signal, priority: 'high', headers: window.QueueHunter.getRandomHeaders() });
+                    const text = p.includes('allorigins') ? (await res.json()).contents : await res.text();
+                    if (res.ok && text.length > 500) {
+                        window.QueueHunter.updateUI(`Proxy ${p} successful: Response length ${text.length} chars`);
+                        return p;
+                    } else {
+                        window.QueueHunter.updateUI(`Proxy ${p} failed: Response too short (${text.length} chars) or status ${res.status}`);
+                    }
+                } catch (e) {
+                    console.error('Proxy error:', e.message);
+                    blacklisted.add(p);
+                    setTimeout(() => {
+                        blacklisted.delete(p);
+                        window.QueueHunter.updateUI(`Proxy ${p} removed from blacklist after timeout`);
+                    }, 300000);
+                    window.QueueHunter.updateUI(`Proxy ${p} error: ${e.message}; blacklisted for 5 minutes`);
+                }
+            }
+            window.QueueHunter.updateUI('All proxies failed; attempting direct fetch');
+            try {
+                const ctrl = new AbortController();
+                setTimeout(() => ctrl.abort(), 20000);
+                const res = await fetch(url, { signal: ctrl.signal, priority: 'high', headers: window.QueueHunter.getRandomHeaders() });
+                const text = await res.text();
+                if (res.ok && text.length > 500) {
+                    window.QueueHunter.updateUI(`Direct fetch successful for ${url}: Response length ${text.length} chars`);
+                    return null;
+                } else {
+                    window.QueueHunter.updateUI(`Direct fetch failed: Response too short (${text.length} chars) or status ${res.status}`);
+                }
+            } catch (e) {
+                window.QueueHunter.updateUI(`Direct fetch error for ${url}: ${e.message}`);
+                return null;
+            }
+        };
+        window.QueueHunter.extractQueueLength = function(text) {
+            const patterns = [
+                /(\d+)\s*users?\s*ahead/i,
+                /queue\s*position\s*[:=]?\s*(\d+)/i,
+                /(\d+)\s*in\s*queue/i,
+                /position\s*in\s*queue\s*[:=]?\s*(\d+)/i,
+                /pos[:=]?\s*(\d+)/i
+            ];
+            for (const pattern of patterns) {
+                const match = text.match(pattern);
+                if (match) {
+                    window.QueueHunter.updateUI(`Queue length detected: ${match[1]} (pattern: ${pattern.source})`);
+                    return match[1];
+                }
+            }
+            window.QueueHunter.updateUI('No queue length detected in response');
+            return null;
+        };
         window.QueueHunter.checkShopAccess = async function(isConsecutiveCheck = false) {
-            const apiEndpoint = 'https://YOUR_PRIVATE_HUNTER_API/api/check_status'; // **REPLACE WITH YOUR ACTUAL API**
-            const urlInput = document.getElementById('urlList')?.value || 'https://www.pokemoncenter.com/';
+            const urlInput = document.getElementById('urlList')?.value || '';
             const urls = urlInput ? urlInput.split(',').map(u => u.trim()) : [
                 'https://www.pokemoncenter.com/',
                 'https://www.pokemoncenter.com/category/trading-card-game'
             ];
-            
-            window.QueueHunter.updateUI(`Calling Hunter API for site check (URLs: ${urls.join(', ')})`);
-            window.QueueHunter.updateStatusBanner('Connecting to Hunter API...', 'yellow');
-
-            const payload = {
-                target_urls: urls,
-                webhook_code: document.getElementById('webhookCode').value
-            };
-
-            try {
-                const response = await fetch(apiEndpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
-                    signal: new AbortController().signal,
-                    priority: 'high'
-                });
-
-                if (!response.ok) {
-                    // Handle API gateway errors (e.g., 500 server error, 403 authorization)
-                    throw new Error(`Hunter API Gateway Error: ${response.status} ${response.statusText}`);
-                }
-
-                const result = await response.json();
-                const { status, details, url, isFailure, queueLength } = result;
-
-                // Client-side processing of the authoritative server status
-                window.QueueHunter.updateUI(`API Server Status: ${status} | Details: ${details.substring(0, 50)}...`);
-
-                if (isFailure) {
-                    const finalStatus = status === 'IP Blacklisted' || status === 'Permanent Block' ? 'Possible Bot Block' : status;
-                    const finalDetails = status === 'IP Blacklisted' ? 'Hunter API IP was blocked. Server is rotating IP and will retry.' : details;
-
-                    if (finalStatus === 'Queue Detected' || finalStatus === 'CAPTCHA Detected' || document.getElementById('autoOpen').checked) {
-                        window.open('https://www.pokemoncenter.com/', '_blank');
-                        window.QueueHunter.updateUI(`Auto-opened page for detection: ${finalStatus}`);
+            window.QueueHunter.updateUI(`Starting ${isConsecutiveCheck ? 'consecutive' : 'initial'} check for ${urls.length} URL(s): ${urls.join(', ')}`);
+            let response = null;
+            let proxyUsed = '';
+            let urlUsed = '';
+            let proxyErrors = [];
+            for (const targetUrl of urls) {
+                window.QueueHunter.updateUI(`Checking URL: ${targetUrl}`);
+                for (const proxy of proxies.filter(pr => !blacklisted.has(pr))) {
+                    try {
+                        window.QueueHunter.updateUI(`Attempting fetch via proxy ${proxy} for ${targetUrl}`);
+                        response = await fetch(proxy + encodeURIComponent(targetUrl), {
+                            method: 'GET',
+                            headers: window.QueueHunter.getRandomHeaders(),
+                            signal: new AbortController().signal
+                        });
+                        proxyUsed = proxy;
+                        urlUsed = targetUrl;
+                        if (response.ok && response.status === 200) {
+                            window.QueueHunter.updateUI(`Fetch successful via proxy ${proxy} for ${targetUrl}: Status ${response.status}`);
+                            break;
+                        }
+                        proxyErrors.push(`Proxy ${proxy} for ${targetUrl} returned status: ${response?.status || 'unknown'}`);
+                        window.QueueHunter.updateUI(`Proxy ${proxy} failed for ${targetUrl}: Status ${response?.status || 'unknown'}`);
+                    } catch (proxyError) {
+                        proxyErrors.push(`Proxy ${proxy} for ${targetUrl} failed: ${proxyError.message}`);
+                        window.QueueHunter.updateUI(`Proxy ${proxy} error for ${targetUrl}: ${proxyError.message}`);
+                        console.warn(`Proxy ${proxy} for ${targetUrl} failed:`, proxyError);
                     }
-                    
-                    return { status: finalStatus, details: finalDetails, isFailure: true, url: url, queueLength };
-                } else {
-                    return { status, details, isFailure: false, url };
+                    if (response && response.ok && response.status === 200) break;
                 }
-
-            } catch (e) {
-                // This catch handles network errors, timeouts, or a downed API server
-                const errorStatus = 'API Offline/Error';
-                const errorDetails = `Could not connect to the Hunter API: ${e.message}. Check your API server status.`;
-                window.QueueHunter.updateUI(`Check failed: ${errorDetails}`);
-                return { status: errorStatus, details: errorDetails, isFailure: true, url: 'N/A' };
+                if (response && response.ok && response.status === 200) break;
+            }
+            if (!response || !response.ok) {
+                const status = 'Proxy error';
+                const details = `Failed to fetch page through all proxies. Errors: ${proxyErrors.join('; ')}. Please check the site manually.`;
+                window.QueueHunter.updateUI(`Check failed: ${details}`);
+                return { status, details, isFailure: true, url: urlUsed };
+            }
+            let text = '';
+            if (proxyUsed.includes('api.allorigins.win/get')) {
+                window.QueueHunter.updateUI('Processing allorigins.win response');
+                const jsonResponse = await response.json();
+                text = jsonResponse.contents || '';
+            } else {
+                text = await response.text();
+            }
+            window.QueueHunter.updateUI(`Received response: ${text.length} chars`);
+            const finalUrl = decodeURIComponent(response.url.replace(proxyUsed, ''));
+            window.QueueHunter.updateUI(`Final URL after fetch: ${finalUrl}`);
+            const isQueue =
+                /queue-it\.net/i.test(finalUrl) ||
+                /waiting room|queue-it|waitingroom|virtual waiting|queue\s*position/i.test(text);
+            const isCaptcha =
+                /captcha|hcaptcha|h-captcha|verify you are not a bot|human verification|challenge|recaptcha|cloudflare|akamai/i.test(text) ||
+                /hcaptcha\.com|recaptcha\.net|cloudflare\.com|akamai\.com/i.test(finalUrl);
+            window.QueueHunter.updateUI(`Queue detection: ${isQueue ? 'Queue indicators found' : 'No queue indicators'}`);
+            window.QueueHunter.updateUI(`CAPTCHA detection: ${isCaptcha ? 'CAPTCHA indicators found' : 'No CAPTCHA indicators'}`);
+            if (isCaptcha) {
+                const status = 'CAPTCHA Detected';
+                const details = `CAPTCHA challenge detected at ${finalUrl} (checked ${urlUsed}). Manual intervention required.`;
+                if (!isConsecutiveCheck && document.getElementById('autoOpen').checked) {
+                    window.open('https://www.pokemoncenter.com/', '_blank');
+                    window.QueueHunter.updateUI(`Auto-opened page for CAPTCHA: https://www.pokemoncenter.com/`);
+                }
+                window.QueueHunter.updateUI(`CAPTCHA detection confirmed: ${details}`);
+                return { status, details, isFailure: true, url: finalUrl };
+            } else if (isQueue) {
+                const queueLength = window.QueueHunter.extractQueueLength(text);
+                const status = 'Queue Detected';
+                const details = `Queue detected at ${finalUrl} (checked ${urlUsed}). Queue length: ${queueLength || 'unknown'}.`;
+                if (!isConsecutiveCheck && document.getElementById('autoOpen').checked) {
+                    window.open('https://www.pokemoncenter.com/', '_blank');
+                    window.QueueHunter.updateUI(`Auto-opened queue page: https://www.pokemoncenter.com/`);
+                }
+                window.QueueHunter.updateUI(`Queue detection confirmed: ${details}`);
+                return { status, details, isFailure: true, url: finalUrl, queueLength };
+            } else if (/pokemoncenter\.com(\/|$|\/category\/)/i.test(finalUrl)) {
+                const hasShopContent = /shop|products|category|store|cart|new releases|all products|add to cart|merchandise|collectibles|plush|trading card|Pokémon|shop now|browse|collections/i.test(text);
+                const hasDynamicElements = /<nav\b|<a\b[^>]*href=["'][^"']*(product|shop|category|collections)[^"']*["']|<div\b[^>]*class=["'][^"']*(product|shop|category|collections)[^"']*["']/i.test(text);
+                const isLargeResponse = text.length > 1000;
+                window.QueueHunter.updateUI(`Shop content check: Shop keywords=${hasShopContent}, Dynamic elements=${hasDynamicElements}, Response length=${text.length}`);
+                if (hasShopContent || hasDynamicElements || isLargeResponse) {
+                    const status = 'Shop Accessible';
+                    const details = `Reached ${finalUrl} (checked ${urlUsed}), shop content detected (keywords or dynamic elements present). Response length: ${text.length} chars.`;
+                    window.QueueHunter.updateUI(`Shop accessible: ${details}`);
+                    return { status, details, isFailure: false, url: finalUrl };
+                } else {
+                    const status = 'Queue Soon or Active';
+                    const details = `Reached ${finalUrl} (checked ${urlUsed}), but no shop content or dynamic elements found. Likely a static landing page. Response length: ${text.length} chars.`;
+                    window.QueueHunter.updateUI(`Possible queue soon: ${details}`);
+                    return { status, details, isFailure: true, url: finalUrl };
+                }
+            } else {
+                const status = 'Possible Queue';
+                const details = `Reached ${finalUrl} (checked ${urlUsed}), but it does not appear to be the Pokémon Center shop. Response length: ${text.length} chars.`;
+                window.QueueHunter.updateUI(`Unexpected page detected: ${details}`);
+                return { status, details, isFailure: true, url: finalUrl };
             }
         };
-
-        /**
-         * Simplified consecutive check - now only checks for API failure confirmation
-         */
         window.QueueHunter.performConsecutiveChecks = async function(currentFailureCount, maxFailures, status, details, url, queueLength = null) {
             window.QueueHunter.updateUI(`Starting consecutive check ${currentFailureCount}/${maxFailures} for status: ${status}`);
-
             if (currentFailureCount >= maxFailures) {
                 const stockStatus = document.getElementById('stockStatus');
                 if (stockStatus) stockStatus.textContent = status;
-
-                let colorClass;
-                if (status === 'Queue Detected') colorClass = 'red';
-                else if (status === 'Queue Soon or Active') colorClass = 'orange';
-                else if (status === 'CAPTCHA Detected') colorClass = 'purple';
-                else if (status === 'Possible Bot Block' || status === 'API Offline/Error') colorClass = 'dark-red';
-                else colorClass = 'purple';
-
-                window.QueueHunter.updateStatusBanner(status === 'Queue Detected' ? 'Queue Detected ??' : status === 'CAPTCHA Detected' ? 'CAPTCHA Detected ??' : status, colorClass);
+                const colorClass = status === 'Queue Detected' ? 'red' : status === 'Queue Soon or Active' ? 'orange' : status === 'CAPTCHA Detected' ? 'purple' : 'purple';
+                window.QueueHunter.updateStatusBanner(status === 'Queue Detected' ? 'Queue Detected ??' : status === 'Queue Soon or Active' ? 'Queue Soon or Active' : status === 'CAPTCHA Detected' ? 'CAPTCHA Detected ??' : status, colorClass);
                 window.QueueHunter.updateUI(`Confirmed ${status}: ${details}`);
-
-                const notifyKey = status === 'Queue Detected' ? 'queueDetected' : 
-                                  status === 'Queue Soon or Active' ? 'queueSoon' : 
-                                  status === 'CAPTCHA Detected' ? 'captchaDetected' : 'possibleBotBlock';
-                
-                if (window.QueueHunter.notificationSettings[notifyKey] && !hasNotified) {
+                if (window.QueueHunter.notificationSettings[status === 'Queue Detected' ? 'queueDetected' : status === 'Queue Soon or Active' ? 'queueSoon' : status === 'CAPTCHA Detected' ? 'captchaDetected' : 'possibleBotBlock'] && !hasNotified) {
                     window.QueueHunter.updateUI('Triggering notifications for confirmed status');
                     window.QueueHunter.playAlert();
-                    let discordColor = status === 'Queue Detected' ? 0xFF0000 : status === 'Queue Soon or Active' ? 0xFFA500 : status === 'CAPTCHA Detected' ? 0x9370DB : 0x8B0000;
-                    window.QueueHunter.sendDiscord(`${status} ??`, details, discordColor);
+                    window.QueueHunter.sendDiscord(`${status} ??`, details, status === 'Queue Detected' ? 0xFF0000 : status === 'Queue Soon or Active' ? 0xFFA500 : 0x9370DB);
                     window.QueueHunter.sendEmail(status, details);
                     if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
                         new Notification(status, { body: url });
@@ -969,17 +1079,14 @@
                 window.QueueHunter.updateUI('Consecutive checks completed');
                 return true;
             }
-
             window.QueueHunter.updateUI(`Waiting 5 seconds before consecutive check ${currentFailureCount + 1}`);
             await new Promise(resolve => setTimeout(resolve, 5000));
-            
             const result = await window.QueueHunter.checkShopAccess(true);
-
             if (!result.isFailure) {
                 const stockStatus = document.getElementById('stockStatus');
-                if (stockStatus) stockStatus.textContent = 'Shop Accessible';
+                if (stockStatus) stockStatus.textContent = 'In Stock';
                 window.QueueHunter.updateStatusBanner('Shop Accessible', 'green');
-                window.QueueHunter.updateUI(`Consecutive check passed (API Success): ${result.details}`);
+                window.QueueHunter.updateUI(`Consecutive check passed: ${result.details}`);
                 consecFails = 0;
                 cleanChecks++;
                 if (cleanChecks >= 1 && hasNotified) {
@@ -989,32 +1096,25 @@
                 }
                 window.QueueHunter.stopAlert();
                 isCheckingConsecutiveFailures = false;
-                window.QueueHunter.updateUI('Consecutive checks aborted due to API success');
+                window.QueueHunter.updateUI('Consecutive checks aborted due to successful access');
                 return false;
             }
-
-            // Continue consecutive checks if API returns failure again
             return await window.QueueHunter.performConsecutiveChecks(currentFailureCount + 1, maxFailures, result.status, result.details, result.url, result.queueLength);
         };
-        
         window.QueueHunter.checkSite = async function(isConsec = false) {
-            // ... (Initial check logic - mostly unchanged)
             const currentEmails = window.QueueHunter.emails.filter(email => /\S+@\S+\.\S+/.test(email));
             if (currentEmails.length === 0) {
                 window.QueueHunter.updateUI('No valid email addresses provided; email notifications will be skipped');
             }
             window.QueueHunter.updateStatusBanner('Checking...', 'yellow');
-            window.QueueHunter.updateUI(`Initiating ${isConsec ? 'consecutive' : 'initial'} site check via Hunter API`);
-            
+            window.QueueHunter.updateUI(`Initiating ${isConsec ? 'consecutive' : 'initial'} site check`);
             const result = await window.QueueHunter.checkShopAccess();
-            
             document.getElementById('lastCheck').textContent = new Date().toLocaleTimeString();
-
             if (!result.isFailure) {
                 const stockStatus = document.getElementById('stockStatus');
-                if (stockStatus) stockStatus.textContent = 'Shop Accessible';
+                if (stockStatus) stockStatus.textContent = 'In Stock';
                 window.QueueHunter.updateStatusBanner('Shop Accessible', 'green');
-                window.QueueHunter.updateUI(`Site check successful (API Success): ${result.details}`);
+                window.QueueHunter.updateUI(`Site check successful: ${result.details}`);
                 consecFails = 0;
                 cleanChecks++;
                 if (cleanChecks >= 1 && hasNotified) {
@@ -1026,39 +1126,26 @@
                 return { success: true, isFail: false, suspectedQueue: false };
             } else {
                 consecFails++;
-                window.QueueHunter.updateUI(`Potential failure detected, consecutive API fails: ${consecFails}/${failThresh}`);
-                
+                window.QueueHunter.updateUI(`Potential failure detected, consecutive fails: ${consecFails}/${failThresh}`);
                 if (consecFails >= failThresh) {
                     isCheckingConsecutiveFailures = true;
                     window.QueueHunter.updateUI(`Threshold reached; initiating consecutive checks for confirmation`);
-                    
-                    // Note: Consecutive checks now confirm the API's status (Queue, CAPTCHA, or IP Block)
                     const confirmed = await window.QueueHunter.performConsecutiveChecks(1, failThresh, result.status, result.details, result.url, result.queueLength);
-                    
                     if (!confirmed) {
                         consecFails = 0;
-                        window.QueueHunter.updateUI('Consecutive checks passed (API recovered); resetting failure count');
+                        window.QueueHunter.updateUI('Consecutive checks passed; resetting failure count');
                     }
                     return { success: false, isFail: true, suspectedQueue: true };
                 } else {
                     const stockStatus = document.getElementById('stockStatus');
                     if (stockStatus) stockStatus.textContent = result.status;
-                    
-                    let colorClass;
-                    if (result.status === 'Queue Detected') colorClass = 'red';
-                    else if (result.status === 'Queue Soon or Active') colorClass = 'orange';
-                    else if (result.status === 'CAPTCHA Detected') colorClass = 'purple';
-                    else if (result.status === 'Possible Bot Block' || result.status === 'API Offline/Error') colorClass = 'dark-red';
-                    else colorClass = 'purple';
-
+                    const colorClass = result.status === 'Queue Detected' ? 'red' : result.status === 'Queue Soon or Active' ? 'orange' : result.status === 'CAPTCHA Detected' ? 'purple' : 'purple';
                     window.QueueHunter.updateStatusBanner(result.status, colorClass);
-                    window.QueueHunter.updateUI(`Site check failed (API Report): ${result.details}`);
+                    window.QueueHunter.updateUI(`Site check failed: ${result.details}`);
                     return { success: false, isFail: true, suspectedQueue: true };
                 }
             }
         };
-
-        // Monitoring lifecycle functions (Unchanged, cited for completeness)
         window.QueueHunter.testNow = async function() {
             window.QueueHunter.updateUI('Manual test triggered');
             await window.QueueHunter.checkSite();
@@ -1079,7 +1166,7 @@
             consecFails = 0;
             window.QueueHunter.updateUI('Monitoring started; initializing background lock');
             await window.QueueHunter.requestLock();
-            window.QueueHunter.updateUI('API Hunt started, beginning site checks');
+            window.QueueHunter.updateUI('Hunt started, beginning site checks');
             function runCheck() {
                 if (isCheckingConsecutiveFailures) {
                     window.QueueHunter.updateUI('Waiting for consecutive checks to complete');
@@ -1088,7 +1175,7 @@
                 }
                 window.QueueHunter.checkSite(true).then(result => {
                     const nextInterval = window.QueueHunter.getDynamicFreq(result.suspectedQueue);
-                    window.QueueHunter.updateUI(`Scheduling next API call in ${nextInterval / 1000} seconds`);
+                    window.QueueHunter.updateUI(`Scheduling next check in ${nextInterval / 1000} seconds`);
                     intervalId = setTimeout(runCheck, nextInterval);
                 }).catch(e => {
                     window.QueueHunter.updateUI(`CheckSite error: ${e.message}; continuing monitoring`);
