@@ -114,6 +114,8 @@
     .pokeball-top-right { top: -15px; right: -15px; transform: rotate(15deg); }
     .pokeball-bottom-left { bottom: -15px; left: -15px; transform: rotate(40deg); }
     .pokeball-bottom-right { bottom: -15px; right: -15px; transform: rotate(-30deg); }
+    
+    /* MODIFIED: Combined selectors for email AND url inputs to ensure styling is applied to the new webhook field */
     input[type="email"], input[type="url"] {
       border: 2px solid #a0d2eb;
       padding: 0.6rem 1rem;
@@ -128,6 +130,7 @@
       background-color: #f3f4f6;
       cursor: not-allowed;
     }
+    
     button {
       font-weight: 600;
       transition: background-color 0.3s ease, transform 0.2s ease;
@@ -139,12 +142,14 @@
     .text-center {
       text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
     }
+    /* This is the key Flexbox style used for both email and webhook groups */
     .email-input-group {
       display: flex;
       align-items: center;
       margin-bottom: 0.5rem;
     }
-    .email-input-group input {
+    /* MODIFIED: Combined selector for all inputs in the group */
+    .email-input-group input { 
       flex-grow: 1;
       margin-right: 0.5rem;
     }
@@ -287,7 +292,7 @@
         <button type="button" class="submit-email-button" id="submitWebhookButton">Submit</button>
       </div>
     </div>
-        
+    
     <div id="emailInputsContainer" class="mb-2">
       <label class="block text-sm text-gray-600 mb-1">Emails for alerts:</label>
       <div class="email-input-group">
@@ -312,12 +317,12 @@
     <button id="startButton" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Start Checking</button>
     <button id="stopButton" class="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600 mt-2 hidden">Stop Checking</button>
     
-    <button id="emailToggleButton" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 mt-2 email-toggle-button active">Deactivate Email Alerts</button>
+        <button id="emailToggleButton" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 mt-2 email-toggle-button active">Deactivate Email Alerts</button>
     <button id="testEmailButton" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 mt-2">Test Email</button>
     
         <button id="webhookToggleButton" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 mt-2 email-toggle-button active">Deactivate Webhook Alerts</button>
     <button id="testWebhookButton" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 mt-2">Test Webhook</button>
-      </div>
+  </div>
   <audio id="beepSound">
     <source src="https://www.soundjay.com/buttons/beep-01a.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
@@ -372,8 +377,8 @@
     const stopButton = document.getElementById('stopButton');
     const testEmailButton = document.getElementById('testEmailButton');
     const emailToggleButton = document.getElementById('emailToggleButton');
-    const testWebhookButton = document.getElementById('testWebhookButton'); // New
-    const webhookToggleButton = document.getElementById('webhookToggleButton'); // New
+    const testWebhookButton = document.getElementById('testWebhookButton');
+    const webhookToggleButton = document.getElementById('webhookToggleButton');
     const beepSound = document.getElementById('beepSound');
     const runTime = document.getElementById('runTime');
     const emailInputsContainer = document.getElementById('emailInputsContainer');
@@ -381,16 +386,16 @@
     const emailFeedback = document.getElementById('emailFeedback');
     const frequencySlider = document.getElementById('frequencySlider');
     const frequencyValue = document.getElementById('frequencyValue');
-    const discordWebhookUrlInput = document.getElementById('discordWebhookUrl'); // New
-    const submitWebhookButton = document.getElementById('submitWebhookButton'); // New
-    const webhookInputContainer = document.getElementById('webhookInputContainer'); // New
+    const discordWebhookUrlInput = document.getElementById('discordWebhookUrl');
+    const submitWebhookButton = document.getElementById('submitWebhookButton');
+    const webhookInputContainer = document.getElementById('webhookInputContainer');
 
     let intervalId = null;
     let startTime = null;
     let timerInterval = null;
     let currentCheckInterval = 10 * 60 * 1000;
     let emailNotificationsEnabled = true;
-    let webhookNotificationsEnabled = true; // New
+    let webhookNotificationsEnabled = true;
 
     // --- Webhook Toggle Logic ---
     webhookToggleButton.addEventListener('click', () => {
@@ -478,6 +483,7 @@
     // --- Webhook Input Logic ---
     submitWebhookButton.addEventListener('click', function() {
       const webhook = discordWebhookUrlInput.value.trim();
+      // Discord webhook URL regex:
       const webhookRegex = /^https:\/\/discord\.com\/api\/webhooks\/\d+\/[a-zA-Z0-9_-]+$/;
       if (!webhook || !webhookRegex.test(webhook)) {
         alert('Please enter a valid Discord Webhook URL.');
@@ -486,11 +492,15 @@
       }
       discordWebhookUrlInput.setAttribute('readonly', 'true');
       submitWebhookButton.remove();
+      
+      // Create a new Remove button
       const removeButton = document.createElement('button');
       removeButton.type = 'button';
       removeButton.className = 'remove-email-button';
       removeButton.textContent = 'Remove';
       webhookInputContainer.querySelector('.email-input-group').appendChild(removeButton);
+      
+      // Add remove logic
       removeButton.addEventListener('click', function() {
         discordWebhookUrlInput.removeAttribute('readonly');
         discordWebhookUrlInput.value = '';
@@ -498,6 +508,7 @@
         webhookInputContainer.querySelector('.email-input-group').appendChild(submitWebhookButton);
         showEmailFeedback('Webhook removed.');
       });
+
       showEmailFeedback('Webhook submitted.');
       console.log('Submitted webhook:', webhook);
     });
@@ -571,8 +582,8 @@
         }
       }, 1500);
     }
-    
-    // --- Discord Webhook Function ---
+
+    // --- NEW: Discord Webhook Function ---
     async function sendDiscordWebhook(status, details) {
       const webhookUrl = discordWebhookUrlInput.value.trim();
       const webhookRegex = /^https:\/\/discord\.com\/api\/webhooks\/\d+\/[a-zA-Z0-9_-]+$/;
@@ -589,9 +600,9 @@
       
       let color;
       if (status.includes('accessible') || status.includes('in queue')) {
-        color = 65280; // Green
+        color = 65280; // Green (RGB: 0, 255, 0)
       } else if (status.includes('not accessible') || status.includes('Proxy error') || status.includes('down')) {
-        color = 16711680; // Red
+        color = 16711680; // Red (RGB: 255, 0, 0)
       } else {
         color = 16776960; // Yellow
       }
@@ -611,14 +622,22 @@
       };
       
       try {
-        await fetch(webhookUrl, {
+        const res = await fetch(webhookUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
+
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error('Failed to send Discord Webhook. Status:', res.status, 'Error:', errorText);
+          return;
+        }
+
         console.log('Discord Webhook sent successfully.');
       } catch (error) {
         console.error('Failed to send Discord Webhook:', error);
+        return;
       }
       
       // Deactivate webhook after successful alert
@@ -698,12 +717,11 @@
         alert('Email functionality is unavailable. Please check your network connection and try again.');
         return;
       }
-      console.log('Sending test email to:', recipientEmails);
-      // Note: sendEmail will disable the toggle after sending, but we want it to remain on for the user if they were active.
-      // We temporarily store and restore the state.
-      const wasEnabled = emailNotificationsEnabled;
+      
+      // Preserve email state for test
+      const wasEmailEnabled = emailNotificationsEnabled;
       sendEmail('Test Email', 'This is a test email from Pokémon Center Shop Access Checker.', recipientEmails);
-      if (wasEnabled) {
+      if (wasEmailEnabled) {
         emailNotificationsEnabled = true;
         emailToggleButton.textContent = 'Deactivate Email Alerts';
         emailToggleButton.classList.remove('inactive', 'bg-gray-500');
@@ -711,8 +729,8 @@
       }
       alert('Test email(s) sent! Check your inbox(es) (and spam/junk folder).');
     }
-
-    // --- Test Webhook Function ---
+    
+    // --- NEW: Test Webhook Function ---
     async function testWebhook() {
       const webhookUrl = discordWebhookUrlInput.value.trim();
       const webhookRegex = /^https:\/\/discord\.com\/api\/webhooks\/\d+\/[a-zA-Z0-9_-]+$/;
@@ -728,11 +746,11 @@
         return;
       }
       
-      console.log('Sending test webhook to:', webhookUrl);
-      // Note: sendDiscordWebhook will disable the toggle after sending, but we want it to remain on for the user if they were active.
-      const wasEnabled = webhookNotificationsEnabled;
+      // Preserve webhook state for test
+      const wasWebhookEnabled = webhookNotificationsEnabled;
       await sendDiscordWebhook('Test Webhook', 'This is a test notification from Pokémon Center Shop Access Checker.');
-      if (wasEnabled) {
+      
+      if (wasWebhookEnabled) {
         webhookNotificationsEnabled = true;
         webhookToggleButton.textContent = 'Deactivate Webhook Alerts';
         webhookToggleButton.classList.remove('inactive', 'bg-gray-500');
@@ -756,7 +774,6 @@
       return null;
     }
 
-    // Note: You'll notice this function now calls the webhook function too!
     async function checkShopAccess() {
       const emailInputs = document.querySelectorAll('.email-input');
       const currentEmails = [];
@@ -815,7 +832,7 @@
           playThreeBeeps();
           if (statusText.dataset.previousStatus !== status) {
             sendEmail(status, details, currentEmails);
-            sendDiscordWebhook(status, details); // Webhook Alert
+            sendDiscordWebhook(status, details); // NEW
           }
           statusText.dataset.previousStatus = status;
           return;
@@ -836,10 +853,9 @@
           statusDetails.textContent = details;
           playThreeBeeps();
           
-          // Alert only if status has changed or is the first alert
           if (statusText.dataset.previousStatus !== currentStatus) {
             sendEmail(currentStatus, details, currentEmails);
-            sendDiscordWebhook(currentStatus, details); // Webhook Alert
+            sendDiscordWebhook(currentStatus, details); // NEW
           }
 
           statusText.dataset.previousStatus = currentStatus;
@@ -859,11 +875,10 @@
             const details = `Reached ${finalUrl} (checked ${urlUsed}), shop content detected (keywords or dynamic elements present). Response length: ${text.length} chars.`;
             statusDetails.textContent = details;
 
-            // Alert only if status has changed
             if (statusText.dataset.previousStatus !== currentStatus) {
               playThreeBeeps();
               sendEmail(currentStatus, details, currentEmails);
-              sendDiscordWebhook(currentStatus, details); // Webhook Alert
+              sendDiscordWebhook(currentStatus, details); // NEW
             }
             
             statusText.dataset.previousStatus = currentStatus;
@@ -878,7 +893,7 @@
             playThreeBeeps();
             if (statusText.dataset.previousStatus !== currentStatus) {
               sendEmail(currentStatus, details, currentEmails);
-              sendDiscordWebhook(currentStatus, details); // Webhook Alert
+              sendDiscordWebhook(currentStatus, details); // NEW
             }
             statusText.dataset.previousStatus = currentStatus;
           }
@@ -892,7 +907,7 @@
           playThreeBeeps();
           if (statusText.dataset.previousStatus !== currentStatus) {
             sendEmail(currentStatus, details, currentEmails);
-            sendDiscordWebhook(currentStatus, details); // Webhook Alert
+            sendDiscordWebhook(currentStatus, details); // NEW
           }
           statusText.dataset.previousStatus = currentStatus;
         }
@@ -908,50 +923,59 @@
         playThreeBeeps();
         if (statusText.dataset.previousStatus !== status) {
           sendEmail(status, details, currentEmails);
-          sendDiscordWebhook(status, details); // Webhook Alert
+          sendDiscordWebhook(status, details); // NEW
         }
         statusText.dataset.previousStatus = status;
       }
     }
     function startChecking() {
       const emailInputs = document.querySelectorAll('.email-input');
-      let allEmailsValid = true;
-      let hasAtLeastOneEmailOrWebhook = false;
+      let allInputsValid = true;
+      let hasAtLeastOneAlertMethod = false;
 
+      // Check Webhook Input
       const webhookUrl = discordWebhookUrlInput.value.trim();
       const webhookRegex = /^https:\/\/discord\.com\/api\/webhooks\/\d+\/[a-zA-Z0-9_-]+$/;
+      
       if (webhookUrl && discordWebhookUrlInput.hasAttribute('readonly') && webhookRegex.test(webhookUrl)) {
-        hasAtLeastOneEmailOrWebhook = true;
+        hasAtLeastOneAlertMethod = true;
       } else if (webhookUrl && !discordWebhookUrlInput.hasAttribute('readonly')) {
         alert('Please submit the Discord Webhook URL before starting.');
         discordWebhookUrlInput.focus();
-        allEmailsValid = false;
+        allInputsValid = false;
+      } else if (webhookUrl && !webhookRegex.test(webhookUrl)) {
+        alert('The submitted Discord Webhook URL is invalid.');
+        discordWebhookUrlInput.focus();
+        allInputsValid = false;
       }
       
+      // Check Email Inputs
       Array.from(emailInputs).forEach((input, index) => {
         const email = input.value.trim();
         if (email && !input.hasAttribute('readonly')) {
           alert('Please submit all email addresses before starting.');
           input.focus();
-          allEmailsValid = false;
+          allInputsValid = false;
         } else if (email && input.hasAttribute('readonly')) {
           if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            hasAtLeastOneEmailOrWebhook = true;
+            hasAtLeastOneAlertMethod = true;
           } else {
             alert(`Please ensure email ${index + 1} is valid: ${email}`);
             input.focus();
-            allEmailsValid = false;
+            allInputsValid = false;
           }
         }
       });
-      if (!allEmailsValid) {
+      
+      if (!allInputsValid) {
         return;
       }
-      if (!hasAtLeastOneEmailOrWebhook) {
+      if (!hasAtLeastOneAlertMethod) {
         console.warn('No valid email or webhook provided.');
         alert('Please submit at least one valid email address OR a Discord webhook URL.');
         return;
       }
+      
       if (intervalId) {
         clearTimeout(intervalId);
       }
@@ -986,7 +1010,7 @@
     startButton.addEventListener('click', startChecking);
     stopButton.addEventListener('click', stopChecking);
     testEmailButton.addEventListener('click', testEmail);
-    testWebhookButton.addEventListener('click', testWebhook); // New
+    testWebhookButton.addEventListener('click', testWebhook);
   </script>
 </body>
 </html>
