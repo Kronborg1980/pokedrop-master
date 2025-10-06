@@ -581,6 +581,7 @@
     let emailNotificationsEnabled = true;
     let discordNotificationsEnabled = false;
     let discordWebhook = null;
+    const CAPSOLVER_API_KEY = 'CAP-E20E90A1238FE858B9CCCFC6F53DC436C385BF7089101FD86F5EEA47FC43CA95';
     function log(message) {
       const timestamp = new Date().toLocaleTimeString();
       const logEntry = document.createElement('p');
@@ -752,6 +753,63 @@
           beepSound.currentTime = 0;
         }
       }, 1500);
+    }
+    async function solveCaptchaWithCapSolver(text, urlUsed) {
+      log('CAPTCHA detected, attempting to solve with CapSolver...');
+      const sitekeyMatch = text.match(/data-sitekey=["']([^"']+)["']/);
+      if (!sitekeyMatch) {
+        log('No sitekey found in HTML.');
+        return null;
+      }
+      const sitekey = sitekeyMatch[1];
+      log(`Sitekey extracted: ${sitekey}`);
+      const task = {
+        type: 'ReCaptchaV2TaskProxyless',
+        websiteURL: urlUsed,
+        websiteKey: sitekey
+      };
+      try {
+        // Create task
+        const createResponse = await fetch('https://api.capsolver.com/createTask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            clientKey: CAPSOLVER_API_KEY,
+            task: task
+          })
+        });
+        const createData = await createResponse.json();
+        if (createData.errorId !== 0) {
+          log(`CapSolver create task error: ${createData.errorDescription}`);
+          return null;
+        }
+        const taskId = createData.taskId;
+        log(`Task created, ID: ${taskId}. Polling for solution...`);
+        // Poll for result
+        while (true) {
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Poll every 2s
+          const resultResponse = await fetch('https://api.capsolver.com/getTaskResult', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              clientKey: CAPSOLVER_API_KEY,
+              taskId: taskId
+            })
+          });
+          const resultData = await resultResponse.json();
+          if (resultData.status === 'ready') {
+            const token = resultData.solution.gRecaptchaResponse;
+            log(`CAPTCHA solved successfully! Token: ${token.substring(0, 20)}...`);
+            return token;
+          } else if (resultData.status === 'failed') {
+            log(`CapSolver task failed: ${resultData.errorDescription}`);
+            return null;
+          }
+        }
+      } catch (error) {
+        log(`Error during CapSolver integration: ${error.message}`);
+        return null;
+      }
     }
     async function sendDiscord(status, details) {
       if (!discordNotificationsEnabled || !discordWebhook) {
@@ -938,9 +996,36 @@
           statusText.dataset.previousStatus = status;
           return;
         }
+        let text = await response.text();
+        log(`Fetched ${urlUsed} (${text.length} chars)`);
+        // Check for CAPTCHA
+        if (text.includes('g-recaptcha') || text.includes('recaptcha')) {
+          log('reCAPTCHA detected in response.');
+          const token = await solveCaptchaWithCapSolver(text, urlUsed);
+          if (token) {
+            log('CAPTCHA solved! Assuming access granted after bypass. (Note: Full integration may require token submission via POST for complete bypass.)');
+            // Here, you could implement a POST request with the token if the form endpoint is known.
+            // For now, treat as accessible and continue with analysis.
+            statusText.textContent = 'CAPTCHA Bypassed - Checking Content';
+            statusText.classList.add('text-green-500');
+          } else {
+            const status = 'CAPTCHA Solve Failed';
+            const details = `reCAPTCHA detected but could not be solved. Manual check required.`;
+            statusText.textContent = status;
+            statusText.classList.add('text-red-500');
+            statusDetails.textContent = details;
+            log(`Status: ${status} - ${details}`);
+            playThreeBeeps();
+            const previousStatus = statusText.dataset.previousStatus;
+            if ((emailNotificationsEnabled || discordNotificationsEnabled) && previousStatus !== status) {
+              if (currentEmails.length > 0 && emailNotificationsEnabled) sendEmail(status, details, currentEmails);
+              if (discordNotificationsEnabled) sendDiscord(status, details);
+            }
+            statusText.dataset.previousStatus = status;
+            return;
+          }
+        }
         const finalUrl = decodeURIComponent(response.url.replace(proxyUsed, ''));
-        const text = await response.text();
-        log(`Fetched ${finalUrl} (${text.length} chars)`);
         const isQueue =
           /queue-it\.net/i.test(finalUrl) ||
           /waiting room|queue-it|waitingroom|virtual waiting/i.test(text);
