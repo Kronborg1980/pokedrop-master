@@ -102,7 +102,7 @@
       text-align: center;
     }
     .pokemon-header-sprite {
-      width: 60px;
+      width: 72px; /* Increased from 60px to 72px (20% larger) */
       height: auto;
       filter: drop-shadow(0 0 10px #00ffff);
       z-index: 5;
@@ -193,6 +193,7 @@
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      margin-bottom: 0.5rem;
     }
     .email-input-group input {
       flex: 1;
@@ -306,9 +307,9 @@
       <div id="emailInputsContainer">
         <div class="email-input-group">
           <input type="email" placeholder="name@example.com" class="email-input" required>
-          <button type="button" class="submit-email-button bg-green-500 text-white">Submit</button>
         </div>
       </div>
+      <button id="submitAllEmailsButton" class="submit-all-emails-button mt-2 bg-green-500 text-white">Submit All Emails</button>
       <button id="addEmailButton" class="add-email-button mt-2 bg-green-500 text-white">Add Another Email</button>
       <div id="emailFeedback" class="status-feedback"></div>
     </div>
@@ -414,6 +415,7 @@
     const runTime = document.getElementById('runTime');
     const emailInputsContainer = document.getElementById('emailInputsContainer');
     const addEmailButton = document.getElementById('addEmailButton');
+    const submitAllEmailsButton = document.getElementById('submitAllEmailsButton');
     const emailFeedback = document.getElementById('emailFeedback');
     const webhookFeedback = document.getElementById('webhookFeedback');
     const frequencySlider = document.getElementById('frequencySlider');
@@ -501,62 +503,44 @@
       emailInputGroup.className = 'email-input-group';
       emailInputGroup.innerHTML = `
         <input type="email" placeholder="name@example.com" class="email-input" required>
-        <button type="button" class="submit-email-button bg-green-500 text-white">Submit</button>
       `;
       emailInputsContainer.appendChild(emailInputGroup);
-      const submitButton = emailInputGroup.querySelector('.submit-email-button');
-      const emailInput = emailInputGroup.querySelector('.email-input');
-      submitButton.addEventListener('click', function() {
-        const email = emailInput.value.trim();
-        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-          alert('Please enter a valid email address.');
-          emailInput.focus();
-          return;
-        }
-        emailInput.setAttribute('readonly', 'true');
-        submitButton.remove();
-        const removeButton = document.createElement('button');
-        removeButton.type = 'button';
-        removeButton.className = 'remove-email-button bg-red-500 text-white';
-        removeButton.textContent = 'Remove';
-        emailInputGroup.appendChild(removeButton);
-        removeButton.addEventListener('click', function() {
-          emailInputGroup.remove();
-          showFeedback(emailFeedback, 'Email removed.');
-          log('Email removed from alerts.');
-        });
-        showFeedback(emailFeedback, 'Email submitted.');
-        log(`Email submitted: ${email}`);
-      });
       log('New email input field added.');
       showFeedback(emailFeedback, 'Email field added.');
     }
-    document.addEventListener('DOMContentLoaded', () => {
-      const initialInputGroup = emailInputsContainer.querySelector('.email-input-group');
-      const initialInput = initialInputGroup.querySelector('.email-input');
-      const submitButton = initialInputGroup.querySelector('.submit-email-button');
-      submitButton.addEventListener('click', function() {
-        const email = initialInput.value.trim();
+    submitAllEmailsButton.addEventListener('click', () => {
+      const emailInputs = emailInputsContainer.querySelectorAll('.email-input');
+      let allValid = true;
+      let submittedEmails = 0;
+      emailInputs.forEach((input, index) => {
+        const email = input.value.trim();
         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-          alert('Please enter a valid email address.');
-          initialInput.focus();
+          alert(`Please enter a valid email address for email ${index + 1}.`);
+          input.focus();
+          allValid = false;
           return;
         }
-        initialInput.setAttribute('readonly', 'true');
-        submitButton.remove();
-        const removeButton = document.createElement('button');
-        removeButton.type = 'button';
-        removeButton.className = 'remove-email-button bg-red-500 text-white';
-        removeButton.textContent = 'Remove';
-        initialInputGroup.appendChild(removeButton);
-        removeButton.addEventListener('click', function() {
-          initialInputGroup.remove();
-          showFeedback(emailFeedback, 'Email removed.');
-          log('Email removed from alerts.');
-        });
-        showFeedback(emailFeedback, 'Email submitted.');
-        log(`Email submitted: ${email}`);
+        if (!input.hasAttribute('readonly')) {
+          input.setAttribute('readonly', 'true');
+          const removeButton = document.createElement('button');
+          removeButton.type = 'button';
+          removeButton.className = 'remove-email-button bg-red-500 text-white';
+          removeButton.textContent = 'Remove';
+          input.parentElement.appendChild(removeButton);
+          removeButton.addEventListener('click', function() {
+            input.parentElement.remove();
+            showFeedback(emailFeedback, 'Email removed.');
+            log('Email removed from alerts.');
+          });
+          submittedEmails++;
+          log(`Email submitted: ${email}`);
+        }
       });
+      if (allValid && submittedEmails > 0) {
+        showFeedback(emailFeedback, `${submittedEmails} email${submittedEmails > 1 ? 's' : ''} submitted.`);
+      } else if (allValid && submittedEmails === 0) {
+        showFeedback(emailFeedback, 'No new emails to submit.');
+      }
     });
     addEmailButton.addEventListener('click', addEmailInputField);
     function formatDuration(ms) {
@@ -661,7 +645,7 @@
         return;
       }
       const embedMessage = {
-        content: '@everyone', // Ensure @everyone ping
+        content: '@everyone',
         embeds: [{
           title: '🌀 Pokémon Center Shop Alert! 🌀',
           description: `**Status:** ${status}\n**Details:** ${details}\n**Timestamp:** ${new Date().toLocaleString()}\n**Checked URL:** ${details.includes('checked') ? details.match(/checked (.*?)(\.|,|$)/)?.[1] || 'N/A' : 'N/A'}\n**Response Length:** ${details.includes('chars') ? details.match(/(\d+) chars/)?.[1] || 'N/A' : 'N/A'}`,
@@ -1007,9 +991,9 @@
           const previousStatus = statusText.dataset.previousStatus;
           if ((emailNotificationsEnabled || discordNotificationsEnabled) && previousStatus !== currentStatus) {
             if (currentEmails.length > 0 && emailNotificationsEnabled) sendEmail(currentStatus, details, currentEmails);
-            if (discordNotificationsEnabled) sendDiscord(currentStatus, details);
+            if (discordNotificationsEnabled) sendDiscord(status, details);
           }
-          statusText.dataset.previousStatus = currentStatus;
+          statusText.dataset.previousStatus = status;
         }
       } catch (error) {
         log(`Error checking page: ${error.message}`);
