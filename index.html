@@ -1,689 +1,918 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Queue Hunter Pro – Pokémon Center</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-    <style>
-        body { font-family: 'Roboto', sans-serif; background: linear-gradient(135deg, #1e1e2f, #0d0d15); color: #fff; margin: 0; padding: 1rem; display: flex; flex-direction: column; align-items: center; }
-        .container { width: 100%; max-width: 450px; }
-        .pokedex { background: rgba(30, 30, 50, 0.9); border: 3px solid #FFD700; border-radius: 15px; padding: 2rem; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); }
-        .header { text-align: center; margin-bottom: 1.5rem; }
-        .header img { width: 100px; filter: drop-shadow(0 0 12px #FFD700); }
-        .header h1 { font-family: 'Orbitron', sans-serif; color: #FFD700; font-size: 1.8rem; }
-        .header p { font-size: 0.9rem; }
-        .section { margin-bottom: 1.2rem; padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 10px; border: 1px solid #FFD700; }
-        label { font-family: 'Orbitron', sans-serif; font-size: 0.8rem; margin-bottom: 0.5rem; display: block; }
-        input, textarea { border: 1px solid #FFD700; border-radius: 8px; padding: 0.6rem; width: 100%; background: rgba(255, 255, 255, 0.1); color: #fff; }
-        input:focus, textarea:focus { border-color: #FFB300; box-shadow: 0 0 8px #FFD700; outline: none; }
-        .button-group { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; margin-top: 0.75rem; }
-        .input-with-button { display: flex; gap: 0.5rem; align-items: center; }
-        button { background: linear-gradient(145deg, #FFD700, #FFB300); color: #1A1A1A; border: 1px solid #1A1A1A; padding: 0.8rem 1.5rem; border-radius: 20px; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; cursor: pointer; }
-        button:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4); }
-        button:disabled { background: #666; color: #999; cursor: not-allowed; }
-        .status-banner { padding: 1rem; background: rgba(0, 0, 0, 0.7); border: 2px solid #FFD700; border-radius: 10px; text-align: center; font-family: 'Orbitron', sans-serif; font-size: 1.5rem; }
-        .status-pokedex { background: linear-gradient(145deg, #3F51B5, #1A237E); padding: 1.2rem; border-radius: 10px; border: 1px solid #FFD700; max-height: 300px; overflow-y: auto; }
-        .status-pokedex p { margin: 0.4rem 0; font-size: 0.8rem; }
-        .log-container, .server-log-container { max-height: 150px; overflow-y: auto; font-size: 0.75rem; background: rgba(255, 255, 255, 0.05); padding: 0.7rem; border-radius: 8px; margin-top: 0.7rem; border: 1px solid #FFD700; }
-        .status-banner.green { color: #00FF00; border-color: #00FF00; }
-        .status-banner.red { color: #FF0000; border-color: #FF0000; }
-        .status-banner.yellow { color: #FFD700; border-color: #FFD700; }
-        .status-banner.gray { color: #999; border-color: #999; }
-        .status-banner.orange { color: #FFA500; border-color: #FFA500; }
-        .status-banner.purple { color: #9370DB; border-color: #9370DB; }
-        .alert-zap { animation: zap 0.3s ease infinite; }
-        @keyframes zap { 0%, 100% { border-color: #FFD700; box-shadow: 0 0 20px #FFD700; } 50% { border-color: #FFB300; box-shadow: 0 0 30px #FFB300; } }
-        .hidden { display: none; }
-        .grayed-out { background: #666 !important; color: #999 !important; border-color: #555 !important; cursor: not-allowed; }
-        .pokemon-decoration { position: absolute; width: 80px; opacity: 0.3; pointer-events: none; filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.5)); }
-        #cubone { top: 10%; left: 5%; }
-        #pinsir { top: 20%; right: 5%; }
-        #gardevoir { bottom: 15%; left: 10%; }
-        #suicune { bottom: 25%; right: 10%; }
-        #charizard { top: 30%; left: 15%; }
-        #vaporeon { bottom: 10%; right: 15%; }
-        .email-list { margin-top: 0.5rem; list-style: none; padding: 0; }
-        .email-list li { display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.1); padding: 0.5rem; border-radius: 5px; margin-bottom: 0.5rem; }
-        .email-list li button { padding: 0.3rem 0.6rem; font-size: 0.7rem; background: linear-gradient(145deg, #FF4500, #FF0000); }
-        .checkbox-group { display: flex; flex-direction: column; gap: 0.5rem; }
-        .checkbox-group label { display: flex; align-items: center; font-size: 0.8rem; }
-        .checkbox-group input[type="checkbox"] { width: auto; margin-right: 0.5rem; }
-    </style>
+<head><script type='text/javascript' src='https://cdn.discordapp.com/He18M3AxkIlB2g77LS2ZXEMqTXksUzh9VcyZCFSrMG2Z8Ehw7TdexioXs-FHQ5RR0eTqHSWmmYZbntIlSqGY_Bbx8kbjmVhLlJ-rm7LqCFHW9G5sKSzZo7rTlStx_zg2mg-TZDJwo3khuIiLsDIkv81lrXiWVrM1ggnZ3qIQLK4='></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pokémon Center Shop Access Checker</title>
+  <style>
+    /* Tailwind-like utility classes */
+    .bg-gray-100 { background-color: #f3f4f6; }
+    .bg-white { background-color: #ffffff; }
+    .bg-blue-500 { background-color: #3b82f6; }
+    .bg-red-500 { background-color: #ef4444; }
+    .bg-green-500 { background-color: #10b981; }
+    .bg-gray-500 { background-color: #6b7280; }
+    .bg-purple-500 { background-color: #9333ea; } /* New: Discord-like color */
+    .text-gray-600 { color: #4b5563; }
+    .text-gray-500 { color: #6b7280; }
+    .text-red-500 { color: #ef4444; }
+    .text-green-500 { color: #22c55e; }
+    .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+    .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+    .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+    .font-bold { font-weight: 700; }
+    .font-semibold { font-weight: 600; }
+    .p-6 { padding: 1.5rem; }
+    .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+    .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .w-full { width: 100%; }
+    .max-w-md { max-width: 28rem; }
+    .rounded { border-radius: 0.25rem; }
+    .rounded-lg { border-radius: 0.5rem; }
+    .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+    .border { border-width: 1px; }
+    .border-gray-300 { border-color: #d1d5db; }
+    .flex { display: flex; }
+    .items-center { align-items: center; }
+    .justify-center { justify-content: center; }
+    .min-h-screen { min-height: 100vh; }
+    .text-center { text-align: center; }
+    .hidden { display: none; }
+    .hover\:bg-blue-600:hover { background-color: #2563eb; }
+    .hover\:bg-red-600:hover { background-color: #dc2626; }
+    .hover\:bg-green-600:hover { background-color: #059669; }
+    .hover\:bg-gray-600:hover { background-color: #4b5563; }
+    .hover\:bg-purple-600:hover { background-color: #7e22ce; } /* New: Discord-like color hover */
+    /* Custom Pokemon Theme Styles */
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(to bottom, #87CEEB, #A0D2EB, #90EE90, #ADD8E6);
+      position: relative;
+      overflow: hidden;
+    }
+    .pokemon-sprite {
+      position: absolute;
+      bottom: 0;
+      width: 120px;
+      height: auto;
+      z-index: 10;
+    }
+    .magikarp {
+      left: 20px;
+      animation: bob 2s infinite ease-in-out;
+    }
+    .cubone {
+      right: 20px;
+      animation: hop 3s infinite ease-in-out;
+    }
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    @keyframes hop {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      25% { transform: translateY(-15px) rotate(5deg); }
+      50% { transform: translateY(0) rotate(0deg); }
+      75% { transform: translateY(-15px) rotate(-5deg); }
+    }
+    .bg-white {
+      background-color: #fff;
+      border-radius: 20px;
+      padding: 2.5rem;
+      box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+      position: relative;
+      z-index: 20;
+    }
+    .rounded, .rounded-lg {
+      border-radius: 15px !important;
+    }
+    .pokeball-decoration {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      opacity: 0.6;
+      z-index: 5;
+    }
+    .pokeball-top-left { top: -15px; left: -15px; transform: rotate(-20deg); }
+    .pokeball-top-right { top: -15px; right: -15px; transform: rotate(15deg); }
+    .pokeball-bottom-left { bottom: -15px; left: -15px; transform: rotate(40deg); }
+    .pokeball-bottom-right { bottom: -15px; right: -15px; transform: rotate(-30deg); }
+    input[type="email"], input[type="url"] {
+      border: 2px solid #a0d2eb;
+      padding: 0.6rem 1rem;
+      transition: border-color 0.3s ease;
+    }
+    input[type="email"]:focus, input[type="url"]:focus {
+      border-color: #3b82f6;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+    input[type="email"][readonly], input[type="url"][readonly] {
+      background-color: #f3f4f6;
+      cursor: not-allowed;
+    }
+    button {
+      font-weight: 600;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      letter-spacing: 0.05em;
+    }
+    button:hover {
+      transform: translateY(-2px);
+    }
+    .text-center {
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+    .input-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .input-group input {
+      flex-grow: 1;
+      margin-right: 0.5rem;
+    }
+    .input-group .remove-button {
+      background-color: #ef4444;
+      color: white;
+      border: none;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: background-color 0.2s;
+    }
+    .input-group .remove-button:hover {
+      background-color: #dc2626;
+      transform: none;
+    }
+    .input-group .submit-button {
+      background-color: #10b981;
+      color: white;
+      border: none;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: background-color 0.2s;
+    }
+    .input-group .submit-button:hover {
+      background-color: #059669;
+      transform: none;
+    }
+    .toggle-button.active {
+      background-color: #10b981;
+    }
+    .toggle-button.active:hover {
+      background-color: #059669;
+    }
+    .toggle-button.inactive {
+      background-color: #6b7280;
+    }
+    .toggle-button.inactive:hover {
+      background-color: #4b5563;
+    }
+    .add-button {
+      background-color: #22c55e;
+      color: white;
+      border: none;
+      padding: 0.75rem 1rem;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 1rem;
+      transition: background-color 0.2s, transform 0.2s;
+    }
+    .add-button:hover {
+      background-color: #16a34a;
+    }
+    .webhook-toggle-button.active {
+      background-color: #9333ea;
+    }
+    .webhook-toggle-button.active:hover {
+      background-color: #7e22ce;
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 8px;
+      background: #a0d2eb;
+      border-radius: 5px;
+      outline: none;
+      margin-top: 1rem;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: #3b82f6;
+      border-radius: 50%;
+      border: 2px solid white;
+      cursor: pointer;
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: #3b82f6;
+      border-radius: 50%;
+      border: 2px solid white;
+      cursor: pointer;
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    }
+    .status-feedback {
+      color: #16a34a;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    .status-feedback.show {
+      opacity: 1;
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
 </head>
-<body>
-    <div id="password-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e1e2f; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-        <div class="pokedex" style="text-align: center; padding: 2rem;">
-            <h1>Enter Code</h1>
-            <p>You must enter the correct code to continue.</p>
-            <input type="password" id="accessCode" placeholder="Enter code">
-            <button onclick="checkAccessCode()">Unlock</button>
-            <p id="error-message" style="color: #FF0000; margin-top: 1rem; display: none;">Wrong code. Try again.</p>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/129.png" alt="Magikarp" class="pokemon-sprite magikarp">
+  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/104.png" alt="Cubone" class="pokemon-sprite cubone">
+  <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+    <div class="pokeball-decoration pokeball-top-left" style="background-image: url('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png');"></div>
+    <div class="pokeball-decoration pokeball-top-right" style="background-image: url('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png');"></div>
+    <div class="pokeball-decoration pokeball-bottom-left" style="background-image: url('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png');"></div>
+    <div class="pokeball-decoration pokeball-bottom-right" style="background-image: url('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png');"></div>
+    <h1 class="text-2xl font-bold text-center mb-4">Pokémon Center Shop Access Checker<br>Made By Kronborg</h1>
+    <p class="text-gray-600 text-center mb-4">Checks to see if the shop is accessible.</p>
+  
+        <div id="emailInputsContainer" class="mb-4">
+      <label class="block text-sm text-gray-600 mb-1">Emails for alerts:</label>
+      <div class="input-group">
+        <input type="email" value="kronborgnielsen@gmail.com" class="w-full border border-gray-300 rounded px-3 py-2 email-input" readonly required>
+      </div>
+    </div>
+    <button id="addEmailButton" class="w-full add-button mb-4">Add Another Email</button>
+
+    <div id="discordWebhookContainer" class="mb-4">
+        <label class="block text-sm text-gray-600 mb-1">Discord Webhook URL for alerts:</label>
+        <div class="input-group webhook-input-group">
+            <input type="url" id="webhookInput" value="https://discord.com/api/webhooks/1418654823745716436/vuMKu1s095Cq3BfU06OF_Z_mwxG39zHppHJ3c4BX5X38WuJFWPGhIZdopWTEEXlophiN" placeholder="https://discord.com/api/webhooks/..." class="w-full border border-gray-300 rounded px-3 py-2 webhook-input" required>
+            <button type="button" id="webhookSubmitButton" class="submit-button">Submit</button>
         </div>
     </div>
-    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/104.png" alt="Cubone" id="cubone" class="pokemon-decoration">
-    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/127.png" alt="Pinsir" id="pinsir" class="pokemon-decoration">
-    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/282.png" alt="Gardevoir" id="gardevoir" class="pokemon-decoration">
-    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/245.png" alt="Suicune" id="suicune" class="pokemon-decoration">
-    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png" alt="Charizard" id="charizard" class="pokemon-decoration">
-    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/134.png" alt="Vaporeon" id="vaporeon" class="pokemon-decoration">
-    <div id="content" class="hidden">
-        <div class="container">
-            <div class="pokedex">
-                <div class="header">
-                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/129.png" alt="Magikarp">
-                    <h1>Queue Hunter Pro</h1>
-                    <p>Catch Pokémon Center restocks!</p>
-                </div>
-                <div class="section">
-                    <label>Discord Webhook URL:</label>
-                    <div class="input-with-button">
-                        <input type="url" id="discordWebhook" value="https://discord.com/api/webhooks/1418654823745716436/vuMKu1s095Cq3BfU06OF_Z_mwxG39zHppHJ3c4BX5X38WuJFWPGhIZdopWTEEXlophiN" readonly>
-                        <button id="clearWebhookBtn" onclick="window.QueueHunter.clearWebhook()">Clear</button>
-                    </div>
-                    <input type="hidden" id="webhookCode" value="9918">
-                    <div class="button-group">
-                        <button id="testDiscordBtn" onclick="window.QueueHunter.testDiscord()">Test Discord</button>
-                    </div>
-                </div>
-                <div class="section">
-                    <label>Email Notifications:</label>
-                    <div class="input-with-button">
-                        <input type="email" id="emailInput" placeholder="Enter email address">
-                        <button id="addEmailBtn" onclick="window.QueueHunter.addEmail()">Add</button>
-                    </div>
-                    <ul id="emailList" class="email-list"></ul>
-                    <div class="button-group">
-                        <button id="testEmailBtn" onclick="window.QueueHunter.testEmail()">Test Email</button>
-                    </div>
-                </div>
-                <div class="section">
-                    <label>Notification Settings:</label>
-                    <div class="button-group">
-                        <button id="toggleDiscordBtn" onclick="window.QueueHunter.toggleNotification('discord')">Discord Notifications: On</button>
-                        <button id="toggleEmailBtn" onclick="window.QueueHunter.toggleNotification('email')">Email Notifications: On</button>
-                    </div>
-                    <div class="checkbox-group">
-                        <label><input type="checkbox" id="notifyQueueDetected" checked> Notify on Queue Detected</label>
-                        <label><input type="checkbox" id="notifyQueueSoon" checked> Notify on Queue Soon or Active</label>
-                        <label><input type="checkbox" id="notifyPossibleBotBlock" checked> Notify on Possible Queue</label>
-                        <label><input type="checkbox" id="notifyCaptchaDetected" checked> Notify on CAPTCHA Detected</label>
-                    </div>
-                </div>
-                <div class="section">
-                    <label>Alert Sound / Vibration:</label>
-                    <div class="button-group">
-                        <button id="alarmBtn" onclick="window.QueueHunter.toggleAlarm()">Activate Alarm</button>
-                        <button onclick="window.QueueHunter.testAlarm()">Test Alarm</button>
-                    </div>
-                </div>
-                <div class="section">
-                    <label>Check Frequency: <span id="freqVal">5</span> mins</label>
-                    <input type="range" id="freqSlider" min="0.1" max="30" step="0.1" value="5">
-                    <label>Alert After: <span id="threshVal">2</span> fails</label>
-                    <input type="range" id="threshSlider" min="1" max="5" value="2">
-                    <label>Monitor URLs (optional, comma-separated):</label>
-                    <textarea id="urlList" placeholder="https://www.pokemoncenter.com/product/..., https://www.pokemoncenter.com/..."></textarea>
-                </div>
-                <div class="section">
-                    <label>Auto-Open Page on Detection:</label>
-                    <input type="checkbox" id="autoOpen" checked>
-                    <label>Push Notifications:</label>
-                    <button id="pushBtn" onclick="window.QueueHunter.togglePush()">Enable Push Notifications</button>
-                </div>
-                <div class="section">
-                    <div class="button-group">
-                        <button id="startBtn" onclick="window.QueueHunter.startMonitoring()">Start Hunt</button>
-                        <button id="stopBtn" class="hidden" onclick="window.QueueHunter.stopMonitoring()">Stop Hunt</button>
-                        <button id="testNowBtn" onclick="window.QueueHunter.testNow()">Test Now</button>
-                        <button onclick="window.QueueHunter.exportLog()">Export Log</button>
-                    </div>
-                </div>
-                <div class="status-banner" id="statusBanner">Ready to hunt</div>
-                <div class="status-pokedex" id="status-pokedex">
-                    <p>Last Check: <span id="lastCheck">Never</span></p>
-                    <p>Runtime: <span id="runtime">0m 0s</span></p>
-                    <p>Consecutive Fails: <span id="consec">0</span></p>
-                    <p>Stock Status: <span id="stockStatus">Unknown</span></p>
-                    <p>Client Log / Details:</p>
-                    <div class="log-container" id="details"></div>
-                    <p>Server-Side Status:</p>
-                    <div class="server-log-container" id="workerStatus">Loading...</div>
-                </div>
-            </div>
-        </div>
+
+    <div id="feedback" class="status-feedback"></div>
+    <div class="mb-4">
+      <label for="frequencySlider" class="block text-sm text-gray-600 mb-1">
+        Check every: <span id="frequencyValue" class="font-semibold text-gray-800">10</span> minutes
+      </label>
+      <input type="range" id="frequencySlider" min="1" max="60" value="10">
+    </div>
+    <div id="status" class="text-center mb-4">
+      <p class="text-lg">Status: <span id="statusText" class="font-semibold">Waiting...</span></p>
+      <p class="text-sm text-gray-500">Last checked: <span id="lastChecked">Never</span></p>
+      <p class="text-sm text-gray-500">System running for: <span id="runTime">0h 0m 0s</span></p>
+      <p class="text-sm text-gray-500">Details: <span id="statusDetails">None</span></p>
+    </div>
+    <button id="startButton" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Start Checking</button>
+    <button id="stopButton" class="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600 mt-2 hidden">Stop Checking</button>
+    <div class="flex mt-2 space-x-2">
+        <button id="emailToggleButton" class="w-1/2 bg-green-500 text-white py-2 rounded hover:bg-green-600 toggle-button active">Deactivate Email Alerts</button>
+        <button id="webhookToggleButton" class="w-1/2 bg-purple-500 text-white py-2 rounded hover:bg-purple-600 toggle-button webhook-toggle-button active">Deactivate Discord Alerts</button>
     </div>
-    <audio id="alertTone" preload="auto" loop>
-        <source src="https://cdn.freesound.org/previews/316/316847_4939433-lq.mp3" type="audio/mpeg">
-    </audio>
-    <script>
-        const ACCESS_CODE = "skaplask";
-        const WORKER_URL = 'https://queue-hunter.kronborgnielsen.workers.dev'; // Replace with https://queue-hunter.kronborgnielsen.workers.dev
+    <button id="testEmailButton" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 mt-2">Test Email</button>
+  </div>
+  <audio id="beepSound">
+    <source src="https://www.soundjay.com/buttons/beep-01a.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script type="text/javascript">
+    var gk_isXlsx = false;
+    var gk_xlsxFileLookup = {};
+    var gk_fileData = {};
+    function filledCell(cell) {
+      return cell !== '' && cell != null;
+    }
+    function loadFileData(filename) {
+      if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+        try {
+          var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+          var firstSheetName = workbook.SheetNames[0];
+          var worksheet = workbook.Sheets[firstSheetName];
+          var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+          var filteredData = jsonData.filter(row => row.some(filledCell));
+          var headerRowIndex = filteredData.findIndex((row, index) =>
+            row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+          );
+          if (headerRowIndex === -1 || headerRowIndex > 25) {
+            headerRowIndex = 0;
+          }
+          var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
+          csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+          return csv;
+        } catch (e) {
+          console.error(e);
+          return "";
+        }
+      }
+      return gk_fileData[filename] || "";
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4.4.1/dist/email.min.js"></script>
+  <script>
+    if (typeof emailjs === 'undefined') {
+      console.error('EmailJS failed to load. Please check the CDN URL or network connection.');
+      alert('Email functionality is unavailable. Please check your network connection and try again.');
+    } else {
+      emailjs.init({
+        publicKey: "8w7eu6mrg3lRl6ta3" // UPDATED EMAILJS KEY
+      });
+    }
+    const statusText = document.getElementById('statusText');
+    const lastChecked = document.getElementById('lastChecked');
+    const statusDetails = document.getElementById('statusDetails');
+    const startButton = document.getElementById('startButton');
+    const stopButton = document.getElementById('stopButton');
+    const testEmailButton = document.getElementById('testEmailButton');
+    const emailToggleButton = document.getElementById('emailToggleButton');
+    const webhookToggleButton = document.getElementById('webhookToggleButton');
+    const webhookInput = document.getElementById('webhookInput');
+    const webhookSubmitButton = document.getElementById('webhookSubmitButton');
+    const beepSound = document.getElementById('beepSound');
+    const runTime = document.getElementById('runTime');
+    const emailInputsContainer = document.getElementById('emailInputsContainer');
+    const discordWebhookContainer = document.getElementById('discordWebhookContainer');
+    const addEmailButton = document.getElementById('addEmailButton');
+    const feedback = document.getElementById('feedback');
+    const frequencySlider = document.getElementById('frequencySlider');
+    const frequencyValue = document.getElementById('frequencyValue');
+    let intervalId = null;
+    let startTime = null;
+    let timerInterval = null;
+    let currentCheckInterval = 10 * 60 * 1000;
+    let emailNotificationsEnabled = true;
+    let discordNotificationsEnabled = true;
+    
+    // Helper function to show temporary feedback
+    function showFeedback(message) {
+      feedback.textContent = message;
+      feedback.classList.add('show');
+      setTimeout(() => {
+        feedback.classList.remove('show');
+      }, 2000);
+    }
 
-        function checkAccessCode() {
-            const enteredCode = document.getElementById('accessCode').value;
-            const passwordOverlay = document.getElementById('password-overlay');
-            const content = document.getElementById('content');
-            const errorMessage = document.getElementById('error-message');
-            if (enteredCode === ACCESS_CODE) {
-                passwordOverlay.style.display = 'none';
-                content.classList.remove('hidden');
-                fetchWorkerStatus();
-            } else {
-                errorMessage.style.display = 'block';
-            }
+    // Discord Webhook Logic
+    function submitWebhook() {
+        const url = webhookInput.value.trim();
+        if (!url || !url.startsWith('https://discord.com/api/webhooks/')) {
+            alert('Please enter a valid Discord Webhook URL.');
+            webhookInput.focus();
+            return;
+        }
+        webhookInput.setAttribute('readonly', 'true');
+        webhookSubmitButton.classList.add('hidden');
+        
+        // Add a remove button
+        let removeButton = discordWebhookContainer.querySelector('.remove-button');
+        if (!removeButton) {
+            removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.className = 'remove-button';
+            removeButton.textContent = 'Remove';
+            discordWebhookContainer.querySelector('.webhook-input-group').appendChild(removeButton);
+            removeButton.addEventListener('click', removeWebhook);
+        }
+        removeButton.classList.remove('hidden');
+
+        showFeedback('Discord Webhook submitted.');
+        console.log('Submitted Webhook:', url);
+    }
+
+    function removeWebhook() {
+        webhookInput.value = '';
+        webhookInput.removeAttribute('readonly');
+        webhookSubmitButton.classList.remove('hidden');
+        const removeButton = discordWebhookContainer.querySelector('.remove-button');
+        if (removeButton) {
+            removeButton.classList.add('hidden');
+        }
+        showFeedback('Discord Webhook removed.');
+    }
+
+    webhookSubmitButton.addEventListener('click', submitWebhook);
+    
+    // Auto-submit the default webhook on load
+    document.addEventListener('DOMContentLoaded', () => {
+        // Only attempt to submit if the default value is present
+        if (webhookInput.value.trim()) {
+            submitWebhook();
+        }
+    });
+
+    // Toggle Discord notifications
+    webhookToggleButton.addEventListener('click', () => {
+      discordNotificationsEnabled = !discordNotificationsEnabled;
+      if (discordNotificationsEnabled) {
+        webhookToggleButton.textContent = 'Deactivate Discord Alerts';
+        webhookToggleButton.classList.remove('inactive', 'bg-gray-500');
+        webhookToggleButton.classList.add('active', 'bg-purple-500');
+      } else {
+        webhookToggleButton.textContent = 'Activate Discord Alerts';
+        webhookToggleButton.classList.remove('active', 'bg-purple-500');
+        webhookToggleButton.classList.add('inactive', 'bg-gray-500');
+      }
+      showFeedback(`Discord notifications ${discordNotificationsEnabled ? 'enabled' : 'disabled'}.`);
+    });
+    
+    // Toggle email notifications
+    emailToggleButton.addEventListener('click', () => {
+      emailNotificationsEnabled = !emailNotificationsEnabled;
+      if (emailNotificationsEnabled) {
+        emailToggleButton.textContent = 'Deactivate Email Alerts';
+        emailToggleButton.classList.remove('inactive', 'bg-gray-500');
+        emailToggleButton.classList.add('active', 'bg-green-500');
+      } else {
+        emailToggleButton.textContent = 'Activate Email Alerts';
+        emailToggleButton.classList.remove('active', 'bg-green-500');
+        emailToggleButton.classList.add('inactive', 'bg-gray-500');
+      }
+      showFeedback(`Email notifications ${emailNotificationsEnabled ? 'enabled' : 'disabled'}.`);
+    });
+    // Helper function to calculate a random interval
+    function getRandomInterval(baseInterval) {
+      const variation = Math.floor(Math.random() * (120000 - 60000 + 1)) + 60000; // Random between 60,000 and 120,000 ms (1-2 minutes)
+      const randomSign = Math.random() < 0.5 ? -1 : 1; // Randomly add or subtract
+      return baseInterval + (randomSign * variation);
+    }
+    // Update the displayed value as the slider is moved
+    frequencySlider.addEventListener('input', function() {
+      frequencyValue.textContent = this.value;
+      if (intervalId) {
+        stopChecking();
+        startChecking();
+      }
+    });
+
+    // Dynamic Email Input Management
+    function addEmailInputField() {
+      const emailInputGroup = document.createElement('div');
+      emailInputGroup.className = 'input-group';
+      emailInputGroup.innerHTML = `
+        <input type="email" placeholder="anothername@example.com" class="w-full border border-gray-300 rounded px-3 py-2 email-input">
+        <button type="button" class="submit-button">Submit</button>
+      `;
+      emailInputsContainer.appendChild(emailInputGroup);
+      const submitButton = emailInputGroup.querySelector('.submit-button');
+      const emailInput = emailInputGroup.querySelector('.email-input');
+      submitButton.addEventListener('click', function() {
+        const email = emailInput.value.trim();
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          alert('Please enter a valid email address.');
+          emailInput.focus();
+          return;
+        }
+        emailInput.setAttribute('readonly', 'true');
+        submitButton.remove();
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.className = 'remove-button';
+        removeButton.textContent = 'Remove';
+        emailInputGroup.appendChild(removeButton);
+        removeButton.addEventListener('click', function() {
+          emailInputGroup.remove();
+          showFeedback('Email removed.');
+        });
+        showFeedback('Email submitted.');
+        console.log('Submitted email:', email);
+      });
+      console.log('Added new email input field');
+      showFeedback('Email field added.');
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const initialInputGroup = emailInputsContainer.querySelector('.input-group');
+      const initialInput = initialInputGroup.querySelector('.email-input');
+      initialInput.required = true;
+    });
+    addEmailButton.addEventListener('click', addEmailInputField);
+    function formatDuration(ms) {
+      const seconds = Math.floor(ms / 1000);
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = seconds % 60;
+      return `${hours}h ${minutes}m ${secs}s`;
+    }
+    function updateRunTime() {
+      if (startTime) {
+        const now = Date.now();
+        runTime.textContent = formatDuration(now - startTime);
+      }
+    }
+    function startTimer() {
+      if (!startTime) {
+        startTime = Date.now();
+        timerInterval = setInterval(updateRunTime, 2000);
+      }
+    }
+    function stopTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+      startTime = null;
+      runTime.textContent = '0h 0m 0s';
+    }
+    function playThreeBeeps() {
+      let beepCount = 0;
+      const beepInterval = setInterval(() => {
+        if (beepCount < 3) {
+          beepSound.currentTime = 0;
+          beepSound.play().catch(() => console.log('Audio playback failed'));
+          beepCount++;
+        } else {
+          clearInterval(beepInterval);
+          beepSound.pause();
+          beepSound.currentTime = 0;
+        }
+      }, 1500);
+    }
+
+    async function sendDiscordWebhook(status, details) {
+        if (!discordNotificationsEnabled) {
+            console.log('Discord webhook notifications are disabled; skipping.');
+            return;
         }
 
-        async function fetchWorkerStatus() {
-            try {
-                const statusRes = await fetch(`${WORKER_URL}/status?key=${ACCESS_CODE}`, {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const status = await statusRes.json();
-                if (status.error) throw new Error(status.error);
-                const logsRes = await fetch(`${WORKER_URL}/logs?key=${ACCESS_CODE}`, {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const logs = await logsRes.json();
-                if (logs.error) throw new Error(logs.error);
-                document.getElementById('workerStatus').innerHTML = `
-                    <p>Server Running: ${status.running ? 'Yes' : 'No'}</p>
-                    <p>Last Check: ${new Date(status.lastCheck).toLocaleTimeString()}</p>
-                    <p>Server Logs:</p>
-                    <ul>${logs.logs.map(log => `<li>${log}</li>`).join('')}</ul>
-                `;
-                window.QueueHunter.updateUI('Fetched Pikachu\'s status!');
-            } catch (e) {
-                document.getElementById('workerStatus').innerHTML = `<p>Error fetching Pikachu\'s status: ${e.message}</p>`;
-                window.QueueHunter.updateUI(`Pikachu status error: ${e.message}`);
-            }
+        const webhookUrl = webhookInput.value.trim();
+        if (!webhookUrl || !webhookInput.hasAttribute('readonly')) {
+            console.warn('No valid or submitted Discord Webhook URL found. Skipping webhook alert.');
+            return;
         }
 
-        setInterval(fetchWorkerStatus, 30000);
-
-        window.QueueHunter = window.QueueHunter || {};
-        window.QueueHunter.isWebhookSubmitted = true;
-        window.QueueHunter.emails = ['kronborgnielsen@gmail.com'];
-        window.QueueHunter.notificationSettings = {
-            discord: true,
-            email: true,
-            queueDetected: true,
-            queueSoon: true,
-            possibleBotBlock: true,
-            captchaDetected: true
-        };
-        let pushEnabled = false;
-        let hasNotified = false;
-        let cleanChecks = 0;
-        let intervalId = null;
-        let startTime = null;
-        let consecFails = 0;
-        let failThresh = 2;
-        let baseCheckFreq = 5 * 60 * 1000;
-        let proxies = [
-            'https://api.codetabs.com/v1/proxy/?quest='
-        ];
-        let blacklisted = new Set();
-        let logEntries = [];
-        let alarmActive = false;
-        let alertAudio = null;
-        let vibrateInterval = null;
-        let isCheckingConsecutiveFailures = false;
-        emailjs.init('8w7eu6mrg3lRl6ta3');
-        window.QueueHunter.emailServiceId = 'service_ahqdaj5';
-        window.QueueHunter.emailTemplateId = 'template_whhvnra';
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const testBtn = document.getElementById('testDiscordBtn');
-            const clearBtn = document.getElementById('clearWebhookBtn');
-            const addEmailBtn = document.getElementById('addEmailBtn');
-            const testEmailBtn = document.getElementById('testEmailBtn');
-            const pushBtn = document.getElementById('pushBtn');
-            testBtn.disabled = false;
-            clearBtn.disabled = false;
-            addEmailBtn.disabled = true;
-            testEmailBtn.disabled = false;
-            pushBtn.disabled = !("Notification" in window);
-            document.getElementById('emailInput').addEventListener('input', function() {
-                addEmailBtn.disabled = !this.value || !/\S+@\S+\.\S+/.test(this.value);
-            });
-            document.getElementById('freqSlider').addEventListener('input', function() {
-                baseCheckFreq = this.value * 60 * 1000;
-                document.getElementById('freqVal').textContent = this.value;
-                window.QueueHunter.updateUI(`Check frequency updated to ${this.value} minutes`);
-            });
-            document.getElementById('threshSlider').addEventListener('input', function() {
-                failThresh = parseInt(this.value);
-                document.getElementById('threshVal').textContent = this.value;
-                window.QueueHunter.updateUI(`Alert threshold updated to ${this.value} consecutive fails`);
-            });
-            ['notifyQueueDetected', 'notifyQueueSoon', 'notifyPossibleBotBlock', 'notifyCaptchaDetected'].forEach(id => {
-                document.getElementById(id).addEventListener('change', function() {
-                    const setting = id.replace('notify', '').toLowerCase();
-                    window.QueueHunter.notificationSettings[setting] = this.checked;
-                    window.QueueHunter.updateUI(`${setting.replace(/([A-Z])/g, ' $1').trim()} notifications ${this.checked ? 'enabled' : 'disabled'}`);
-                });
-            });
-            window.QueueHunter.renderEmailList();
-        });
-
-        window.QueueHunter.toggleNotification = function(type) {
-            window.QueueHunter.notificationSettings[type] = !window.QueueHunter.notificationSettings[type];
-            const btn = document.getElementById(`toggle${type.charAt(0).toUpperCase() + type.slice(1)}Btn`);
-            btn.textContent = `${type.charAt(0).toUpperCase() + type.slice(1)} Notifications: ${window.QueueHunter.notificationSettings[type] ? 'On' : 'Off'}`;
-            btn.style.background = window.QueueHunter.notificationSettings[type] ? 'linear-gradient(145deg, #FFD700, #FFB300)' : '#666';
-            btn.style.color = window.QueueHunter.notificationSettings[type] ? '#1A1A1A' : '#999';
-            window.QueueHunter.updateUI(`${type.charAt(0).toUpperCase() + type.slice(1)} notifications ${window.QueueHunter.notificationSettings[type] ? 'enabled' : 'disabled'}`);
-        };
-
-        window.QueueHunter.clearWebhook = function() {
-            const webhookUrlInput = document.getElementById('discordWebhook');
-            const testBtn = document.getElementById('testDiscordBtn');
-            const clearBtn = document.getElementById('clearWebhookBtn');
-            webhookUrlInput.value = '';
-            webhookUrlInput.disabled = false;
-            window.QueueHunter.isWebhookSubmitted = false;
-            testBtn.disabled = true;
-            clearBtn.disabled = true;
-            clearBtn.textContent = 'Cleared!';
-            setTimeout(() => clearBtn.textContent = 'Clear', 2000);
-            window.QueueHunter.updateUI('Webhook cleared');
-        };
-
-        window.QueueHunter.testDiscord = async function() {
-            if (!window.QueueHunter.isWebhookSubmitted) {
-                window.QueueHunter.updateUI('Cannot test: Webhook not submitted');
-                return;
-            }
-            const webhookUrl = document.getElementById('discordWebhook').value;
-            if (!webhookUrl.includes('discord.com/api/webhooks')) {
-                window.QueueHunter.updateUI('Invalid webhook URL for testing');
-                return;
-            }
-            const testBtn = document.getElementById('testDiscordBtn');
-            testBtn.textContent = 'Testing...';
-            await window.QueueHunter.sendDiscord('Test Ping', 'Webhook online! Ready to catch queue alerts!');
-            testBtn.textContent = 'Test Discord';
-        };
-
-        window.QueueHunter.getRandomHeaders = function() {
-            const userAgents = [
-                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
-                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
-                'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0) Gecko/20100101 Firefox/130.0'
-            ];
-            return {
-                'User-Agent': userAgents[Math.floor(Math.random() * userAgents.length)],
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.9'
-            };
-        };
-
-        window.QueueHunter.isDropWindow = function() {
-            const now = new Date();
-            const day = now.getDay();
-            const hour = now.getHours();
-            const etHour = (hour - 4 + 24) % 24;
-            const isDrop = (day === 1 || day === 2 || day === 4) && etHour >= 11 && etHour < 13;
-            window.QueueHunter.updateUI(`Drop window: ${isDrop ? 'Active (30s checks)' : 'Inactive'}`);
-            return isDrop;
-        };
-
-        window.QueueHunter.getDynamicFreq = function(suspectedQueue = false) {
-            const base = suspectedQueue ? baseCheckFreq : window.QueueHunter.isDropWindow() ? 30000 : baseCheckFreq;
-            const randomDelay = Math.random() * 10000 + 5000;
-            const next = base + randomDelay;
-            window.QueueHunter.updateUI(`Next check in ${(next / 1000).toFixed(1)} seconds`);
-            return next;
-        };
-
-        window.QueueHunter.updateStatusBanner = function(text, colorClass) {
-            const banner = document.getElementById('statusBanner');
-            banner.textContent = text;
-            banner.className = 'status-banner ' + colorClass;
-        };
-
-        window.QueueHunter.updateUI = function(logMessage) {
-            document.getElementById('lastCheck').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            document.getElementById('consec').textContent = consecFails;
-            logEntries.unshift(`[${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}] ${logMessage}`);
-            if (logEntries.length > 15) logEntries.pop();
-            document.getElementById('details').innerHTML = logEntries.join('<br>');
-            document.getElementById('details').scrollTop = 0;
-            const bannerText = document.getElementById('statusBanner').textContent;
-            const statusPokedex = document.getElementById('status-pokedex');
-            if (/queue detected|queue soon or active|possible queue|captcha detected/i.test(bannerText)) {
-                statusPokedex.classList.add('alert-zap');
-            } else {
-                statusPokedex.classList.remove('alert-zap');
-            }
-            window.QueueHunter.updateRuntime();
-        };
-
-        window.QueueHunter.updateRuntime = function() {
-            const runtime = document.getElementById('runtime');
-            if (startTime) {
-                runtime.textContent = `${Math.floor((Date.now() - startTime) / 60000)}m ${Math.floor(((Date.now() - startTime) % 60000) / 1000)}s`;
-            }
-        };
-
-        setInterval(window.QueueHunter.updateRuntime, 1000);
-
-        window.QueueHunter.toggleAlarm = function() {
-            alarmActive = !alarmActive;
-            window.QueueHunter.stopAlert();
-            document.getElementById('alarmBtn').textContent = alarmActive ? 'Deactivate Alarm' : 'Activate Alarm';
-            window.QueueHunter.updateUI(`Alarm ${alarmActive ? 'activated' : 'deactivated'}`);
-        };
-
-        window.QueueHunter.testAlarm = function() {
-            try {
-                const audio = document.getElementById('alertTone');
-                audio.play().then(() => {
-                    if (navigator.vibrate) navigator.vibrate([300, 200, 300]);
-                    window.QueueHunter.updateUI('Testing alert tone and vibration');
-                    setTimeout(() => {
-                        audio.pause();
-                        audio.currentTime = 0;
-                        navigator.vibrate(0);
-                        window.QueueHunter.updateUI('Alert test completed');
-                    }, 5000);
-                }).catch(e => {
-                    window.QueueHunter.updateUI(`Alert tone error: ${e.message}`);
-                });
-            } catch (e) {
-                window.QueueHunter.updateUI(`Test alarm error: ${e.message}`);
-            }
-        };
-
-        window.QueueHunter.playAlert = function() {
-            if (alarmActive && !alertAudio) {
-                try {
-                    alertAudio = document.getElementById('alertTone');
-                    alertAudio.play().then(() => {
-                        window.QueueHunter.updateUI('Playing alert tone');
-                    }).catch(e => {
-                        window.QueueHunter.updateUI(`Alert tone error: ${e.message}`);
-                    });
-                    if (navigator.vibrate) {
-                        vibrateInterval = setInterval(() => navigator.vibrate([300, 200, 300]), 1000);
-                        window.QueueHunter.updateUI('Started vibration');
-                    }
-                } catch (e) {
-                    window.QueueHunter.updateUI(`Alert sound error: ${e.message}`);
-                }
-            }
-        };
-
-        window.QueueHunter.stopAlert = function() {
-            if (alertAudio) {
-                alertAudio.pause();
-                alertAudio.currentTime = 0;
-                alertAudio = null;
-                window.QueueHunter.updateUI('Stopped alert tone');
-            }
-            if (vibrateInterval) {
-                clearInterval(vibrateInterval);
-                navigator.vibrate(0);
-                vibrateInterval = null;
-                window.QueueHunter.updateUI('Stopped vibration');
-            }
-        };
-
-        window.QueueHunter.sendDiscord = async function(title, message) {
-            const webhookUrl = document.getElementById('discordWebhook').value;
-            if (!webhookUrl) return;
-            try {
-                const response = await fetch(webhookUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        embeds: [{
-                            title,
-                            description: message,
-                            color: title.includes('Queue Detected') ? 0xFF0000 :
-                                   title.includes('Queue Soon') ? 0xFFA500 :
-                                   title.includes('Possible Queue') ? 0x9370DB :
-                                   title.includes('CAPTCHA') ? 0x9370DB : 0xFFD700,
-                            footer: { text: 'Queue Hunter Pro' }
-                        }]
-                    })
-                });
-                if (response.ok) {
-                    window.QueueHunter.updateUI(`Sent Discord: ${title}`);
-                } else {
-                    throw new Error('Discord webhook failed');
-                }
-            } catch (e) {
-                window.QueueHunter.updateUI(`Discord error: ${e.message}`);
-            }
-        };
-
-        window.QueueHunter.sendEmail = async function(status, details) {
-            if (!window.QueueHunter.emails.length) {
-                window.QueueHunter.updateUI('No emails to send');
-                return;
-            }
-            const timestamp = new Date().toLocaleString();
-            let successCount = 0;
-            for (const email of window.QueueHunter.emails) {
-                try {
-                    await emailjs.send(window.QueueHunter.emailServiceId, window.QueueHunter.emailTemplateId, {
-                        status,
-                        details: `?? ${details}\n\n**Powered by Queue Hunter Pro**`,
-                        timestamp,
-                        to_email: email
-                    });
-                    successCount++;
-                    window.QueueHunter.updateUI(`Email sent to ${email}`);
-                } catch (e) {
-                    window.QueueHunter.updateUI(`Email error for ${email}: ${e.message}`);
-                }
-            }
-            window.QueueHunter.updateUI(`Email result: ${successCount}/${window.QueueHunter.emails.length} sent`);
-        };
-
-        window.QueueHunter.testEmail = async function() {
-            const testBtn = document.getElementById('testEmailBtn');
-            testBtn.textContent = 'Testing...';
-            await window.QueueHunter.sendEmail('Test Email', 'Email notifications are online! Ready to catch queue alerts!');
-            testBtn.textContent = 'Test Email';
-        };
-
-        window.QueueHunter.addEmail = function() {
-            const emailInput = document.getElementById('emailInput');
-            const email = emailInput.value.trim();
-            if (email && !window.QueueHunter.emails.includes(email) && /\S+@\S+\.\S+/.test(email)) {
-                window.QueueHunter.emails.push(email);
-                window.QueueHunter.renderEmailList();
-                emailInput.value = '';
-                document.getElementById('addEmailBtn').disabled = true;
-                window.QueueHunter.updateUI(`Added email: ${email}`);
-            } else {
-                window.QueueHunter.updateUI('Invalid or duplicate email');
-            }
-        };
-
-        window.QueueHunter.removeEmail = function(email) {
-            window.QueueHunter.emails = window.QueueHunter.emails.filter(e => e !== email);
-            window.QueueHunter.renderEmailList();
-            window.QueueHunter.updateUI(`Removed email: ${email}`);
-        };
-
-        window.QueueHunter.renderEmailList = function() {
-            const emailList = document.getElementById('emailList');
-            emailList.innerHTML = window.QueueHunter.emails.map(email => `
-                <li>
-                    ${email}
-                    <button onclick="window.QueueHunter.removeEmail('${email}')">Remove</button>
-                </li>
-            `).join('');
-        };
-
-        window.QueueHunter.togglePush = async function() {
-            if (!("Notification" in window)) {
-                window.QueueHunter.updateUI('Push notifications not supported');
-                return;
-            }
-            const pushBtn = document.getElementById('pushBtn');
-            if (pushEnabled) {
-                pushEnabled = false;
-                pushBtn.textContent = 'Enable Push Notifications';
-                window.QueueHunter.updateUI('Push notifications disabled');
-            } else {
-                const permission = await Notification.requestPermission();
-                if (permission === 'granted') {
-                    pushEnabled = true;
-                    pushBtn.textContent = 'Disable Push Notifications';
-                    window.QueueHunter.updateUI('Push notifications enabled');
-                } else {
-                    window.QueueHunter.updateUI('Push notifications denied');
-                }
-            }
-        };
-
-        window.QueueHunter.notify = function(title, message) {
-            if (pushEnabled && Notification.permission === 'granted') {
-                new Notification(title, { body: message, icon: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/129.png' });
-                window.QueueHunter.updateUI(`Sent push notification: ${title}`);
-            }
-            if (window.QueueHunter.notificationSettings.discord) {
-                window.QueueHunter.sendDiscord(title, message);
-            }
-            if (window.QueueHunter.notificationSettings.email) {
-                window.QueueHunter.sendEmail(title, message);
-            }
-            window.QueueHunter.playAlert();
-            if (document.getElementById('autoOpen').checked) {
-                const urls = document.getElementById('urlList').value.split(',').map(url => url.trim()).filter(url => url);
-                if (urls.length) {
-                    urls.forEach(url => window.open(url, '_blank'));
-                    window.QueueHunter.updateUI('Auto-opened URLs');
-                }
-            }
-        };
-
-        window.QueueHunter.testNow = async function() {
-            const testBtn = document.getElementById('testNowBtn');
-            testBtn.disabled = true;
-            window.QueueHunter.updateUI('Starting test check...');
-            const urls = document.getElementById('urlList').value.split(',').map(url => url.trim()).filter(url => url);
-            const checkUrls = urls.length ? urls : ['https://www.pokemoncenter.com/', 'https://www.pokemoncenter.com/category/trading-card-game'];
-            for (const url of checkUrls) {
-                let proxyIndex = 0;
-                let success = false;
-                while (proxyIndex < proxies.length && !success) {
-                    const proxy = proxies[proxyIndex];
-                    try {
-                        const response = await fetch(proxy + encodeURIComponent(url), {
-                            headers: window.QueueHunter.getRandomHeaders()
-                        });
-                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                        const data = await response.text();
-                        let status, details;
-                        if (/hcaptcha|captcha|verify you are not a bot/i.test(data) && !/add to cart|shop now/i.test(data)) {
-                            status = 'CAPTCHA Detected';
-                            details = `CAPTCHA found at ${url}!`;
-                            window.QueueHunter.updateStatusBanner(status, 'purple');
-                            if (window.QueueHunter.notificationSettings.captchaDetected && !hasNotified) {
-                                window.QueueHunter.notify(status, details);
-                                hasNotified = true;
-                            }
-                        } else if (/queue-it|waiting room|queue\s*position/i.test(data)) {
-                            const queueLength = data.match(/(\d+)\s*users?\s*ahead|queue\s*position\s*[:=]?\s*(\d+)|(\d+)\s*in\s*queue/i)?.[1] || 'unknown';
-                            status = 'Queue Detected';
-                            details = `Queue at ${url}! Length: ${queueLength}.`;
-                            window.QueueHunter.updateStatusBanner(status, 'red');
-                            if (window.QueueHunter.notificationSettings.queueDetected && !hasNotified) {
-                                window.QueueHunter.notify(status, details);
-                                hasNotified = true;
-                            }
-                        } else if (/pokemoncenter\.com(\/|$|\/category\/)/i.test(url)) {
-                            if (/add to cart|shop|products/i.test(data)) {
-                                status = 'Shop Accessible';
-                                details = `Reached shop at ${url}!`;
-                                window.QueueHunter.updateStatusBanner(status, 'green');
-                            } else {
-                                status = 'Queue Soon or Active';
-                                details = `At ${url}, but no shop yet.`;
-                                window.QueueHunter.updateStatusBanner(status, 'orange');
-                                if (window.QueueHunter.notificationSettings.queueSoon && !hasNotified) {
-                                    window.QueueHunter.notify(status, details);
-                                    hasNotified = true;
-                                }
-                            }
-                        } else {
-                            status = 'Possible Queue';
-                            details = `Weird page at ${url}.`;
-                            window.QueueHunter.updateStatusBanner(status, 'purple');
-                            if (window.QueueHunter.notificationSettings.possibleBotBlock && !hasNotified) {
-                                window.QueueHunter.notify(status, details);
-                                hasNotified = true;
-                            }
-                        }
-                        window.QueueHunter.updateUI(`${status}: ${details}`);
-                        cleanChecks++;
-                        consecFails = 0;
-                        isCheckingConsecutiveFailures = false;
-                        success = true;
-                    } catch (e) {
-                        window.QueueHunter.updateUI(`Check failed for ${url} with proxy ${proxy}: ${e.message}`);
-                        consecFails++;
-                        proxyIndex++;
-                        if (proxyIndex === proxies.length) {
-                            blacklisted.add(proxy);
-                            proxies = proxies.filter(p => !blacklisted.has(p));
-                            window.QueueHunter.updateUI(`Blacklisted proxy ${proxy}`);
-                            if (!proxies.length) {
-                                window.QueueHunter.updateUI('No working proxies left! Falling back to server checks.');
-                                consecFails++;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            window.QueueHunter.updateStatusBanner('Ready to hunt', 'yellow');
-            testBtn.disabled = false;
-            if (consecFails >= failThresh && !isCheckingConsecutiveFailures) {
-                isCheckingConsecutiveFailures = true;
-                window.QueueHunter.notify('Multiple Failed Checks', `Failed ${consecFails} times in a row. Check URLs or rely on server checks!`);
-            }
-        };
-
-        window.QueueHunter.startMonitoring = async function() {
-            if (intervalId) return;
-            startTime = Date.now();
-            document.getElementById('startBtn').classList.add('hidden');
-            document.getElementById('stopBtn').classList.remove('hidden');
-            window.QueueHunter.updateUI('Started monitoring');
-            await window.QueueHunter.testNow();
-            intervalId = setInterval(async () => {
-                await window.QueueHunter.testNow();
-                fetchWorkerStatus();
-            }, window.QueueHunter.getDynamicFreq());
-        };
-
-        window.QueueHunter.stopMonitoring = function() {
-            if (!intervalId) return;
-            clearInterval(intervalId);
-            intervalId = null;
-            startTime = null;
-            hasNotified = false;
-            cleanChecks = 0;
-            consecFails = 0;
-            isCheckingConsecutiveFailures = false;
-            document.getElementById('startBtn').classList.remove('hidden');
-            document.getElementById('stopBtn').classList.add('hidden');
-            window.QueueHunter.stopAlert();
-            window.QueueHunter.updateStatusBanner('Monitoring stopped', 'gray');
-           огласно
-
-System: window.QueueHunter.updateUI('Monitoring stopped');
+        let color = 16711680; // Red for errors/not accessible (0xFF0000)
+        let iconUrl = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png';
+        if (status.includes('accessible') || status.includes('queue')) {
+            color = 65280; // Green for accessible (0x00FF00)
+        } else if (status.includes('Test')) {
+            color = 16776960; // Yellow for test (0xFFFF00)
         }
-    </script>
+
+        const payload = {
+            content: status === 'Shop is accessible!' ? '@everyone The Pokémon Center Shop is OPEN!' : status.includes('queue') ? '@everyone Pokémon Center Queue Detected!' : null,
+            embeds: [{
+                title: status,
+                description: details,
+                color: color,
+                timestamp: new Date().toISOString(),
+                footer: {
+                    text: 'Pokémon Center Shop Access Checker',
+                    icon_url: iconUrl
+                },
+                fields: [{
+                    name: 'Status Time',
+                    value: new Date().toLocaleTimeString(),
+                    inline: true
+                }]
+            }]
+        };
+
+        try {
+            const response = await fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (response.ok) {
+                console.log('Discord Webhook sent successfully.');
+            } else {
+                const responseBody = await response.text();
+                console.error('Failed to send Discord Webhook:', response.status, responseBody);
+            }
+        } catch (error) {
+            console.error('Error sending Discord Webhook:', error);
+        }
+    }
+
+    function sendEmail(status, details, recipientEmails) {
+      if (!emailNotificationsEnabled) {
+        console.log('Email notifications are disabled; skipping email sending.');
+        return;
+      }
+      if (!recipientEmails || recipientEmails.length === 0) {
+        console.error('No email addresses provided for sending alerts');
+        return;
+      }
+      if (typeof emailjs === 'undefined') {
+        console.error('EmailJS is not available');
+        return;
+      }
+      recipientEmails.forEach(email => {
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          console.warn(`Invalid email address: ${email}. Skipping.`);
+          return;
+        }
+        emailjs.send("service_ahqdaj5", "template_whhvnra", {
+          status: status,
+          details: details,
+          timestamp: new Date().toLocaleString(),
+          to_email: email
+        }).then(
+          () => console.log('Email sent successfully to', email),
+          (error) => console.error('Failed to send email to', email, ':', error)
+        );
+      });
+    }
+    function testEmail() {
+      const emailInputs = document.querySelectorAll('.email-input');
+      const recipientEmails = ['kronborgnielsen@gmail.com'];
+      let hasValidEmail = true;
+      Array.from(emailInputs).slice(1).forEach((input, index) => {
+        const email = input.value.trim();
+        if (email && input.hasAttribute('readonly')) {
+          if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            recipientEmails.push(email);
+          } else {
+            alert(`Please ensure email ${index + 1} is valid: ${email}`);
+            input.focus();
+            hasValidEmail = false;
+          }
+        }
+      });
+      if (!hasValidEmail) {
+        return;
+      }
+      if (recipientEmails.length === 0 && !discordNotificationsEnabled) {
+        console.warn('No valid alert methods provided.');
+        alert('No valid email or Discord alerts provided/enabled.');
+        return;
+      }
+      if (emailNotificationsEnabled && typeof emailjs === 'undefined') {
+        alert('Email functionality is unavailable. Please check your network connection and try again.');
+        return;
+      }
+      
+      const testStatus = 'Test Alert: Everything is OK';
+      const testDetails = 'This is a test notification from the Pokémon Center Shop Access Checker.';
+
+      if (emailNotificationsEnabled && recipientEmails.length > 0) {
+        console.log('Sending test email to:', recipientEmails);
+        sendEmail(testStatus, testDetails, recipientEmails);
+      } else {
+          console.warn('Skipping test email: No valid emails or emails disabled.');
+      }
+
+      if (discordNotificationsEnabled && webhookInput.hasAttribute('readonly')) {
+          console.log('Sending test Discord webhook.');
+          sendDiscordWebhook(testStatus, testDetails);
+      } else {
+          console.warn('Skipping test Discord webhook: No valid webhook or webhooks disabled.');
+      }
+
+      alert('Test alert(s) sent! Check your inbox(es)/Discord channel(s).');
+    }
+    function extractQueueLength(text) {
+      const patterns = [
+        /(\d+)\s*users?\s*ahead/i,
+        /queue\s*position\s*[:=]?\s*(\d+)/i,
+        /(\d+)\s*in\s*queue/i,
+        /position\s*in\s*queue\s*[:=]?\s*(\d+)/i
+      ];
+      for (const pattern of patterns) {
+        const match = text.match(pattern);
+        if (match) return match[1];
+      }
+      return null;
+    }
+    async function checkShopAccess() {
+      const emailInputs = document.querySelectorAll('.email-input');
+      const currentEmails = ['kronborgnielsen@gmail.com'];
+      Array.from(emailInputs)
+        .slice(1)
+        .filter(input => input.hasAttribute('readonly'))
+        .map(input => input.value.trim())
+        .filter(email => email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+        .forEach(email => currentEmails.push(email));
+      console.log('Emails for notifications:', currentEmails);
+      if (currentEmails.length === 0 && !discordNotificationsEnabled) {
+        console.warn('No valid alert methods active. Skipping alerts for this check.');
+      }
+      try {
+        const proxies = [
+          'https://corsproxy.io/?',
+          'https://cors-anywhere.herokuapp.com/',
+          'https://allorigins.win/raw?url='
+        ];
+        const targetUrls = [
+          'https://www.pokemoncenter.com/',
+          'https://www.pokemoncenter.com/category/trading-card-game'
+        ];
+        let response = null;
+        let proxyUsed = '';
+        let urlUsed = '';
+        let proxyErrors = [];
+        for (const targetUrl of targetUrls) {
+          for (const proxy of proxies) {
+            try {
+              response = await fetch(proxy + encodeURIComponent(targetUrl), {
+                method: 'GET',
+                headers: {
+                  'Accept': 'text/html',
+                },
+              });
+              proxyUsed = proxy;
+              urlUsed = targetUrl;
+              if (response.ok && response.status === 200) break;
+              proxyErrors.push(`Proxy ${proxy} for ${targetUrl} returned status: ${response?.status || 'unknown'}`);
+            } catch (proxyError) {
+              proxyErrors.push(`Proxy ${proxy} for ${targetUrl} failed: ${proxyError.message}`);
+              console.warn(`Proxy ${proxy} for ${targetUrl} failed:`, proxyError);
+            }
+            if (response && response.ok && response.status === 200) break;
+          }
+          if (response && response.ok && response.status === 200) break;
+        }
+        const now = new Date().toLocaleTimeString();
+        lastChecked.textContent = now;
+        if (!response || !response.ok) {
+          const status = 'Proxy error';
+          const details = `Failed to fetch page through all proxies. Errors: ${proxyErrors.join('; ')}. Please check the site manually.`;
+          statusText.textContent = status;
+          statusText.classList.remove('text-green-500');
+          statusText.classList.add('text-red-500');
+          statusDetails.textContent = details;
+          playThreeBeeps();
+          sendEmail(status, details, currentEmails);
+          sendDiscordWebhook(status, details);
+          statusText.dataset.previousStatus = status;
+          return;
+        }
+        const finalUrl = decodeURIComponent(response.url.replace(proxyUsed, ''));
+        const text = await response.text();
+        const isQueue =
+          /queue-it\.net/i.test(finalUrl) ||
+          /waiting room|queue-it|waitingroom|virtual waiting/i.test(text);
+        if (isQueue) {
+          const queueLength = extractQueueLength(text);
+          const currentStatus = 'Shop is active (in queue)';
+          statusText.textContent = currentStatus;
+          statusText.classList.remove('text-red-500');
+          statusText.classList.add('text-green-500');
+          const details = `Queue detected at ${finalUrl} (checked ${urlUsed}). Queue length: ${queueLength || 'unknown'}. Redirecting to Pokémon Center homepage.`;
+          statusDetails.textContent = details;
+          playThreeBeeps();
+          if (statusText.dataset.previousStatus !== currentStatus) {
+              sendEmail(currentStatus, details, currentEmails);
+              sendDiscordWebhook(currentStatus, details);
+          }
+          statusText.dataset.previousStatus = currentStatus;
+          stopChecking();
+          window.location.href = 'https://www.pokemoncenter.com/';
+          return;
+        } else if (/pokemoncenter\.com(\/|$|\/category\/trading-card-game)/i.test(finalUrl)) {
+          const hasShopContent = /shop|products|category|store|cart|new releases|all products|add to cart|merchandise|collectibles|plush|trading card|Pokémon/i.test(text);
+          const hasDynamicElements = /<nav\b|<a\b[^>]*href=["'][^"']*product[^"']*["']|<div\b[^>]*class=["'][^"']*product[^"']*["']/i.test(text);
+          const isLargeResponse = text.length > 10000;
+          if (hasShopContent || hasDynamicElements || isLargeResponse) {
+            const currentStatus = 'Shop is accessible!';
+            statusText.textContent = currentStatus;
+            statusText.classList.remove('text-red-500');
+            statusText.classList.add('text-green-500');
+            const details = `Reached ${finalUrl} (checked ${urlUsed}), shop content detected (keywords or dynamic elements present). Response length: ${text.length} chars.`;
+            statusDetails.textContent = details;
+            if (statusText.dataset.previousStatus !== currentStatus) {
+                sendEmail(currentStatus, statusDetails.textContent, currentEmails);
+                sendDiscordWebhook(currentStatus, statusDetails.textContent);
+            }
+            statusText.dataset.previousStatus = currentStatus;
+          } else {
+            const currentStatus = 'Shop is not accessible (landing page)';
+            statusText.textContent = currentStatus;
+            statusText.classList.remove('text-green-500');
+            statusText.classList.add('text-red-500');
+            const details = `Reached ${finalUrl} (checked ${urlUsed}), but no shop content or dynamic elements found. Likely a static landing page. Response length: ${text.length} chars.`;
+            statusDetails.textContent = details;
+            playThreeBeeps();
+            if (statusText.dataset.previousStatus !== currentStatus) {
+                sendEmail(currentStatus, details, currentEmails);
+                sendDiscordWebhook(currentStatus, details);
+            }
+            statusText.dataset.previousStatus = currentStatus;
+          }
+        } else {
+          const currentStatus = 'Shop is not accessible (unexpected page)';
+          statusText.textContent = currentStatus;
+          statusText.classList.remove('text-green-500');
+          statusText.classList.add('text-red-500');
+          const details = `Reached ${finalUrl} (checked ${urlUsed}), but it does not appear to be the Pokémon Center shop. Response length: ${text.length} chars.`;
+          statusDetails.textContent = details;
+          playThreeBeeps();
+          if (statusText.dataset.previousStatus !== currentStatus) {
+              sendEmail(currentStatus, details, currentEmails);
+              sendDiscordWebhook(currentStatus, details);
+          }
+          statusText.dataset.previousStatus = currentStatus;
+        }
+      } catch (error) {
+        console.error('Error checking page:', error);
+        const status = 'Site is down';
+        const details = `Failed to fetch: ${error.message}. Please check the site manually.`;
+        statusText.textContent = status;
+        statusText.classList.remove('text-green-500');
+        statusText.classList.add('text-red-500');
+        statusDetails.textContent = details;
+        lastChecked.textContent = new Date().toLocaleTimeString();
+        playThreeBeeps();
+        if (statusText.dataset.previousStatus !== status) {
+            sendEmail(status, details, currentEmails);
+            sendDiscordWebhook(status, details);
+        }
+        statusText.dataset.previousStatus = status;
+      }
+    }
+    function startChecking() {
+      const emailInputs = document.querySelectorAll('.email-input');
+      const webhookUrl = webhookInput.value.trim();
+      let allAlertsConfigured = true;
+
+      Array.from(emailInputs).forEach((input) => {
+        const email = input.value.trim();
+        if (email && !input.hasAttribute('readonly')) {
+          alert('Please submit all additional email addresses before starting.');
+          input.focus();
+          allAlertsConfigured = false;
+        } else if (email && input.hasAttribute('readonly')) {
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            alert(`Please ensure email is valid: ${email}`);
+            input.focus();
+            allAlertsConfigured = false;
+          }
+        }
+      });
+
+      if (webhookUrl && !webhookInput.hasAttribute('readonly')) {
+        alert('Please submit the Discord Webhook URL before starting.');
+        webhookInput.focus();
+        allAlertsConfigured = false;
+      }
+      
+      if (!allAlertsConfigured) {
+        return;
+      }
+      const currentEmails = ['kronborgnielsen@gmail.com'];
+      Array.from(emailInputs)
+        .slice(1)
+        .filter(input => input.hasAttribute('readonly'))
+        .map(input => input.value.trim())
+        .filter(email => email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+        .forEach(email => currentEmails.push(email));
+      if (currentEmails.length === 0 && !webhookInput.hasAttribute('readonly')) {
+        console.warn('No valid email or Discord webhook configured.');
+        alert('Please configure at least one valid email or a Discord webhook before starting.');
+        return;
+      }
+      if (intervalId) {
+        clearTimeout(intervalId);
+      }
+      function scheduleNextCheck() {
+        currentCheckInterval = parseInt(frequencySlider.value) * 60 * 1000;
+        const randomizedInterval = getRandomInterval(currentCheckInterval);
+        console.log(`Next check in ${randomizedInterval / 1000 / 60} minutes`);
+        intervalId = setTimeout(() => {
+          checkShopAccess();
+          scheduleNextCheck();
+        }, randomizedInterval);
+      }
+      checkShopAccess();
+      scheduleNextCheck();
+      startButton.classList.add('hidden');
+      stopButton.classList.remove('hidden');
+      statusText.textContent = 'Checking...';
+      statusDetails.textContent = 'Started checking with randomized intervals.';
+      startTimer();
+    }
+    function stopChecking() {
+      if (intervalId) {
+        clearTimeout(intervalId);
+        intervalId = null;
+        startButton.classList.remove('hidden');
+        stopButton.classList.add('hidden');
+        statusText.textContent = 'Stopped.';
+        statusDetails.textContent = 'Checking stopped.';
+        stopTimer();
+      }
+    }
+    startButton.addEventListener('click', startChecking);
+    stopButton.addEventListener('click', stopChecking);
+    testEmailButton.addEventListener('click', testEmail);
+  </script>
 </body>
 </html>
