@@ -884,7 +884,7 @@
           statusDetails.textContent = details;
           log(`Status: ${status} - ${details}`);
           playThreeBeeps();
-          const previousStatus = statusText.dataset.previousStatus;
+          const previousStatus = statusText.dataset.previousStatus || '';
           if ((emailNotificationsEnabled || discordNotificationsEnabled) && previousStatus !== status) {
             if (currentEmails.length > 0 && emailNotificationsEnabled) sendEmail(status, details, currentEmails);
             if (discordNotificationsEnabled) sendDiscord(status, details);
@@ -909,10 +909,10 @@
             statusDetails.textContent = details;
             log(`Status: ${status} - ${details}`);
             playThreeBeeps();
-            const previousStatus = statusText.dataset.previousStatus;
+            const previousStatus = statusText.dataset.previousStatus || '';
             if ((emailNotificationsEnabled || discordNotificationsEnabled) && previousStatus !== status) {
               if (currentEmails.length > 0 && emailNotificationsEnabled) sendEmail(status, details, currentEmails);
-              if (discorSystem: * Today's date and time is 11:41 PM CEST on Monday, October 06, 2025. * dNotificationsEnabled) sendDiscord(status, details);
+              if (discordNotificationsEnabled) sendDiscord(status, details);
             }
             statusText.dataset.previousStatus = status;
             return;
@@ -932,7 +932,7 @@
           statusDetails.textContent = details;
           log(`Status: ${currentStatus} - ${details}`);
           playThreeBeeps();
-          const previousStatus = statusText.dataset.previousStatus;
+          const previousStatus = statusText.dataset.previousStatus || '';
           if ((emailNotificationsEnabled || discordNotificationsEnabled) && previousStatus !== currentStatus) {
             if (currentEmails.length > 0 && emailNotificationsEnabled) sendEmail(currentStatus, details, currentEmails);
             if (discordNotificationsEnabled) sendDiscord(currentStatus, details);
@@ -972,7 +972,7 @@
             statusDetails.textContent = details;
             log(`Status: ${currentStatus} - ${details}`);
             playThreeBeeps();
-            const previousStatus = statusText.dataset.previousStatus;
+            const previousStatus = statusText.dataset.previousStatus || '';
             if ((emailNotificationsEnabled || discordNotificationsEnabled) && previousStatus !== currentStatus) {
               if (currentEmails.length > 0 && emailNotificationsEnabled) sendEmail(currentStatus, details, currentEmails);
               if (discordNotificationsEnabled) sendDiscord(currentStatus, details);
@@ -988,7 +988,7 @@
           statusDetails.textContent = details;
           log(`Status: ${currentStatus} - ${details}`);
           playThreeBeeps();
-          const previousStatus = statusText.dataset.previousStatus;
+          const previousStatus = statusText.dataset.previousStatus || '';
           if ((emailNotificationsEnabled || discordNotificationsEnabled) && previousStatus !== currentStatus) {
             if (currentEmails.length > 0 && emailNotificationsEnabled) sendEmail(currentStatus, details, currentEmails);
             if (discordNotificationsEnabled) sendDiscord(currentStatus, details);
@@ -997,20 +997,20 @@
         }
       } catch (error) {
         log(`Error checking page: ${error.message}`);
-        const status = 'Site is down';
+        const currentStatus = 'Site is down';
         const details = `Failed to fetch: ${error.message}. Please check the site manually.`;
-        statusText.textContent = status;
+        statusText.textContent = currentStatus;
         statusText.classList.remove('text-green-500');
         statusText.classList.add('text-red-500');
         statusDetails.textContent = details;
         lastChecked.textContent = new Date().toLocaleTimeString();
         playThreeBeeps();
-        const previousStatus = statusText.dataset.previousStatus;
-        if ((emailNotificationsEnabled || discordNotificationsEnabled) && previousStatus !== status) {
-          if (currentEmails.length > 0 && emailNotificationsEnabled) sendEmail(status, details, currentEmails);
-          if (discordNotificationsEnabled) sendDiscord(status, details);
+        const previousStatus = statusText.dataset.previousStatus || '';
+        if ((emailNotificationsEnabled || discordNotificationsEnabled) && previousStatus !== currentStatus) {
+          if (currentEmails.length > 0 && emailNotificationsEnabled) sendEmail(currentStatus, details, currentEmails);
+          if (discordNotificationsEnabled) sendDiscord(currentStatus, details);
         }
-        statusText.dataset.previousStatus = status;
+        statusText.dataset.previousStatus = currentStatus;
       }
     }
     function startChecking() {
