@@ -228,7 +228,7 @@
       background: rgba(26, 26, 46, 0.7);
       border-radius: 6px;
       box-shadow: 0 0 5px rgba(0, 255, 255, 0.2);
-      font-size: 0.875rem;
+      font-size: 0.9rem; /* Increased font size for better visibility */
       color: #ffffff;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
       animation: fadeIn 0.3s ease-in;
@@ -254,6 +254,15 @@
     .submitted-emails button:hover {
       box-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
       transform: translateY(-1px);
+    }
+    .no-emails-message {
+      font-size: 0.875rem;
+      color: #00ffff;
+      text-align: center;
+      padding: 0.5rem;
+      background: rgba(0, 255, 255, 0.1);
+      border-radius: 4px;
+      box-shadow: 0 0 5px rgba(0, 255, 255, 0.2);
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
