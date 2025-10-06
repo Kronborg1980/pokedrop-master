@@ -98,9 +98,10 @@
     /* Input/Button Group Styling */
     input[type="email"], input[type="url"] {
       border: 2px solid #a0d2eb;
-      padding: 0.6rem 1rem;
       transition: border-color 0.3s ease;
       box-sizing: border-box; 
+      height: 2.5rem; 
+      padding: 0.5rem 1rem;
     }
     input[type="email"]:focus, input[type="url"]:focus {
       border-color: #3b82f6;
@@ -115,51 +116,53 @@
       font-weight: 600;
       transition: background-color 0.3s ease, transform 0.2s ease;
       letter-spacing: 0.05em;
+      color: white; /* Ensure all main buttons have white text */
+      text-shadow: 0 1px 1px rgba(0,0,0,0.1);
     }
     button:hover { transform: translateY(-2px); }
     .text-center { text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
 
-    /* The input group fix - Set the buttons/inputs to match height perfectly */
+    /* The input group fix - Flex setup for side-by-side input/button */
     .input-group {
       display: flex;
-      align-items: stretch; /* Stretch children to match height */
+      align-items: stretch; 
       margin-bottom: 0.5rem;
       width: 100%; 
     }
+    /* The input inside the group must flex-grow */
     .input-group input {
       flex-grow: 1;
       margin-right: 0.5rem;
-      /* Set a fixed height so button height can match */
-      height: 2.5rem; /* ~40px which is a common base input height */
-      padding: 0.5rem 1rem; /* Adjust padding to fit the new height */
+      /* Removed w-full class from HTML, letting flex handle width */
     }
+    /* Buttons inside the group must be fixed size */
     .input-group .remove-button,
     .input-group .submit-button {
       border: none;
-      padding: 0.5rem 0.75rem;
       border-radius: 0.25rem;
       cursor: pointer;
       font-size: 0.8rem;
       transition: background-color 0.2s;
       flex-shrink: 0; 
-      /* Make button fill the height of the container */
       height: 2.5rem; 
-      line-height: 1; /* Center text vertically */
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 0.5rem 0.75rem; /* Set button padding */
     }
-    .input-group .remove-button { background-color: #ef4444; color: white; }
+    .input-group .remove-button { background-color: #ef4444; }
     .input-group .remove-button:hover { background-color: #dc2626; transform: none; }
-    .input-group .submit-button { background-color: #10b981; color: white; }
+    .input-group .submit-button { background-color: #10b981; }
     .input-group .submit-button:hover { background-color: #059669; transform: none; }
-    .add-button { background-color: #22c55e; color: white; }
+    
+    /* Standalone Buttons */
+    .add-button { background-color: #22c55e; }
     .add-button:hover { background-color: #16a34a; }
     
     /* Toggle Button Consistency */
     .toggle-button {
-        /* Ensure all toggle buttons are the same height and have white text */
         color: white;
+        height: 2.5rem; /* Fixed height for consistency */
     }
     .toggle-button.active { background-color: #10b981; }
     .toggle-button.active:hover { background-color: #059669; }
@@ -220,15 +223,15 @@
         <div id="emailInputsContainer" class="mb-4">
       <label class="block text-sm text-gray-600 mb-1">Emails for alerts:</label>
       <div class="input-group">
-        <input type="email" value="kronborgnielsen@gmail.com" class="w-full border border-gray-300 rounded email-input" readonly required>
-      </div>
+        <input type="email" value="kronborgnielsen@gmail.com" class="border border-gray-300 rounded email-input" readonly required>
+              </div>
     </div>
     <button id="addEmailButton" class="w-full add-button mb-4">Add Another Email</button>
 
     <div id="discordWebhookContainer" class="mb-4">
         <label class="block text-sm text-gray-600 mb-1">Discord Webhook URL for alerts:</label>
         <div class="input-group webhook-input-group">
-            <input type="url" id="webhookInput" value="https://discord.com/api/webhooks/1418654823745716436/vuMKu1s095Cq3BfU06OF_Z_mwxG39zHppHJ3c4BX5X38WuJFWPGhIZdopWTEEXlophiN" placeholder="https://discord.com/api/webhooks/..." class="w-full border border-gray-300 rounded webhook-input" required>
+            <input type="url" id="webhookInput" value="https://discord.com/api/webhooks/1418654823745716436/vuMKu1s095Cq3BfU06OF_Z_mwxG39zHppHJ3c4BX5X38WuJFWPGhIZdopWTEEXlophiN" placeholder="https://discord.com/api/webhooks/..." class="border border-gray-300 rounded webhook-input" required>
             <button type="button" id="webhookSubmitButton" class="submit-button">Submit</button>
         </div>
     </div>
@@ -246,13 +249,13 @@
       <p class="text-sm text-gray-500">System running for: <span id="runTime">0h 0m 0s</span></p>
       <p class="text-sm text-gray-500">Details: <span id="statusDetails">None</span></p>
     </div>
-    <button id="startButton" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Start Checking</button>
-    <button id="stopButton" class="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600 mt-2 hidden">Stop Checking</button>
+    <button id="startButton" class="w-full bg-blue-500 py-2 rounded hover:bg-blue-600">Start Checking</button>
+    <button id="stopButton" class="w-full bg-red-500 py-2 rounded hover:bg-red-600 mt-2 hidden">Stop Checking</button>
     <div class="flex mt-2 space-x-2">
         <button id="emailToggleButton" class="w-1/2 py-2 rounded toggle-button active">Deactivate Email Alerts</button>
         <button id="webhookToggleButton" class="w-1/2 py-2 rounded webhook-toggle-button active">Deactivate Discord Alerts</button>
     </div>
-    <button id="testEmailButton" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 mt-2">Test Alert(s)</button>
+    <button id="testEmailButton" class="w-full bg-green-500 py-2 rounded hover:bg-green-600 mt-2">Test Alert(s)</button>
   </div>
   <audio id="beepSound">
     <source src="https://www.soundjay.com/buttons/beep-01a.mp3" type="audio/mpeg">
@@ -443,7 +446,7 @@
       const emailInputGroup = document.createElement('div');
       emailInputGroup.className = 'input-group';
       emailInputGroup.innerHTML = `
-        <input type="email" placeholder="anothername@example.com" class="w-full border border-gray-300 rounded email-input">
+        <input type="email" placeholder="anothername@example.com" class="border border-gray-300 rounded email-input">
         <button type="button" class="submit-button">Submit</button>
       `;
       emailInputsContainer.appendChild(emailInputGroup);
