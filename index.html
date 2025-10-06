@@ -5,16 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pokémon Center Shop Access Checker</title>
   <style>
-    /* Tailwind-like utility classes */
+    /* --- Tailwind-like Utility Classes (Adjusted) --- */
     .bg-gray-100 { background-color: #f3f4f6; }
     .bg-white { background-color: #ffffff; }
     .bg-blue-500 { background-color: #3b82f6; }
     .bg-red-500 { background-color: #ef4444; }
     .bg-green-500 { background-color: #10b981; }
     .bg-gray-500 { background-color: #6b7280; }
-    .bg-purple-500 { background-color: #9333ea; } /* New: Discord-like color */
+    .bg-purple-500 { background-color: #9333ea; } 
     .text-gray-600 { color: #4b5563; }
-    .text-gray-500 { color: #6b7280; }
     .text-red-500 { color: #ef4444; }
     .text-green-500 { color: #22c55e; }
     .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
@@ -40,17 +39,21 @@
     .min-h-screen { min-height: 100vh; }
     .text-center { text-align: center; }
     .hidden { display: none; }
-    .hover\:bg-blue-600:hover { background-color: #2563eb; }
-    .hover\:bg-red-600:hover { background-color: #dc2626; }
-    .hover\:bg-green-600:hover { background-color: #059669; }
-    .hover\:bg-gray-600:hover { background-color: #4b5563; }
-    .hover\:bg-purple-600:hover { background-color: #7e22ce; } /* New: Discord-like color hover */
-    /* Custom Pokemon Theme Styles */
+    .space-x-2 > :not([hidden]) ~ :not([hidden]) {
+        margin-left: 0.5rem;
+    }
+
+    /* --- Custom Pokemon Theme Styles --- */
     body {
       font-family: 'Nunito', sans-serif;
       background: linear-gradient(to bottom, #87CEEB, #A0D2EB, #90EE90, #ADD8E6);
       position: relative;
       overflow: hidden;
+      /* Ensure full height for centering */
+      min-height: 100vh; 
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .pokemon-sprite {
       position: absolute;
@@ -59,14 +62,8 @@
       height: auto;
       z-index: 10;
     }
-    .magikarp {
-      left: 20px;
-      animation: bob 2s infinite ease-in-out;
-    }
-    .cubone {
-      right: 20px;
-      animation: hop 3s infinite ease-in-out;
-    }
+    .magikarp { left: 20px; animation: bob 2s infinite ease-in-out; }
+    .cubone { right: 20px; animation: hop 3s infinite ease-in-out; }
     @keyframes bob {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-10px); }
@@ -85,9 +82,7 @@
       position: relative;
       z-index: 20;
     }
-    .rounded, .rounded-lg {
-      border-radius: 15px !important;
-    }
+    .rounded, .rounded-lg { border-radius: 15px !important; }
     .pokeball-decoration {
       position: absolute;
       width: 40px;
@@ -101,10 +96,13 @@
     .pokeball-top-right { top: -15px; right: -15px; transform: rotate(15deg); }
     .pokeball-bottom-left { bottom: -15px; left: -15px; transform: rotate(40deg); }
     .pokeball-bottom-right { bottom: -15px; right: -15px; transform: rotate(-30deg); }
+    
+    /* Input/Button Group Styling */
     input[type="email"], input[type="url"] {
       border: 2px solid #a0d2eb;
       padding: 0.6rem 1rem;
       transition: border-color 0.3s ease;
+      box-sizing: border-box; /* Crucial for flex layout */
     }
     input[type="email"]:focus, input[type="url"]:focus {
       border-color: #3b82f6;
@@ -120,81 +118,50 @@
       transition: background-color 0.3s ease, transform 0.2s ease;
       letter-spacing: 0.05em;
     }
-    button:hover {
-      transform: translateY(-2px);
-    }
-    .text-center {
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-    }
+    button:hover { transform: translateY(-2px); }
+    .text-center { text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+
+    /* The input group fix */
     .input-group {
       display: flex;
       align-items: center;
       margin-bottom: 0.5rem;
+      width: 100%; /* Ensure it spans the container */
     }
     .input-group input {
       flex-grow: 1;
       margin-right: 0.5rem;
     }
-    .input-group .remove-button {
-      background-color: #ef4444;
-      color: white;
+    .input-group .remove-button,
+    .input-group .submit-button {
       border: none;
       padding: 0.5rem 0.75rem;
       border-radius: 0.25rem;
       cursor: pointer;
       font-size: 0.8rem;
       transition: background-color 0.2s;
+      flex-shrink: 0; /* Prevent button from shrinking */
+      height: 40.8px; /* Match calculated input height for alignment */
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .input-group .remove-button:hover {
-      background-color: #dc2626;
-      transform: none;
-    }
-    .input-group .submit-button {
-      background-color: #10b981;
-      color: white;
-      border: none;
-      padding: 0.5rem 0.75rem;
-      border-radius: 0.25rem;
-      cursor: pointer;
-      font-size: 0.8rem;
-      transition: background-color 0.2s;
-    }
-    .input-group .submit-button:hover {
-      background-color: #059669;
-      transform: none;
-    }
-    .toggle-button.active {
-      background-color: #10b981;
-    }
-    .toggle-button.active:hover {
-      background-color: #059669;
-    }
-    .toggle-button.inactive {
-      background-color: #6b7280;
-    }
-    .toggle-button.inactive:hover {
-      background-color: #4b5563;
-    }
-    .add-button {
-      background-color: #22c55e;
-      color: white;
-      border: none;
-      padding: 0.75rem 1rem;
-      border-radius: 0.25rem;
-      cursor: pointer;
-      font-weight: 600;
-      margin-top: 1rem;
-      transition: background-color 0.2s, transform 0.2s;
-    }
-    .add-button:hover {
-      background-color: #16a34a;
-    }
-    .webhook-toggle-button.active {
-      background-color: #9333ea;
-    }
-    .webhook-toggle-button.active:hover {
-      background-color: #7e22ce;
-    }
+    .input-group .remove-button { background-color: #ef4444; color: white; }
+    .input-group .remove-button:hover { background-color: #dc2626; transform: none; }
+    .input-group .submit-button { background-color: #10b981; color: white; }
+    .input-group .submit-button:hover { background-color: #059669; transform: none; }
+    .add-button { background-color: #22c55e; color: white; }
+    .add-button:hover { background-color: #16a34a; }
+    
+    /* Toggle Button Consistency */
+    .toggle-button.active { background-color: #10b981; }
+    .toggle-button.active:hover { background-color: #059669; }
+    .toggle-button.inactive { background-color: #6b7280; }
+    .toggle-button.inactive:hover { background-color: #4b5563; }
+    .webhook-toggle-button.active { background-color: #9333ea; }
+    .webhook-toggle-button.active:hover { background-color: #7e22ce; }
+
+    /* Range Slider Styling */
     input[type="range"] {
       -webkit-appearance: none;
       width: 100%;
@@ -206,23 +173,16 @@
       cursor: pointer;
     }
     input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 20px;
-      height: 20px;
-      background: #3b82f6;
-      border-radius: 50%;
-      border: 2px solid white;
-      cursor: pointer;
+      -webkit-appearance: none; appearance: none;
+      width: 20px; height: 20px;
+      background: #3b82f6; border-radius: 50%;
+      border: 2px solid white; cursor: pointer;
       box-shadow: 0 0 5px rgba(0,0,0,0.2);
     }
     input[type="range"]::-moz-range-thumb {
-      width: 20px;
-      height: 20px;
-      background: #3b82f6;
-      border-radius: 50%;
-      border: 2px solid white;
-      cursor: pointer;
+      width: 20px; height: 20px;
+      background: #3b82f6; border-radius: 50%;
+      border: 2px solid white; cursor: pointer;
       box-shadow: 0 0 5px rgba(0,0,0,0.2);
     }
     .status-feedback {
@@ -239,7 +199,7 @@
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+<body class="min-h-screen">
   <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/129.png" alt="Magikarp" class="pokemon-sprite magikarp">
   <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/104.png" alt="Cubone" class="pokemon-sprite cubone">
   <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
@@ -282,8 +242,8 @@
     <button id="startButton" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Start Checking</button>
     <button id="stopButton" class="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600 mt-2 hidden">Stop Checking</button>
     <div class="flex mt-2 space-x-2">
-        <button id="emailToggleButton" class="w-1/2 bg-green-500 text-white py-2 rounded hover:bg-green-600 toggle-button active">Deactivate Email Alerts</button>
-        <button id="webhookToggleButton" class="w-1/2 bg-purple-500 text-white py-2 rounded hover:bg-purple-600 toggle-button webhook-toggle-button active">Deactivate Discord Alerts</button>
+        <button id="emailToggleButton" class="w-1/2 py-2 rounded toggle-button active">Deactivate Email Alerts</button>
+        <button id="webhookToggleButton" class="w-1/2 py-2 rounded webhook-toggle-button active">Deactivate Discord Alerts</button>
     </div>
     <button id="testEmailButton" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 mt-2">Test Email</button>
   </div>
@@ -331,7 +291,7 @@
       alert('Email functionality is unavailable. Please check your network connection and try again.');
     } else {
       emailjs.init({
-        publicKey: "8w7eu6mrg3lRl6ta3" // UPDATED EMAILJS KEY
+        publicKey: "8w7eu6mrg3lRl6ta3"
       });
     }
     const statusText = document.getElementById('statusText');
@@ -422,29 +382,40 @@
       if (discordNotificationsEnabled) {
         webhookToggleButton.textContent = 'Deactivate Discord Alerts';
         webhookToggleButton.classList.remove('inactive', 'bg-gray-500');
-        webhookToggleButton.classList.add('active', 'bg-purple-500');
+        webhookToggleButton.classList.add('active', 'bg-purple-500', 'text-white');
       } else {
         webhookToggleButton.textContent = 'Activate Discord Alerts';
-        webhookToggleButton.classList.remove('active', 'bg-purple-500');
-        webhookToggleButton.classList.add('inactive', 'bg-gray-500');
+        webhookToggleButton.classList.remove('active', 'bg-purple-500', 'text-white');
+        webhookToggleButton.classList.add('inactive', 'bg-gray-500', 'text-white');
       }
       showFeedback(`Discord notifications ${discordNotificationsEnabled ? 'enabled' : 'disabled'}.`);
     });
-    
+    
+    // Initial state setup for webhook toggle (since we added text-white to the active state)
+    if (discordNotificationsEnabled) {
+        webhookToggleButton.classList.add('bg-purple-500', 'text-white');
+    }
+
     // Toggle email notifications
     emailToggleButton.addEventListener('click', () => {
       emailNotificationsEnabled = !emailNotificationsEnabled;
       if (emailNotificationsEnabled) {
         emailToggleButton.textContent = 'Deactivate Email Alerts';
         emailToggleButton.classList.remove('inactive', 'bg-gray-500');
-        emailToggleButton.classList.add('active', 'bg-green-500');
+        emailToggleButton.classList.add('active', 'bg-green-500', 'text-white');
       } else {
         emailToggleButton.textContent = 'Activate Email Alerts';
-        emailToggleButton.classList.remove('active', 'bg-green-500');
-        emailToggleButton.classList.add('inactive', 'bg-gray-500');
+        emailToggleButton.classList.remove('active', 'bg-green-500', 'text-white');
+        emailToggleButton.classList.add('inactive', 'bg-gray-500', 'text-white');
       }
       showFeedback(`Email notifications ${emailNotificationsEnabled ? 'enabled' : 'disabled'}.`);
     });
+    
+    // Initial state setup for email toggle (since we added text-white to the active state)
+    if (emailNotificationsEnabled) {
+        emailToggleButton.classList.add('bg-green-500', 'text-white');
+    }
+
     // Helper function to calculate a random interval
     function getRandomInterval(baseInterval) {
       const variation = Math.floor(Math.random() * (120000 - 60000 + 1)) + 60000; // Random between 60,000 and 120,000 ms (1-2 minutes)
