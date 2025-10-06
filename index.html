@@ -195,10 +195,10 @@
                     <p>Server Logs:</p>
                     <ul>${logs.logs.map(log => `<li>${log}</li>`).join('')}</ul>
                 `;
-                window.QueueHunter.updateUI('Fetched server status');
+                window.QueueHunter.updateUI('Fetched Pikachu\'s status!');
             } catch (e) {
-                document.getElementById('workerStatus').innerHTML = `<p>Error fetching server status: ${e.message}</p>`;
-                window.QueueHunter.updateUI(`Server status error: ${e.message}`);
+                document.getElementById('workerStatus').innerHTML = `<p>Error fetching Pikachu\'s status: ${e.message}</p>`;
+                window.QueueHunter.updateUI(`Pikachu status error: ${e.message}`);
             }
         }
 
@@ -224,7 +224,7 @@
         let failThresh = 2;
         let baseCheckFreq = 5 * 60 * 1000;
         let proxies = [
-            'https://corsproxy.io/?'
+            'https://api.codetabs.com/v1/proxy/?quest='
         ];
         let blacklisted = new Set();
         let logEntries = [];
@@ -582,7 +582,7 @@
                             headers: window.QueueHunter.getRandomHeaders()
                         });
                         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                        const data = await (proxy.includes('allorigins') ? response.json().then(d => d.contents) : response.text());
+                        const data = await response.text();
                         let status, details;
                         if (/hcaptcha|captcha|verify you are not a bot/i.test(data) && !/add to cart|shop now/i.test(data)) {
                             status = 'CAPTCHA Detected';
@@ -630,15 +630,15 @@
                         isCheckingConsecutiveFailures = false;
                         success = true;
                     } catch (e) {
-                        window.QueueHunter.updateUI(`Check failed for ${url}: ${e.message}`);
+                        window.QueueHunter.updateUI(`Check failed for ${url} with proxy ${proxy}: ${e.message}`);
                         consecFails++;
                         proxyIndex++;
                         if (proxyIndex === proxies.length) {
                             blacklisted.add(proxy);
                             proxies = proxies.filter(p => !blacklisted.has(p));
-                            proxyIndex = 0;
+                            window.QueueHunter.updateUI(`Blacklisted proxy ${proxy}`);
                             if (!proxies.length) {
-                                window.QueueHunter.updateUI('No working proxies left!');
+                                window.QueueHunter.updateUI('No working proxies left! Falling back to server checks.');
                                 consecFails++;
                                 break;
                             }
@@ -650,7 +650,7 @@
             testBtn.disabled = false;
             if (consecFails >= failThresh && !isCheckingConsecutiveFailures) {
                 isCheckingConsecutiveFailures = true;
-                window.QueueHunter.notify('Multiple Failed Checks', `Failed ${consecFails} times in a row. Check URLs or proxies!`);
+                window.QueueHunter.notify('Multiple Failed Checks', `Failed ${consecFails} times in a row. Check URLs or rely on server checks!`);
             }
         };
 
@@ -680,20 +680,10 @@
             document.getElementById('stopBtn').classList.add('hidden');
             window.QueueHunter.stopAlert();
             window.QueueHunter.updateStatusBanner('Monitoring stopped', 'gray');
-            window.QueueHunter.updateUI('Stopped monitoring');
-        };
+           огласно
 
-        window.QueueHunter.exportLog = function() {
-            const logText = logEntries.join('\n');
-            const blob = new Blob([logText], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'queue_hunter_log.txt';
-            a.click();
-            URL.revokeObjectURL(url);
-            window.QueueHunter.updateUI('Exported log file');
-        };
+System: window.QueueHunter.updateUI('Monitoring stopped');
+        }
     </script>
 </body>
 </html>
