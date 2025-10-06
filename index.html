@@ -1,836 +1,305 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Queue Hunter Pro – Pokémon Center</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-    <style>
-        body { font-family: 'Roboto', sans-serif; background: linear-gradient(135deg, #1e1e2f, #0d0d15); color: #fff; margin: 0; padding: 1rem; display: flex; flex-direction: column; align-items: center; }
-        .container { width: 100%; max-width: 450px; }
-        .pokedex { background: rgba(30, 30, 50, 0.9); border: 3px solid #FFD700; border-radius: 15px; padding: 2rem; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); }
-        .header { text-align: center; margin-bottom: 1.5rem; }
-        .header img { width: 100px; filter: drop-shadow(0 0 12px #FFD700); }
-        .header h1 { font-family: 'Orbitron', sans-serif; color: #FFD700; font-size: 1.8rem; }
-        .header p { font-size: 0.9rem; }
-        .section { margin-bottom: 1.2rem; padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 10px; border: 1px solid #FFD700; }
-        label { font-family: 'Orbitron', sans-serif; font-size: 0.8rem; margin-bottom: 0.5rem; display: block; }
-        input, textarea { border: 1px solid #FFD700; border-radius: 8px; padding: 0.6rem; width: 100%; background: rgba(255, 255, 255, 0.1); color: #fff; }
-        input:focus, textarea:focus { border-color: #FFB300; box-shadow: 0 0 8px #FFD700; outline: none; }
-        .button-group { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; margin-top: 0.75rem; }
-        .input-with-button { display: flex; gap: 0.5rem; align-items: center; }
-        button { background: linear-gradient(145deg, #FFD700, #FFB300); color: #1A1A1A; border: 1px solid #1A1A1A; padding: 0.8rem 1.5rem; border-radius: 20px; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; cursor: pointer; }
-        button:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4); }
-        button:disabled { background: #666; color: #999; cursor: not-allowed; }
-        .status-banner { padding: 1rem; background: rgba(0, 0, 0, 0.7); border: 2px solid #FFD700; border-radius: 10px; text-align: center; font-family: 'Orbitron', sans-serif; font-size: 1.5rem; }
-        .status-pokedex { background: linear-gradient(145deg, #3F51B5, #1A237E); padding: 1.2rem; border-radius: 10px; border: 1px solid #FFD700; max-height: 300px; overflow-y: auto; }
-        .status-pokedex p { margin: 0.4rem 0; font-size: 0.8rem; }
-        .log-container, .server-log-container { max-height: 150px; overflow-y: auto; font-size: 0.75rem; background: rgba(255, 255, 255, 0.05); padding: 0.7rem; border-radius: 8px; margin-top: 0.7rem; border: 1px solid #FFD700; }
-        .status-banner.green { color: #00FF00; border-color: #00FF00; }
-        .status-banner.red { color: #FF0000; border-color: #FF0000; }
-        .status-banner.yellow { color: #FFD700; border-color: #FFD700; }
-        .status-banner.gray { color: #999; border-color: #999; }
-        .status-banner.orange { color: #FFA500; border-color: #FFA500; }
-        .status-banner.purple { color: #9370DB; border-color: #9370DB; }
-        .alert-zap { animation: zap 0.3s ease infinite; }
-        @keyframes zap { 0%, 100% { border-color: #FFD700; box-shadow: 0 0 20px #FFD700; } 50% { border-color: #FFB300; box-shadow: 0 0 30px #FFB300; } }
-        .hidden { display: none; }
-        .grayed-out { background: #666 !important; color: #999 !important; border-color: #555 !important; cursor: not-allowed; }
-        .pokemon-decoration { position: absolute; width: 80px; opacity: 0.3; pointer-events: none; filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.5)); }
-        #cubone { top: 10%; left: 5%; }
-        #pinsir { top: 20%; right: 5%; }
-        #gardevoir { bottom: 15%; left: 10%; }
-        #suicune { bottom: 25%; right: 10%; }
-        #charizard { top: 30%; left: 15%; }
-        #vaporeon { bottom: 10%; right: 15%; }
-        .email-list { margin-top: 0.5rem; list-style: none; padding: 0; }
-        .email-list li { display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.1); padding: 0.5rem; border-radius: 5px; margin-bottom: 0.5rem; }
-        .email-list li button { padding: 0.3rem 0.6rem; font-size: 0.7rem; background: linear-gradient(145deg, #FF4500, #FF0000); }
-        .checkbox-group { display: flex; flex-direction: column; gap: 0.5rem; }
-        .checkbox-group label { display: flex; align-items: center; font-size: 0.8rem; }
-        .checkbox-group input[type="checkbox"] { width: auto; margin-right: 0.5rem; }
-    </style>
-</head>
-<body>
-    <div id="password-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e1e2f; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-        <div class="pokedex" style="text-align: center; padding: 2rem;">
-            <h1>Enter Code</h1>
-            <p>Enter the code to unlock the tool.</p>
-            <input type="password" id="accessCode" placeholder="Enter code">
-            <button onclick="checkAccessCode()">Unlock</button>
-            <p id="error-message" style="color: #FF0000; margin-top: 1rem; display: none;">Wrong code. Try again.</p>
-        </div>
-    </div>
-    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/104.png" alt="Cubone" id="cubone" class="pokemon-decoration">
-    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/127.png" alt="Pinsir" id="pinsir" class="pokemon-decoration">
-    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/282.png" alt="Gardevoir" id="gardevoir" class="pokemon-decoration">
-    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/245.png" alt="Suicune" id="suicune" class="pokemon-decoration">
-    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png" alt="Charizard" id="charizard" class="pokemon-decoration">
-    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/134.png" alt="Vaporeon" id="vaporeon" class="pokemon-decoration">
-    <div id="content" class="hidden">
-        <div class="container">
-            <div class="pokedex">
-                <div class="header">
-                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/129.png" alt="Magikarp">
-                    <h1>Queue Hunter Pro</h1>
-                    <p>Catch Pokémon Center restocks!</p>
-                </div>
-                <div class="section">
-                    <label>Discord Webhook URL:</label>
-                    <div class="input-with-button">
-                        <input type="url" id="discordWebhook" placeholder="https://discord.com/api/webhooks/...">
-                        <button id="submitWebhookBtn" onclick="window.QueueHunter.submitWebhook()">Submit</button>
-                        <button id="clearWebhookBtn" onclick="window.QueueHunter.clearWebhook()">Clear</button>
-                    </div>
-                    <input type="hidden" id="webhookCode" value="9918">
-                    <div class="button-group">
-                        <button id="addPokezonanBtn" onclick="window.QueueHunter.addPokezonanWebhook()">Add Pokezonan Webhook</button>
-                        <button id="testDiscordBtn" onclick="window.QueueHunter.testDiscord()">Test Discord</button>
-                    </div>
-                </div>
-                <div class="section">
-                    <label>Email Notifications:</label>
-                    <div class="input-with-button">
-                        <input type="email" id="emailInput" placeholder="Enter email address">
-                        <button id="addEmailBtn" onclick="window.QueueHunter.addEmail()">Add</button>
-                    </div>
-                    <ul id="emailList" class="email-list"></ul>
-                    <div class="button-group">
-                        <button id="testEmailBtn" onclick="window.QueueHunter.testEmail()">Test Email</button>
-                    </div>
-                </div>
-                <div class="section">
-                    <label>Notification Settings:</label>
-                    <div class="button-group">
-                        <button id="toggleDiscordBtn" onclick="window.QueueHunter.toggleNotification('discord')">Discord Notifications: On</button>
-                        <button id="toggleEmailBtn" onclick="window.QueueHunter.toggleNotification('email')">Email narratives: On</button>
-                    </div>
-                    <div class="checkbox-group">
-                        <label><input type="checkbox" id="notifyQueueDetected" checked> Notify on Queue Detected</label>
-                        <label><input type="checkbox" id="notifyQueueSoon" checked> Notify on Queue Soon or Active</label>
-                        <label><input type="checkbox" id="notifyPossibleBotBlock" checked> Notify on Possible Queue</label>
-                        <label><input type="checkbox" id="notifyCaptchaDetected" checked> Notify on CAPTCHA Detected</label>
-                    </div>
-                </div>
-                <div class="section">
-                    <label>Alert Sound / Vibration:</label>
-                    <div class="button-group">
-                        <button id="alarmBtn" onclick="window.QueueHunter.toggleAlarm()">Activate Alarm</button>
-                        <button onclick="window.QueueHunter.testAlarm()">Test Alarm</button>
-                    </div>
-                </div>
-                <div class="section">
-                    <label>Check Frequency: <span id="freqVal">5</span> mins</label>
-                    <input type="range" id="freqSlider" min="0.1" max="30" step="0.1" value="5">
-                    <label>Alert After: <span id="threshVal">2</span> fails</label>
-                    <input type="range" id="threshSlider" min="1" max="5" value="2">
-                    <label>Monitor URLs (optional, comma-separated):</label>
-                    <textarea id="urlList" placeholder="https://www.pokemoncenter.com/product/..., https://www.pokemoncenter.com/..."></textarea>
-                </div>
-                <div class="section">
-                    <label>Auto-Open Page on Detection:</label>
-                    <input type="checkbox" id="autoOpen" checked>
-                    <label>Push Notifications:</label>
-                    <button id="pushBtn" onclick="window.QueueHunter.togglePush()">Enable Push Notifications</button>
-                </div>
-                <div class="section">
-                    <div class="button-group">
-                        <button id="startBtn" onclick="window.QueueHunter.startMonitoring()">Start Hunt</button>
-                        <button id="stopBtn" class="hidden" onclick="window.QueueHunter.stopMonitoring()">Stop Hunt</button>
-                        <button id="testNowBtn" onclick="window.QueueHunter.testNow()">Test Now</button>
-                        <button onclick="window.QueueHunter.exportLog()">Export Log</button>
-                    </div>
-                </div>
-                <div class="status-banner" id="statusBanner">Ready to hunt</div>
-                <div class="status-pokedex" id="status-pokedex">
-                    <p>Last Check: <span id="lastCheck">Never</span></p>
-                    <p>Runtime: <span id="runtime">0m 0s</span></p>
-                    <p>Consecutive Fails: <span id="consec">0</span></p>
-                    <p>Stock Status: <span id="stockStatus">Unknown</span></p>
-                    <p>Client Log / Details:</p>
-                    <div class="log-container" id="details"></div>
-                    <p>Server-Side Status:</p>
-                    <div class="server-log-container" id="workerStatus">Loading...</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <audio id="alertTone" preload="auto" loop>
-        <source src="https://cdn.freesound.org/previews/316/316847_4939433-lq.mp3" type="audio/mpeg">
-    </audio>
-    <script>
-        const ACCESS_CODE = "skaplask";
-        const WORKER_URL = 'https://queue-hunter.kronborgnielsen.workers.dev/'; // Replace with https://queue-hunter.your-subdomain.workers.dev
+const BROWSERLESS_TOKEN = '2TBee3s4m5MFrBQd32cf338178a9cb1981d3fd9f4f7e405ef'; // Your magical browser key
+const DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1418654823745716436/vuMKu1s095Cq3BfU06OF_Z_mwxG39zHppHJ3c4BX5X38WuJFWPGhIZdopWTEEXlophiN'; // Chatot’s singing spot
+const EMAILJS_USER_ID = '8w7eu6mrg3lRl6ta3'; // Delibird’s ID
+const EMAILJS_SERVICE_ID = 'service_ahqdaj5'; // Delibird’s service
+const EMAILJS_TEMPLATE_ID = 'template_whhvnra'; // Delibird’s letter template
+const CAPSOLVER_KEY = 'CAP-E20E90A1238FE858B9CCCFC6F53DC436C385BF7089101FD86F5EEA47FC43CA95'; // Machamp’s punching power
+const CHECK_URLS = ['https://www.pokemoncenter.com/', 'https://www.pokemoncenter.com/category/trading-card-game']; // Places to check for queues
+const NOTIFICATION_SETTINGS = {
+    queueDetected: true, // Alert for queues
+    queueSoon: true, // Alert for possible queues
+    possibleBotBlock: true, // Alert for weird pages
+    captchaDetected: true, // Alert for CAPTCHAs
+    discord: true, // Chatot singing
+    email: true // Delibird delivering
+};
+const EMAILS = ['kronborgnielsen@gmail.com']; // Delibird’s delivery address
+const SECRET_KEY = 'skaplask'; // Secret code for Pikachu’s diary
 
-        function checkAccessCode() {
-            const enteredCode = document.getElementById('accessCode').value;
-            const passwordOverlay = document.getElementById('password-overlay');
-            const content = document.getElementById('content');
-            const errorMessage = document.getElementById('error-message');
-            if (enteredCode === ACCESS_CODE) {
-                passwordOverlay.style.display = 'none';
-                content.classList.remove('hidden');
-                fetchWorkerStatus(); // Load server status on unlock
-            } else {
-                errorMessage.style.display = 'block';
-            }
-        }
+// Special headers to stop Team Rocket (CORS errors)
+const corsHeaders = {
+    'Access-Control-Allow-Origin': 'https://kronborg1980.github.io', // Only let your Pokédex talk to Pikachu
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Cache-Control',
+    'Access-Control-Max-Age': '86400'
+};
 
-        async function fetchWorkerStatus() {
-            try {
-                const statusRes = await fetch(`${WORKER_URL}/status?key=${ACCESS_CODE}`);
-                const status = await statusRes.json();
-                if (status.error) throw new Error(status.error);
-                const logsRes = await fetch(`${WORKER_URL}/logs?key=${ACCESS_CODE}`);
-                const logs = await logsRes.json();
-                if (logs.error) throw new Error(logs.error);
-                document.getElementById('workerStatus').innerHTML = `
-                    <p>Server Running: ${status.running ? 'Yes' : 'No'}</p>
-                    <p>Last Check: ${new Date(status.lastCheck).toLocaleTimeString()}</p>
-                    <p>Server Logs:</p>
-                    <ul>${logs.logs.map(log => `<li>${log}</li>`).join('')}</ul>
-                `;
-                window.QueueHunter.updateUI('Fetched server status');
-            } catch (e) {
-                document.getElementById('workerStatus').innerHTML = `<p>Error fetching server status: ${e.message}</p>`;
-                window.QueueHunter.updateUI(`Server status error: ${e.message}`);
-            }
-        }
+// Handle Team Rocket’s sneaky preflight checks
+async function handleOptions() {
+    return new Response(null, { status: 204, headers: corsHeaders });
+}
 
-        // Check server status every 30 seconds
-        setInterval(fetchWorkerStatus, 30000);
+// Pikachu’s diary (last 50 entries)
+let workerLogs = [];
+let lastCheck = null;
 
-        window.QueueHunter = window.QueueHunter || {};
-        window.QueueHunter.isWebhookSubmitted = false;
-        window.QueueHunter.emails = ['kronborgnielsen@gmail.com'];
-        window.QueueHunter.notificationSettings = {
-            discord: true,
-            email: true,
-            queueDetected: true,
-            queueSoon: true,
-            possibleBotBlock: true,
-            captchaDetected: true
-        };
-        let pushEnabled = false;
-        let hasNotified = false;
-        let cleanChecks = 0;
-        let intervalId = null;
-        let startTime = null;
-        let consecFails = 0;
-        let failThresh = 2;
-        let baseCheckFreq = 5 * 60 * 1000;
-        let proxies = [
-            'https://api.allorigins.win/get?url=',
-            'https://corsproxy.io/?',
-            'https://thingproxy.freeboard.io/fetch/'
-        ];
-        let blacklisted = new Set();
-        let logEntries = [];
-        let alarmActive = false;
-        let alertAudio = null;
-        let vibrateInterval = null;
-        let isCheckingConsecutiveFailures = false;
-        emailjs.init('8w7eu6mrg3lRl6ta3');
-        window.QueueHunter.emailServiceId = 'service_ahqdaj5';
-        window.QueueHunter.emailTemplateId = 'template_whhvnra';
-        document.addEventListener('DOMContentLoaded', () => {
-            const testBtn = document.getElementById('testDiscordBtn');
-            const submitBtn = document.getElementById('submitWebhookBtn');
-            const clearBtn = document.getElementById('clearWebhookBtn');
-            const pokezonanBtn = document.getElementById('addPokezonanBtn');
-            const addEmailBtn = document.getElementById('addEmailBtn');
-            const testEmailBtn = document.getElementById('testEmailBtn');
-            const pushBtn = document.getElementById('pushBtn');
-            const webhookInput = document.getElementById('discordWebhook');
-            testBtn.disabled = true;
-            submitBtn.disabled = !webhookInput.value;
-            clearBtn.disabled = !webhookInput.value;
-            pokezonanBtn.disabled = false;
-            addEmailBtn.disabled = true;
-            testEmailBtn.disabled = window.QueueHunter.emails.length === 0;
-            pushBtn.disabled = !("Notification" in window);
-            webhookInput.addEventListener('input', function() {
-                submitBtn.disabled = !this.value || !this.value.includes('discord.com/api/webhooks');
-                clearBtn.disabled = !this.value;
-                testBtn.disabled = !window.QueueHunter.isWebhookSubmitted || !this.value;
-                if (this.value) {
-                    this.classList.remove('grayed-out');
-                } else {
-                    this.classList.add('grayed-out');
-                    window.QueueHunter.isWebhookSubmitted = false;
-                    testBtn.disabled = true;
-                    window.QueueHunter.updateUI('Please enter a valid Discord webhook URL');
-                }
-            });
-            document.getElementById('emailInput').addEventListener('input', function() {
-                addEmailBtn.disabled = !this.value || !/\S+@\S+\.\S+/.test(this.value);
-            });
-            document.getElementById('freqSlider').addEventListener('input', function() {
-                baseCheckFreq = this.value * 60 * 1000;
-                document.getElementById('freqVal').textContent = this.value;
-                window.QueueHunter.updateUI(`Check frequency updated to ${this.value} minutes`);
-            });
-            document.getElementById('threshSlider').addEventListener('input', function() {
-                failThresh = parseInt(this.value);
-                document.getElementById('threshVal').textContent = this.value;
-                window.QueueHunter.updateUI(`Alert threshold updated to ${this.value} consecutive fails`);
-            });
-            ['notifyQueueDetected', 'notifyQueueSoon', 'notifyPossibleBotBlock', 'notifyCaptchaDetected'].forEach(id => {
-                document.getElementById(id).addEventListener('change', function() {
-                    const setting = id.replace('notify', '').toLowerCase();
-                    window.QueueHunter.notificationSettings[setting] = this.checked;
-                    window.QueueHunter.updateUI(`${setting.replace(/([A-Z])/g, ' $1').trim()} notifications ${this.checked ? 'enabled' : 'disabled'}`);
-                });
-            });
-            window.QueueHunter.renderEmailList();
+function addLog(message) {
+    workerLogs.push(`[${new Date().toISOString()}] ${message}`);
+    if (workerLogs.length > 50) workerLogs.shift();
+}
+
+async function sendDiscordNotification(title, message, color = 0xFFD700) {
+    if (!NOTIFICATION_SETTINGS.discord || !DISCORD_WEBHOOK) {
+        addLog('Chatot is sleeping: No webhook');
+        return;
+    }
+    try {
+        await fetch(DISCORD_WEBHOOK, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ embeds: [{ title, description: message, color, footer: { text: 'Queue Hunter Pro' } }] })
         });
-        window.QueueHunter.toggleNotification = function(type) {
-            window.QueueHunter.notificationSettings[type] = !window.QueueHunter.notificationSettings[type];
-            const btn = document.getElementById(`toggle${type.charAt(0).toUpperCase() + type.slice(1)}Btn`);
-            btn.textContent = `${type.charAt(0).toUpperCase() + type.slice(1)} Notifications: ${window.QueueHunter.notificationSettings[type] ? 'On' : 'Off'}`;
-            btn.style.background = window.QueueHunter.notificationSettings[type] ? 'linear-gradient(145deg, #FFD700, #FFB300)' : '#666';
-            btn.style.color = window.QueueHunter.notificationSettings[type] ? '#1A1A1A' : '#999';
-            window.QueueHunter.updateUI(`${type.charAt(0).toUpperCase() + type.slice(1)} notifications ${window.QueueHunter.notificationSettings[type] ? 'enabled' : 'disabled'}`);
-        };
-        window.QueueHunter.addPokezonanWebhook = function() {
-            const webhookUrlInput = document.getElementById('discordWebhook');
-            const testBtn = document.getElementById('testDiscordBtn');
-            const submitBtn = document.getElementById('submitWebhookBtn');
-            const clearBtn = document.getElementById('clearWebhookBtn');
-            const pokezonanBtn = document.getElementById('addPokezonanBtn');
-            const pokezonanWebhook = 'https://discord.com/api/webhooks/1418654823745716436/vuMKu1s095Cq3BfU06OF_Z_mwxG39zHppHJ3c4BX5X38WuJFWPGhIZdopWTEEXlophiN';
-            webhookUrlInput.value = pokezonanWebhook;
-            window.QueueHunter.isWebhookSubmitted = true;
-            webhookUrlInput.disabled = true;
-            webhookUrlInput.classList.add('grayed-out');
-            submitBtn.disabled = true;
-            clearBtn.disabled = false;
-            testBtn.disabled = false;
-            pokezonanBtn.disabled = true;
-            pokezonanBtn.classList.add('grayed-out');
-            pokezonanBtn.textContent = 'Pokezonan Added!';
-            setTimeout(() => pokezonanBtn.textContent = 'Add Pokezonan Webhook', 2000);
-            window.QueueHunter.updateUI('Pokezonan webhook added');
-        };
-        window.QueueHunter.submitWebhook = function() {
-            const webhookUrlInput = document.getElementById('discordWebhook');
-            const testBtn = document.getElementById('testDiscordBtn');
-            const submitBtn = document.getElementById('submitWebhookBtn');
-            const clearBtn = document.getElementById('clearWebhookBtn');
-            const pokezonanBtn = document.getElementById('addPokezonanBtn');
-            if (webhookUrlInput.value && webhookUrlInput.value.includes('discord.com/api/webhooks')) {
-                window.QueueHunter.isWebhookSubmitted = true;
-                webhookUrlInput.disabled = true;
-                webhookUrlInput.classList.add('grayed-out');
-                submitBtn.disabled = true;
-                clearBtn.disabled = false;
-                testBtn.disabled = false;
-                pokezonanBtn.disabled = true;
-                pokezonanBtn.classList.add('grayed-out');
-                submitBtn.textContent = 'Submitted!';
-                setTimeout(() => submitBtn.textContent = 'Submit', 2000);
-                window.QueueHunter.updateUI('Webhook submitted successfully');
-            } else {
-                window.QueueHunter.updateUI('Invalid Discord webhook URL');
-            }
-        };
-        window.QueueHunter.clearWebhook = function() {
-            const webhookUrlInput = document.getElementById('discordWebhook');
-            const testBtn = document.getElementById('testDiscordBtn');
-            const submitBtn = document.getElementById('submitWebhookBtn');
-            const clearBtn = document.getElementById('clearWebhookBtn');
-            const pokezonanBtn = document.getElementById('addPokezonanBtn');
-            webhookUrlInput.value = '';
-            webhookUrlInput.disabled = false;
-            webhookUrlInput.classList.remove('grayed-out');
-            window.QueueHunter.isWebhookSubmitted = false;
-            submitBtn.disabled = true;
-            clearBtn.disabled = true;
-            testBtn.disabled = true;
-            pokezonanBtn.disabled = false;
-            pokezonanBtn.classList.remove('grayed-out');
-            clearBtn.textContent = 'Cleared!';
-            setTimeout(() => clearBtn.textContent = 'Clear', 2000);
-            window.QueueHunter.updateUI('Webhook cleared');
-        };
-        window.QueueHunter.testDiscord = async function() {
-            if (!window.QueueHunter.isWebhookSubmitted) {
-                window.QueueHunter.updateUI('Cannot test: Webhook not submitted');
-                return;
-            }
-            const webhookUrl = document.getElementById('discordWebhook').value;
-            if (!webhookUrl.includes('discord.com/api/webhooks')) {
-                window.QueueHunter.updateUI('Invalid webhook URL for testing');
-                return;
-            }
-            const testBtn = document.getElementById('testDiscordBtn');
-            testBtn.textContent = 'Testing...';
-            await window.QueueHunter.sendDiscord('Test Ping', 'Webhook online! Ready to catch queue alerts!');
-            testBtn.textContent = 'Test Discord';
-        };
-        window.QueueHunter.getRandomHeaders = function() {
-            const userAgents = [
-                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
-                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
-                'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0) Gecko/20100101 Firefox/130.0',
-                'Mozilla/5.0 (iPhone; CPU iPhone OS 17_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Mobile/15E148 Safari/604.1'
-            ];
-            return {
-                'User-Agent': userAgents[Math.floor(Math.random() * userAgents.length)],
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.9',
-                'Accept-Encoding': 'gzip, deflate, br',
-                'Referer': 'https://www.google.com/',
-                'Connection': 'keep-alive',
-                'Upgrade-Insecure-Requests': '1',
-                'Cache-Control': 'no-cache'
-            };
-        };
-        window.QueueHunter.isDropWindow = function() {
-            const now = new Date();
-            const day = now.getDay();
-            const hour = now.getHours();
-            const etHour = (hour - 4 + 24) % 24;
-            const isDrop = (day === 1 || day === 2 || day === 4) && etHour >= 11 && etHour < 13;
-            window.QueueHunter.updateUI(`Drop window: ${isDrop ? 'Active (30s checks)' : 'Inactive'}`);
-            return isDrop;
-        };
-        window.QueueHunter.getDynamicFreq = function(suspectedQueue = false) {
-            const base = suspectedQueue ? baseCheckFreq : window.QueueHunter.isDropWindow() ? 30000 : baseCheckFreq;
-            const randomDelay = Math.random() * 10000 + 5000;
-            const next = base + randomDelay;
-            window.QueueHunter.updateUI(`Next check in ${(next / 1000).toFixed(1)} seconds`);
-            return next;
-        };
-        window.QueueHunter.updateStatusBanner = function(text, colorClass) {
-            const banner = document.getElementById('statusBanner');
-            banner.textContent = text;
-            banner.className = 'status-banner ' + colorClass;
-        };
-        window.QueueHunter.updateUI = function(logMessage) {
-            document.getElementById('lastCheck').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            document.getElementById('consec').textContent = consecFails;
-            logEntries.unshift(`[${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}] ${logMessage}`);
-            if (logEntries.length > 15) logEntries.pop();
-            document.getElementById('details').innerHTML = logEntries.join('<br>');
-            document.getElementById('details').scrollTop = 0;
-            const bannerText = document.getElementById('statusBanner').textContent;
-            const statusPokedex = document.getElementById('status-pokedex');
-            if (/queue detected|queue soon or active|possible queue|captcha detected/i.test(bannerText)) {
-                statusPokedex.classList.add('alert-zap');
-            } else {
-                statusPokedex.classList.remove('alert-zap');
-            }
-            window.QueueHunter.updateRuntime();
-        };
-        window.QueueHunter.updateRuntime = function() {
-            const runtime = document.getElementById('runtime');
-            if (startTime) {
-                runtime.textContent = `${Math.floor((Date.now() - startTime) / 60000)}m ${Math.floor(((Date.now() - startTime) % 60000) / 1000)}s`;
-            }
-        };
-        setInterval(window.QueueHunter.updateRuntime, 1000);
-        window.QueueHunter.toggleAlarm = function() {
-            alarmActive = !alarmActive;
-            window.QueueHunter.stopAlert();
-            document.getElementById('alarmBtn').textContent = alarmActive ? 'Deactivate Alarm' : 'Activate Alarm';
-            window.QueueHunter.updateUI(`Alarm ${alarmActive ? 'activated' : 'deactivated'}`);
-        };
-        window.QueueHunter.testAlarm = function() {
-            try {
-                const audio = document.getElementById('alertTone');
-                audio.play().then(() => {
-                    if (navigator.vibrate) navigator.vibrate([300, 200, 300]);
-                    window.QueueHunter.updateUI('Testing alert tone and vibration');
-                    setTimeout(() => {
-                        audio.pause();
-                        audio.currentTime = 0;
-                        navigator.vibrate(0);
-                        window.QueueHunter.updateUI('Alert test completed');
-                    }, 5000);
-                }).catch(e => {
-                    window.QueueHunter.updateUI(`Alert tone error: ${e.message}`);
-                });
-            } catch (e) {
-                window.QueueHunter.updateUI(`Test alarm error: ${e.message}`);
-            }
-        };
-        window.QueueHunter.playAlert = function() {
-            if (alarmActive && !alertAudio) {
-                try {
-                    alertAudio = document.getElementById('alertTone');
-                    alertAudio.play().then(() => {
-                        window.QueueHunter.updateUI('Playing alert tone');
-                    }).catch(e => {
-                        window.QueueHunter.updateUI(`Alert tone error: ${e.message}`);
-                    });
-                    if (navigator.vibrate) {
-                        vibrateInterval = setInterval(() => navigator.vibrate([300, 200, 300]), 1000);
-                        window.QueueHunter.updateUI('Started vibration');
-                    }
-                } catch (e) {
-                    window.QueueHunter.updateUI(`Alert sound error: ${e.message}`);
-                }
-            }
-        };
-        window.QueueHunter.stopAlert = function() {
-            if (alertAudio) {
-                alertAudio.pause();
-                alertAudio.currentTime = 0;
-                alertAudio = null;
-                window.QueueHunter.updateUI('Stopped alert tone');
-            }
-            if (vibrateInterval) {
-                clearInterval(vibrateInterval);
-                vibrateInterval = null;
-                navigator.vibrate(0);
-                window.QueueHunter.updateUI('Stopped vibration');
-            }
-        };
-        window.QueueHunter.sendDiscord = async function(title, desc, color = 0xFFD700) {
-            if (!window.QueueHunter.notificationSettings.discord) {
-                window.QueueHunter.updateUI('Discord notification skipped: Disabled');
-                return;
-            }
-            const webhookUrl = document.getElementById('discordWebhook').value;
-            const webhookCode = document.getElementById('webhookCode').value;
-            if (!webhookUrl || !window.QueueHunter.isWebhookSubmitted || webhookCode !== '9918') {
-                window.QueueHunter.updateUI('Discord notification skipped: Invalid webhook or code');
-                return;
-            }
-            try {
-                await fetch(webhookUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ embeds: [{ title, description: desc, color, footer: { text: 'Queue Hunter Pro' } }] })
-                });
-                window.QueueHunter.updateUI(`Sent Discord: ${title}`);
-            } catch (e) {
-                window.QueueHunter.updateUI(`Discord error: ${e.message}`);
-            }
-        };
-        window.QueueHunter.addEmail = function() {
-            const emailInput = document.getElementById('emailInput');
-            const email = emailInput.value.trim();
-            if (email && !window.QueueHunter.emails.includes(email) && /\S+@\S+\.\S+/.test(email)) {
-                window.QueueHunter.emails.push(email);
-                window.QueueHunter.renderEmailList();
-                emailInput.value = '';
-                document.getElementById('addEmailBtn').disabled = true;
-                document.getElementById('testEmailBtn').disabled = false;
-                window.QueueHunter.updateUI(`Added email: ${email}`);
-            } else {
-                window.QueueHunter.updateUI('Invalid or duplicate email');
-            }
-        };
-        window.QueueHunter.removeEmail = function(email) {
-            window.QueueHunter.emails = window.QueueHunter.emails.filter(e => e !== email);
-            window.QueueHunter.renderEmailList();
-            document.getElementById('testEmailBtn').disabled = window.QueueHunter.emails.length === 0;
-            window.QueueHunter.updateUI(`Removed email: ${email}`);
-        };
-        window.QueueHunter.renderEmailList = function() {
-            const emailList = document.getElementById('emailList');
-            emailList.innerHTML = '';
-            window.QueueHunter.emails.forEach(email => {
-                const li = document.createElement('li');
-                li.textContent = email;
-                const removeBtn = document.createElement('button');
-                removeBtn.textContent = 'Remove';
-                removeBtn.onclick = () => window.QueueHunter.removeEmail(email);
-                li.appendChild(removeBtn);
-                emailList.appendChild(li);
-            });
-        };
-        window.QueueHunter.sendEmail = async function(status, details) {
-            if (!window.QueueHunter.notificationSettings.email || window.QueueHunter.emails.length === 0) {
-                window.QueueHunter.updateUI('Email notification skipped: Disabled or no emails');
-                return;
-            }
-            const fancyDetails = `?? ${details}\n\n**Powered by Queue Hunter Pro**`;
-            const timestamp = new Date().toLocaleString();
-            let successCount = 0;
-            for (const email of window.QueueHunter.emails) {
-                try {
-                    await emailjs.send(window.QueueHunter.emailServiceId, window.QueueHunter.emailTemplateId, {
-                        status,
-                        details: fancyDetails,
-                        timestamp,
-                        to_email: email
-                    });
-                    successCount++;
-                    window.QueueHunter.updateUI(`Sent email to ${email}`);
-                } catch (e) {
-                    window.QueueHunter.updateUI(`Email error for ${email}: ${e.message}`);
-                }
-            }
-            window.QueueHunter.updateUI(`Email result: ${successCount}/${window.QueueHunter.emails.length} sent`);
-        };
-        window.QueueHunter.testEmail = async function() {
-            if (!window.QueueHunter.notificationSettings.email) {
-                window.QueueHunter.updateUI('Test email skipped: Disabled');
-                return;
-            }
-            const testBtn = document.getElementById('testEmailBtn');
-            testBtn.textContent = 'Test Sent!';
-            setTimeout(() => testBtn.textContent = 'Test Email', 2000);
-            const details = 'Email notifications are online! Ready to hunt queues!';
-            const timestamp = new Date().toLocaleString();
-            let successCount = 0;
-            for (const email of window.QueueHunter.emails) {
-                try {
-                    await emailjs.send(window.QueueHunter.emailServiceId, window.QueueHunter.emailTemplateId, {
-                        status: 'Test Alert',
-                        details: `?? ${details}\n\n**Powered by Queue Hunter Pro**`,
-                        timestamp,
-                        to_email: email
-                    });
-                    successCount++;
-                    window.QueueHunter.updateUI(`Test email sent to ${email}`);
-                } catch (e) {
-                    window.QueueHunter.updateUI(`Test email error for ${email}: ${e.message}`);
-                }
-            }
-            window.QueueHunter.updateUI(`Test email result: ${successCount}/${window.QueueHunter.emails.length} sent`);
-        };
-        window.QueueHunter.getHealthyProxy = async function(url) {
-            const shuffledProxies = proxies.sort(() => Math.random() - 0.5);
-            for (let p of shuffledProxies.filter(pr => !blacklisted.has(pr))) {
-                window.QueueHunter.updateUI(`Trying proxy: ${p}`);
-                try {
-                    const ctrl = new AbortController();
-                    setTimeout(() => ctrl.abort(), 15000);
-                    const res = await fetch(p + encodeURIComponent(url), {
-                        signal: ctrl.signal,
-                        headers: window.QueueHunter.getRandomHeaders()
-                    });
-                    const text = p.includes('allorigins') ? (await res.json()).contents : await res.text();
-                    if (res.ok && text.length > 500) {
-                        window.QueueHunter.updateUI(`Proxy ${p} worked`);
-                        return p;
-                    }
-                } catch (e) {
-                    blacklisted.add(p);
-                    setTimeout(() => blacklisted.delete(p), 300000);
-                    window.QueueHunter.updateUI(`Proxy ${p} failed: ${e.message}`);
-                }
-            }
-            window.QueueHunter.updateUI('All proxies failed; skipping check');
-            return null;
-        };
-        window.QueueHunter.extractQueueLength = function(text) {
-            const patterns = [
-                /(\d+)\s*users?\s*ahead/i,
-                /queue\s*position\s*[:=]?\s*(\d+)/i,
-                /(\d+)\s*in\s*queue/i
-            ];
-            for (const pattern of patterns) {
-                const match = text.match(pattern);
-                if (match) {
-                    window.QueueHunter.updateUI(`Queue length: ${match[1]}`);
-                    return match[1];
-                }
-            }
-            return null;
-        };
-        window.QueueHunter.checkShopAccess = async function(isConsecutiveCheck = false) {
-            const urlInput = document.getElementById('urlList').value || '';
-            const urls = urlInput ? urlInput.split(',').map(u => u.trim()) : [
-                'https://www.pokemoncenter.com/',
-                'https://www.pokemoncenter.com/category/trading-card-game'
-            ];
-            let response = null;
-            let proxyUsed = '';
-            let urlUsed = '';
-            for (const targetUrl of urls) {
-                const proxy = await window.QueueHunter.getHealthyProxy(targetUrl);
-                if (!proxy) continue;
-                try {
-                    response = await fetch(proxy + encodeURIComponent(targetUrl), {
-                        headers: window.QueueHunter.getRandomHeaders()
-                    });
-                    proxyUsed = proxy;
-                    urlUsed = targetUrl;
-                    if (response.ok) break;
-                } catch (e) {
-                    window.QueueHunter.updateUI(`Fetch error for ${targetUrl}: ${e.message}`);
-                }
-            }
-            if (!response || !response.ok) {
-                return { status: 'Proxy error', details: 'Failed to fetch page', isFailure: true, url: urlUsed };
-            }
-            let text = proxyUsed.includes('allorigins') ? (await response.json()).contents : await response.text();
-            const finalUrl = decodeURIComponent(response.url.replace(proxyUsed, ''));
-            const isQueue = /queue-it\.net|waiting room|queue\s*position/i.test(text) || /queue-it\.net/i.test(finalUrl);
-            const isCaptcha = /hcaptcha|captcha|verify you are not a bot/i.test(text) && !/add to cart|shop now/i.test(text);
-            if (isCaptcha) {
-                const details = `CAPTCHA detected at ${finalUrl}`;
-                if (!isConsecutiveCheck && document.getElementById('autoOpen').checked) {
-                    window.open('https://www.pokemoncenter.com/', '_blank');
-                }
-                return { status: 'CAPTCHA Detected', details, isFailure: true, url: finalUrl };
-            } else if (isQueue) {
-                const queueLength = window.QueueHunter.extractQueueLength(text);
-                const details = `Queue detected at ${finalUrl}. Length: ${queueLength || 'unknown'}`;
-                if (!isConsecutiveCheck && document.getElementById('autoOpen').checked) {
-                    window.open('https://www.pokemoncenter.com/', '_blank');
-                }
-                return { status: 'Queue Detected', details, isFailure: true, url: finalUrl, queueLength };
-            } else if (/pokemoncenter\.com(\/|$|\/category\/)/i.test(finalUrl)) {
-                const hasShopContent = /add to cart|shop|products/i.test(text);
-                if (hasShopContent) {
-                    return { status: 'Shop Accessible', details: `Reached shop at ${finalUrl}`, isFailure: false, url: finalUrl };
-                } else {
-                    return { status: 'Queue Soon or Active', details: `Reached ${finalUrl}, but no shop content`, isFailure: true, url: finalUrl };
-                }
-            } else {
-                return { status: 'Possible Queue', details: `Unexpected page at ${finalUrl}`, isFailure: true, url: finalUrl };
-            }
-        };
-        window.QueueHunter.performConsecutiveChecks = async function(currentFailureCount, maxFailures, status, details, url, queueLength = null) {
-            if (currentFailureCount >= maxFailures) {
-                document.getElementById('stockStatus').textContent = status;
-                const colorClass = status === 'Queue Detected' ? 'red' : status === 'Queue Soon or Active' ? 'orange' : status === 'CAPTCHA Detected' ? 'purple' : 'purple';
-                window.QueueHunter.updateStatusBanner(status, colorClass);
-                if (window.QueueHunter.notificationSettings[status.toLowerCase().replace(' ', '')] && !hasNotified) {
-                    window.QueueHunter.playAlert();
-                    window.QueueHunter.sendDiscord(`${status}`, details, status === 'Queue Detected' ? 0xFF0000 : status === 'Queue Soon or Active' ? 0xFFA500 : 0x9370DB);
-                    window.QueueHunter.sendEmail(status, details);
-                    if (pushEnabled && Notification.permission === "granted") {
-                        new Notification(status, { body: url });
-                    }
-                    hasNotified = true;
-                }
-                isCheckingConsecutiveFailures = false;
-                return true;
-            }
-            await new Promise(resolve => setTimeout(resolve, 5000));
-            const result = await window.QueueHunter.checkShopAccess(true);
-            if (!result.isFailure) {
-                document.getElementById('stockStatus').textContent = 'In Stock';
-                window.QueueHunter.updateStatusBanner('Shop Accessible', 'green');
-                consecFails = 0;
-                cleanChecks++;
-                if (cleanChecks >= 1 && hasNotified) {
-                    hasNotified = false;
-                    cleanChecks = 0;
-                }
-                window.QueueHunter.stopAlert();
-                isCheckingConsecutiveFailures = false;
-                return false;
-            }
-            return await window.QueueHunter.performConsecutiveChecks(currentFailureCount + 1, maxFailures, result.status, result.details, result.url, result.queueLength);
-        };
-        window.QueueHunter.checkSite = async function(isConsec = false) {
-            window.QueueHunter.updateStatusBanner('Checking...', 'yellow');
-            const result = await window.QueueHunter.checkShopAccess();
-            document.getElementById('lastCheck').textContent = new Date().toLocaleTimeString();
-            if (!result.isFailure) {
-                document.getElementById('stockStatus').textContent = 'In Stock';
-                window.QueueHunter.updateStatusBanner('Shop Accessible', 'green');
-                consecFails = 0;
-                cleanChecks++;
-                if (cleanChecks >= 1 && hasNotified) {
-                    hasNotified = false;
-                    cleanChecks = 0;
-                }
-                window.QueueHunter.stopAlert();
-                return { success: true, isFail: false, suspectedQueue: false };
-            } else {
-                consecFails++;
-                if (consecFails >= failThresh) {
-                    isCheckingConsecutiveFailures = true;
-                    const confirmed = await window.QueueHunter.performConsecutiveChecks(1, failThresh, result.status, result.details, result.url, result.queueLength);
-                    if (!confirmed) consecFails = 0;
-                    return { success: false, isFail: true, suspectedQueue: true };
-                } else {
-                    document.getElementById('stockStatus').textContent = result.status;
-                    const colorClass = result.status === 'Queue Detected' ? 'red' : result.status === 'Queue Soon or Active' ? 'orange' : result.status === 'CAPTCHA Detected' ? 'purple' : 'purple';
-                    window.QueueHunter.updateStatusBanner(result.status, colorClass);
-                    return { success: false, isFail: true, suspectedQueue: true };
-                }
-            }
-        };
-        window.QueueHunter.testNow = async function() {
-            window.QueueHunter.updateUI('Manual test triggered');
-            await window.QueueHunter.checkSite();
-        };
-        window.QueueHunter.startMonitoring = async function() {
-            const startBtn = document.getElementById('startBtn');
-            const stopBtn = document.getElementById('stopBtn');
-            startBtn.classList.add('hidden');
-            stopBtn.classList.remove('hidden');
-            startTime = Date.now();
-            hasNotified = false;
-            cleanChecks = 0;
-            consecFails = 0;
-            window.QueueHunter.updateUI('Hunt started');
-            function runCheck() {
-                if (isCheckingConsecutiveFailures) {
-                    intervalId = setTimeout(runCheck, 1000);
-                    return;
-                }
-                window.QueueHunter.checkSite(true).then(result => {
-                    const nextInterval = window.QueueHunter.getDynamicFreq(result.suspectedQueue);
-                    intervalId = setTimeout(runCheck, nextInterval);
-                }).catch(e => {
-                    window.QueueHunter.updateUI(`Check error: ${e.message}`);
-                    intervalId = setTimeout(runCheck, window.QueueHunter.getDynamicFreq(true));
-                });
-            }
-            runCheck();
-        };
-        window.QueueHunter.stopMonitoring = function() {
-            if (intervalId) {
-                clearTimeout(intervalId);
-                intervalId = null;
-            }
-            document.getElementById('startBtn').classList.remove('hidden');
-            document.getElementById('stopBtn').classList.add('hidden');
-            startTime = null;
-            consecFails = 0;
-            hasNotified = false;
-            cleanChecks = 0;
-            isCheckingConsecutiveFailures = false;
-            window.QueueHunter.stopAlert();
-            window.QueueHunter.updateStatusBanner('Stopped', 'gray');
-            window.QueueHunter.updateUI('Monitoring stopped');
-        };
-        window.QueueHunter.togglePush = async function() {
-            const pushBtn = document.getElementById('pushBtn');
-            if (pushEnabled) {
-                pushEnabled = false;
-                pushBtn.textContent = 'Enable Push Notifications';
-                window.QueueHunter.updateUI('Push notifications disabled');
-            } else {
-                if ("Notification" in window) {
-                    const permission = await Notification.requestPermission();
-                    if (permission === "granted") {
-                        pushEnabled = true;
-                        pushBtn.textContent = 'Disable Push Notifications';
-                        window.QueueHunter.updateUI('Push notifications enabled');
-                    } else {
-                        pushBtn.disabled = true;
-                        window.QueueHunter.updateUI('Push notifications denied');
-                    }
-                } else {
-                    pushBtn.disabled = true;
-                    window.QueueHunter.updateUI('Push notifications not supported');
-                }
-            }
-        };
-        window.QueueHunter.exportLog = function() {
-            const blob = new Blob([logEntries.join('\n')], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `queue_hunter_log_${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
-            a.click();
-            URL.revokeObjectURL(url);
-            window.QueueHunter.updateUI('Log exported');
-        };
-    </script>
-</body>
-</html>
+        addLog(`Chatot sang: ${title}`);
+    } catch (e) {
+        addLog(`Chatot error: ${e.message}`);
+    }
+}
 
+async function sendEmailNotification(status, details) {
+    if (!NOTIFICATION_SETTINGS.email || EMAILS.length === 0) {
+        addLog('Delibird is napping: No emails');
+        return;
+    }
+    const fancyDetails = `?? ${details}\n\n**Powered by Queue Hunter Pro**`;
+    const timestamp = new Date().toLocaleString();
+    let successCount = 0;
+    for (const email of EMAILS) {
+        try {
+            await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: EMAILJS_USER_ID,
+                    service_id: EMAILJS_SERVICE_ID,
+                    template_id: EMAILJS_TEMPLATE_ID,
+                    template_params: { status, details: fancyDetails, timestamp, to_email: email }
+                })
+            });
+            successCount++;
+            addLog(`Delibird delivered to ${email}`);
+        } catch (e) {
+            addLog(`Delibird error for ${email}: ${e.message}`);
+        }
+    }
+    addLog(`Delibird result: ${successCount}/${EMAILS.length} sent`);
+}
+
+async function solveCaptcha(sessionId, url) {
+    try {
+        const response = await fetch('https://api.capsolver.com/createTask', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                clientKey: CAPSOLVER_KEY,
+                task: { type: 'HCaptchaTaskProxyLess', websiteURL: url, websiteKey: '00000000-0000-0000-0000-000000000000' }
+            })
+        });
+        const { taskId } = await response.json();
+        let solution;
+        while (!solution) {
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            const status = await fetch('https://api.capsolver.com/getTaskResult', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ clientKey: CAPSOLVER_KEY, taskId })
+            });
+            const result = await status.json();
+            if (result.status === 'ready') solution = result.solution.gRecaptchaResponse;
+        }
+        await fetch(`https://chrome.browserless.io/webdriver?token=${BROWSERLESS_TOKEN}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId,
+                cmd: 'Runtime.evaluate',
+                params: { expression: `document.querySelector('[data-hcaptcha-response]').value = "${solution}"; document.querySelector('form').submit();` }
+            })
+        });
+        addLog('Machamp punched CAPTCHA!');
+        return true;
+    } catch (e) {
+        addLog(`Machamp missed: ${e.message}`);
+        return false;
+    }
+}
+
+async function handleStatus(request) {
+    const url = new URL(request.url);
+    const key = url.searchParams.get('key');
+    if (key !== SECRET_KEY) {
+        return new Response(JSON.stringify({ error: 'Wrong secret code!' }), {
+            status: 403,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+    }
+    return new Response(JSON.stringify({
+        running: true,
+        lastCheck: lastCheck || new Date().toISOString(),
+        status: 'Pikachu is battling!'
+    }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+}
+
+async function handleLogs(request) {
+    const url = new URL(request.url);
+    const key = url.searchParams.get('key');
+    if (key !== SECRET_KEY) {
+        return new Response(JSON.stringify({ error: 'Wrong secret code!' }), {
+            status: 403,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+    }
+    return new Response(JSON.stringify({ logs: workerLogs }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+}
+
+addEventListener('fetch', event => {
+    const request = event.request;
+    const url = new URL(request.url);
+    if (request.method === 'OPTIONS') {
+        event.respondWith(handleOptions());
+        return;
+    }
+    if (url.pathname === '/status') {
+        event.respondWith(handleStatus(request));
+    } else if (url.pathname === '/logs') {
+        event.respondWith(handleLogs(request));
+    } else {
+        event.respondWith(new Response('Queue Hunter is running! Pikachu says hi!', {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'text/plain' }
+        }));
+    }
+});
+
+addEventListener('scheduled', event => {
+    event.waitUntil(checkSite());
+});
+
+async function checkSite() {
+    try {
+        lastCheck = new Date().toISOString();
+        addLog('Pikachu is checking the Pokémon Center!');
+        const browserlessUrl = `wss://chrome.browserless.io?token=${BROWSERLESS_TOKEN}`;
+        const response = await fetch('https://chrome.browserless.io/webdriver', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                cmd: 'session.create',
+                params: {
+                    capabilities: {
+                        browserName: 'chrome',
+                        'b:puppeteer': { headless: true }
+                    }
+                }
+            })
+        });
+        const { sessionId } = await response.json();
+        const ws = new WebSocket(browserlessUrl);
+        await new Promise(resolve => ws.on('open', resolve));
+
+        for (const url of CHECK_URLS) {
+            await ws.send(JSON.stringify({
+                id: 1,
+                method: 'Page.navigate',
+                params: { url }
+            }));
+            await new Promise(resolve => setTimeout(resolve, 10000));
+            const contentResponse = await fetch(`https://chrome.browserless.io/content?token=${BROWSERLESS_TOKEN}&sessionId=${sessionId}`);
+            const text = await contentResponse.text();
+            let status, details;
+            if (/hcaptcha|captcha|verify you are not a bot/i.test(text) && !/add to cart|shop now/i.test(text)) {
+                status = 'CAPTCHA Detected';
+                details = `CAPTCHA found at ${url}! Machamp is punching...`;
+                addLog(`${status}: ${details}`);
+                if (NOTIFICATION_SETTINGS.captchaDetected) {
+                    await sendDiscordNotification(status, details, 0x9370DB);
+                    await sendEmailNotification(status, details);
+                }
+                const solved = await solveCaptcha(sessionId, url);
+                if (solved) {
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+                    const newContent = await fetch(`https://chrome.browserless.io/content?token=${BROWSERLESS_TOKEN}&sessionId=${sessionId}`);
+                    const newText = await newContent.text();
+                    if (!/hcaptcha|captcha/i.test(newText)) {
+                        status = 'CAPTCHA Solved';
+                        details = `Machamp won at ${url}! Checking again...`;
+                        addLog(`${status}: ${details}`);
+                        await sendDiscordNotification(status, details, 0x00FF00);
+                        await sendEmailNotification(status, details);
+                        if (/queue-it|waiting room|queue\s*position/i.test(newText)) {
+                            const queueLength = newText.match(/(\d+)\s*users?\s*ahead|queue\s*position\s*[:=]?\s*(\d+)|(\d+)\s*in\s*queue/i)?.[1] || 'unknown';
+                            status = 'Queue Detected';
+                            details = `Queue at ${url}! Length: ${queueLength}.`;
+                            if (NOTIFICATION_SETTINGS.queueDetected) {
+                                await sendDiscordNotification(status, details, 0xFF0000);
+                                await sendEmailNotification(status, details);
+                            }
+                        } else if (/pokemoncenter\.com(\/|$|\/category\/)/i.test(url)) {
+                            if (/add to cart|shop|products/i.test(newText)) {
+                                status = 'Shop Accessible';
+                                details = `Reached shop at ${url}!`;
+                            } else {
+                                status = 'Queue Soon or Active';
+                                details = `At ${url}, but no shop yet.`;
+                                if (NOTIFICATION_SETTINGS.queueSoon) {
+                                    await sendDiscordNotification(status, details, 0xFFA500);
+                                    await sendEmailNotification(status, details);
+                                }
+                            }
+                            addLog(`${status}: ${details}`);
+                        } else {
+                            status = 'Possible Queue';
+                            details = `Weird page at ${url}.`;
+                            if (NOTIFICATION_SETTINGS.possibleBotBlock) {
+                                await sendDiscordNotification(status, details, 0x9370DB);
+                                await sendEmailNotification(status, details);
+                            }
+                            addLog(`${status}: ${details}`);
+                        }
+                    }
+                } else {
+                    status = 'CAPTCHA Failed';
+                    details = `Machamp missed at ${url}! Manual help needed.`;
+                    addLog(`${status}: ${details}`);
+                    await sendDiscordNotification(status, details, 0x9370DB);
+                    await sendEmailNotification(status, details);
+                }
+            } else if (/queue-it|waiting room|queue\s*position/i.test(text)) {
+                const queueLength = text.match(/(\d+)\s*users?\s*ahead|queue\s*position\s*[:=]?\s*(\d+)|(\d+)\s*in\s*queue/i)?.[1] || 'unknown';
+                status = 'Queue Detected';
+                details = `Queue at ${url}! Length: ${queueLength}.`;
+                addLog(`${status}: ${details}`);
+                if (NOTIFICATION_SETTINGS.queueDetected) {
+                    await sendDiscordNotification(status, details, 0xFF0000);
+                    await sendEmailNotification(status, details);
+                }
+            } else if (/pokemoncenter\.com(\/|$|\/category\/)/i.test(url)) {
+                if (/add to cart|shop|products/i.test(text)) {
+                    status = 'Shop Accessible';
+                    details = `Reached shop at ${url}!`;
+                } else {
+                    status = 'Queue Soon or Active';
+                    details = `At ${url}, but no shop yet.`;
+                    if (NOTIFICATION_SETTINGS.queueSoon) {
+                        await sendDiscordNotification(status, details, 0xFFA500);
+                        await sendEmailNotification(status, details);
+                    }
+                }
+                addLog(`${status}: ${details}`);
+            } else {
+                status = 'Possible Queue';
+                details = `Weird page at ${url}.`;
+                if (NOTIFICATION_SETTINGS.possibleBotBlock) {
+                    await sendDiscordNotification(status, details, 0x9370DB);
+                    await sendEmailNotification(status, details);
+                }
+                addLog(`${status}: ${details}`);
+            }
+        }
+        await fetch(`https://chrome.browserless.io/session/${sessionId}?token=${BROWSERLESS_TOKEN}`, { method: 'DELETE' });
+        ws.close();
+    } catch (error) {
+        addLog(`Pikachu fainted: ${error.message}`);
+        await sendDiscordNotification('Check Error', `Pikachu failed: ${error.message}`, 0xFF0000);
+        await sendEmailNotification('Check Error', `Pikachu failed: ${error.message}`);
+    }
+}
