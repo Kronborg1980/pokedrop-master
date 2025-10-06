@@ -102,7 +102,7 @@
       text-align: center;
     }
     .pokemon-header-sprite {
-      width: 72px; /* 20% larger than original 60px */
+      width: 72px;
       height: auto;
       filter: drop-shadow(0 0 10px #00ffff);
       z-index: 5;
@@ -202,62 +202,46 @@
       flex-shrink: 0;
       width: auto;
       padding: 0.5rem 1rem;
+      background: linear-gradient(45deg, #10b981, #059669);
     }
-    .submitted-emails {
+    .email-input-group button:hover {
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+    }
+    .submitted-emails-list {
       margin-top: 0.5rem;
-      padding: 1rem;
-      background: rgba(0, 255, 255, 0.15); /* Slightly brighter background for visibility */
-      border: 2px solid #00ffff; /* Stronger border */
-      border-radius: 8px;
-      box-shadow: 0 0 15px rgba(0, 255, 255, 0.4); /* Stronger glow */
-      min-height: 100px; /* Ensure container is visible even when empty */
     }
-    .submitted-emails-header {
-      font-size: 1rem; /* Slightly larger for prominence */
-      font-weight: 600;
-      color: #00ffff;
-      text-shadow: 0 0 5px #00ffff;
-      margin-bottom: 0.75rem;
-      text-align: left;
-    }
-    .submitted-emails ul {
+    .submitted-emails-list ul {
       list-style: none;
       padding: 0;
       margin: 0;
     }
-    .submitted-emails li {
+    .submitted-emails-list li {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 0.75rem 1rem; /* Increased padding */
+      gap: 0.5rem;
       margin-bottom: 0.5rem;
-      background: rgba(26, 26, 46, 0.8); /* Slightly more opaque background */
-      border-radius: 6px;
-      box-shadow: 0 0 8px rgba(0, 255, 255, 0.3); /* Enhanced glow */
-      font-size: 0.95rem; /* Larger font for better readability */
-      color: #ffffff;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      animation: fadeIn 0.3s ease-in;
-      word-break: break-word; /* Allow long emails to wrap */
-    }
-    .submitted-emails li:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 0 12px rgba(0, 255, 255, 0.6);
-    }
-    .submitted-emails li span {
-      flex: 1;
-      color: #e0ffff; /* Lighter color for better contrast */
-      margin-right: 0.5rem; /* Space between email and button */
-    }
-    .submitted-emails button {
-      padding: 0.25rem 0.75rem;
-      font-size: 0.75rem;
+      padding: 0.5rem;
+      background: rgba(107, 114, 128, 0.5); /* Grayed-out background */
+      border: 1px solid #00ffff;
       border-radius: 4px;
-      background: linear-gradient(45deg, #ef4444, #dc2626);
-      box-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
-      transition: all 0.3s ease;
+      box-shadow: 0 0 5px rgba(0, 255, 255, 0.2);
+      animation: fadeIn 0.2s ease-in;
+      word-break: break-word;
     }
-    .submitted-emails button:hover {
+    .submitted-emails-list li span {
+      flex: 1;
+      font-size: 0.875rem;
+      color: #b0b0b0; /* Grayed-out text */
+    }
+    .submitted-emails-list li button {
+      flex-shrink: 0;
+      width: auto;
+      padding: 0.5rem 1rem; /* Matches Submit Email button */
+      font-size: 0.875rem;
+      background: linear-gradient(45deg, #ef4444, #dc2626); /* Red neon */
+      box-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
+    }
+    .submitted-emails-list li button:hover {
       box-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
       transform: translateY(-1px);
     }
@@ -267,15 +251,16 @@
       text-align: center;
       padding: 0.5rem;
       background: rgba(0, 255, 255, 0.1);
+      border: 1px solid #00ffff;
       border-radius: 4px;
       box-shadow: 0 0 5px rgba(0, 255, 255, 0.2);
-      display: none; /* Hidden by default */
+      display: none;
     }
     .no-emails-message.show {
-      display: block; /* Show when no emails */
+      display: block;
     }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
+      from { opacity: 0; transform: translateY(5px); }
       to { opacity: 1; transform: translateY(0); }
     }
     .checkbox-group {
@@ -385,8 +370,7 @@
           <button type="button" class="submit-email-button bg-green-500 text-white">Submit Email</button>
         </div>
       </div>
-      <div class="submitted-emails">
-        <div class="submitted-emails-header">Submitted Emails</div>
+      <div class="submitted-emails-list">
         <ul id="submittedEmailsList"></ul>
         <div id="noEmailsMessage" class="no-emails-message show">No emails submitted</div>
       </div>
