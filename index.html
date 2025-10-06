@@ -46,29 +46,14 @@
     .hover\:bg-green-600:hover { background-color: #059669; }
     .hover\:bg-purple-600:hover { background-color: #7c3aed; }
     .hover\:bg-gray-600:hover { background-color: #4b5563; }
-    /* Custom Pokemon Theme Styles - ULTRA CRAZY REDESIGN! */
+    /* Custom Pokemon Theme Styles - Subdued Redesign */
     body {
       font-family: 'Nunito', sans-serif;
-      background: linear-gradient(45deg, #87CEEB, #FF69B4, #90EE90, #FFD700, #A0D2EB, #FF1493, #00FF7F, #FFA500, #FF4500, #9370DB, #00BFFF, #FF6347, #32CD32, #DDA0DD, #98FB98, #FFB6C1, #DDA0DD, #B0E0E6);
-      background-size: 800% 800%;
-      animation: ultraRainbowShift 4s ease infinite;
+      background: linear-gradient(to bottom, #87CEEB, #A0D2EB, #90EE90, #ADD8E6);
       position: relative;
       overflow-y: auto;
       scrollbar-width: thin;
       scrollbar-color: #888 #f1f1f1;
-    }
-    @keyframes ultraRainbowShift {
-      0% { background-position: 0% 50%; }
-      10% { background-position: 100% 50%; }
-      20% { background-position: 0% 100%; }
-      30% { background-position: 100% 0%; }
-      40% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      60% { background-position: 0% 100%; }
-      70% { background-position: 100% 0%; }
-      80% { background-position: 0% 50%; }
-      90% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
     }
     body::-webkit-scrollbar {
       width: 10px;
@@ -77,11 +62,11 @@
       background: #f1f1f1;
     }
     body::-webkit-scrollbar-thumb {
-      background: linear-gradient(#FF6B6B, #4ECDC4, #45B7D1, #96CEB4, #FECA57, #FF9FF3, #54A0FF);
+      background: #888;
       border-radius: 5px;
     }
     body::-webkit-scrollbar-thumb:hover {
-      background: linear-gradient(#FF8E8E, #5EDDD1, #5AC8E5, #A8D5BA, #FEDC56, #FFA6F0, #6AB0FF);
+      background: #555;
     }
     .pokemon-sprite {
       position: absolute;
@@ -91,44 +76,38 @@
       filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
       opacity: 0.8;
     }
-    /* ULTRA EMPHASIZE Magikarp and Cubone - STARS OF THE SHOW! */
+    /* Emphasize Magikarp and Cubone */
     .magikarp {
       bottom: 5px;
       left: 5px;
       width: 200px !important;
       z-index: 30 !important;
-      animation: legendaryBob 1s infinite ease-in-out, megaSparkle 1.5s infinite, epicPulse 3s infinite;
-      filter: drop-shadow(0 0 30px #87CEEB) hue-rotate(0deg) !important;
+      animation: bob 2s infinite ease-in-out, sparkle 3s infinite;
+      filter: drop-shadow(0 0 20px #87CEEB) !important;
     }
     .cubone {
       bottom: 5px;
       right: 5px;
       width: 200px !important;
       z-index: 30 !important;
-      animation: legendaryHop 1.5s infinite ease-in-out, megaSparkle 2s infinite reverse, epicPulse 3.5s infinite reverse;
-      filter: drop-shadow(0 0 30px #8B4513) hue-rotate(20deg) !important;
+      animation: hop 3s infinite ease-in-out, sparkle 4s infinite reverse;
+      filter: drop-shadow(0 0 20px #8B4513) !important;
     }
-    @keyframes legendaryBob {
-      0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
-      25% { transform: translateY(-15px) scale(1.15) rotate(-5deg); }
-      50% { transform: translateY(-30px) scale(1.3) rotate(5deg); }
-      75% { transform: translateY(-15px) scale(1.15) rotate(-5deg); }
+    @keyframes bob {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-20px) scale(1.1); }
     }
-    @keyframes legendaryHop {
-      0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
-      25% { transform: translateY(-20px) scale(1.2) rotate(15deg); }
-      50% { transform: translateY(-40px) scale(1.4) rotate(-15deg); }
-      75% { transform: translateY(-20px) scale(1.2) rotate(15deg); }
+    @keyframes hop {
+      0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+      25% { transform: translateY(-25px) rotate(10deg) scale(1.05); }
+      50% { transform: translateY(0) rotate(0deg) scale(1); }
+      75% { transform: translateY(-25px) rotate(-10deg) scale(1.05); }
     }
-    @keyframes megaSparkle {
-      0%, 100% { opacity: 1; filter: brightness(1); }
-      50% { opacity: 0.8; filter: brightness(1.5) saturate(2); }
+    @keyframes sparkle {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; transform: scale(1.1); }
     }
-    @keyframes epicPulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
-    /* Other Pokémon - Less prominent */
+    /* Other Pokémon - Subdued */
     .gardevoir {
       top: 10px;
       left: 10px;
@@ -187,42 +166,39 @@
     }
     .bg-white {
       background-color: rgba(255, 255, 255, 0.98);
-      border-radius: 25px;
+      border-radius: 20px;
       padding: 1.5rem;
-      box-shadow: 0 20px 35px rgba(0, 0, 0, 0.25), inset 0 0 25px rgba(255, 255, 255, 0.6);
+      box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2), inset 0 0 20px rgba(255, 255, 255, 0.5);
       position: relative;
       z-index: 20;
-      border: 4px solid #FFD700;
-      animation: ultraMegaGlow 1s infinite alternate;
+      border: 3px solid #FFD700;
+      animation: subtleGlow 3s infinite alternate;
     }
-    @keyframes ultraMegaGlow {
-      from { box-shadow: 0 20px 35px rgba(0, 0, 0, 0.25), inset 0 0 25px rgba(255, 255, 255, 0.6), 0 0 40px #FFD700, 0 0 50px #FF69B4, 0 0 60px #00FF7F; }
-      to { box-shadow: 0 20px 35px rgba(0, 0, 0, 0.25), inset 0 0 25px rgba(255, 255, 255, 0.6), 0 0 50px #FF1493, 0 0 60px #87CEEB, 0 0 70px #90EE90; }
+    @keyframes subtleGlow {
+      from { box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2), inset 0 0 20px rgba(255, 255, 255, 0.5), 0 0 20px #FFD700; }
+      to { box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2), inset 0 0 20px rgba(255, 255, 255, 0.5), 0 0 30px #87CEEB; }
     }
     .rounded, .rounded-lg {
       border-radius: 15px !important;
     }
     .pokeball-decoration {
       position: absolute;
-      width: 60px;
-      height: 60px;
+      width: 50px;
+      height: 50px;
       background-size: contain;
       background-repeat: no-repeat;
       opacity: 0.6;
       z-index: 5;
-      animation: ultraCrazyFloatPokeball 4s infinite ease-in-out;
+      animation: floatPokeball 6s infinite ease-in-out;
     }
-    @keyframes ultraCrazyFloatPokeball {
-      0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
-      20% { transform: translateY(-20px) rotate(90deg) scale(1.3); }
-      40% { transform: translateY(0) rotate(180deg) scale(0.7); }
-      60% { transform: translateY(-20px) rotate(270deg) scale(1.3); }
-      80% { transform: translateY(10px) rotate(360deg) scale(1.1); }
+    @keyframes floatPokeball {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(180deg); }
     }
-    .pokeball-top-left { top: -25px; left: -25px; transform: rotate(-20deg); }
-    .pokeball-top-right { top: -25px; right: -25px; transform: rotate(15deg); }
-    .pokeball-bottom-left { bottom: -25px; left: -25px; transform: rotate(40deg); }
-    .pokeball-bottom-right { bottom: -25px; right: -25px; transform: rotate(-30deg); }
+    .pokeball-top-left { top: -20px; left: -20px; transform: rotate(-20deg); }
+    .pokeball-top-right { top: -20px; right: -20px; transform: rotate(15deg); }
+    .pokeball-bottom-left { bottom: -20px; left: -20px; transform: rotate(40deg); }
+    .pokeball-bottom-right { bottom: -20px; right: -20px; transform: rotate(-30deg); }
     input[type="email"] {
       border: 2px solid #a0d2eb;
       padding: 0.6rem 1rem;
@@ -231,7 +207,7 @@
     input[type="email"]:focus {
       border-color: #3b82f6;
       outline: none;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2), 0 0 15px #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2), 0 0 10px #3b82f6;
     }
     input[type="email"][readonly] {
       background-color: #f3f4f6;
@@ -244,6 +220,9 @@
       box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
       position: relative;
       overflow: hidden;
+      padding: 0.75rem 1rem;
+      white-space: normal;
+      min-height: 2.5rem;
     }
     button::before {
       content: '';
@@ -259,8 +238,8 @@
       left: 100%;
     }
     button:hover {
-      transform: translateY(-3px) scale(1.03);
-      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.7);
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
     }
     .text-center {
       text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
@@ -314,11 +293,22 @@
     .email-toggle-button.inactive:hover {
       background-color: #4b5563;
     }
+    .webhook-toggle-button.active {
+      background-color: #8b5cf6;
+    }
+    .webhook-toggle-button.active:hover {
+      background-color: #7c3aed;
+    }
+    .webhook-toggle-button.inactive {
+      background-color: #6b7280;
+    }
+    .webhook-toggle-button.inactive:hover {
+      background-color: #4b5563;
+    }
     .add-email-button {
       background-color: #22c55e;
       color: white;
       border: none;
-      padding: 0.75rem 1rem;
       border-radius: 0.25rem;
       cursor: pointer;
       font-weight: 600;
@@ -332,13 +322,11 @@
       background-color: #8b5cf6;
       color: white;
       border: none;
-      padding: 0.75rem 1rem;
       border-radius: 0.25rem;
       cursor: pointer;
       font-weight: 600;
       margin-top: 0.5rem;
       transition: all 0.2s, transform 0.2s;
-      w-full: 100%;
     }
     .add-webhook-button:hover {
       background-color: #7c3aed;
@@ -347,7 +335,6 @@
       background-color: #FFD700;
       color: #000;
       border: none;
-      padding: 0.75rem 1rem;
       border-radius: 0.25rem;
       cursor: pointer;
       font-weight: 600;
@@ -362,7 +349,7 @@
       -webkit-appearance: none;
       width: 100%;
       height: 8px;
-      background: linear-gradient(to right, #87CEEB, #FF69B4, #FFD700, #FF1493);
+      background: #a0d2eb;
       border-radius: 5px;
       outline: none;
       margin-top: 0.5rem;
@@ -373,18 +360,18 @@
       appearance: none;
       width: 20px;
       height: 20px;
-      background: #FFD700;
+      background: #3b82f6;
       border-radius: 50%;
-      border: 2px solid #FF1493;
+      border: 2px solid white;
       cursor: pointer;
       box-shadow: 0 0 5px rgba(0,0,0,0.2);
     }
     input[type="range"]::-moz-range-thumb {
       width: 20px;
       height: 20px;
-      background: #FFD700;
+      background: #3b82f6;
       border-radius: 50%;
-      border: 2px solid #FF1493;
+      border: 2px solid white;
       cursor: pointer;
       box-shadow: 0 0 5px rgba(0,0,0,0.2);
     }
@@ -482,7 +469,7 @@
     }
     @keyframes explode {
       0% { transform: scale(0); }
-      50% { transform: scale(1.3); }
+      50% { transform: scale(1.2); }
       100% { transform: scale(1); opacity: 0; }
     }
   </style>
@@ -587,7 +574,7 @@
       alert('Email functionality is unavailable. Please check your network connection and try again.');
     } else {
       emailjs.init({
-        publicKey: "LxaYn4E6okRV7RG0O"
+        publicKey: "8w7eu6mrg3lRl6ta3"
       });
     }
     const statusText = document.getElementById('statusText');
