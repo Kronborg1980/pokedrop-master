@@ -136,7 +136,7 @@
       color: #00ffff;
       margin-bottom: 0.5rem;
     }
-    input[type="email"], input[type="range"] {
+    input[type="email"] {
       width: 100%;
       padding: 0.75rem;
       border: 1px solid #00ffff;
@@ -151,6 +151,13 @@
       box-shadow: 0 0 10px #00ffff;
     }
     input[type="range"] {
+      width: 100%;
+      padding: 0; /* Changed */
+      border: 1px solid #00ffff; /* Copied from shared style */
+      border-radius: 4px; /* Copied from shared style */
+      box-shadow: 0 0 5px rgba(0, 255, 255, 0.3); /* Copied from shared style */
+      transition: box-shadow 0.3s ease; /* Copied from shared style */
+      color: #ffffff; /* Copied from shared style */
       height: 6px;
       background: rgba(0, 255, 255, 0.2);
     }
