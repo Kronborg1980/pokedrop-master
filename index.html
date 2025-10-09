@@ -145,7 +145,7 @@
       color: #ffffff;
       box-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
       transition: box-shadow 0.3s ease;
-      box-sizing: border-box; /* ADDED FOR CONSISTENCY */
+      box-sizing: border-box;
     }
     input[type="email"]:focus {
       outline: none;
@@ -153,7 +153,7 @@
     }
     input[type="range"] {
       width: 100%;
-      padding: 0;
+      padding: 0 10px; /* THIS IS THE FIX: Added horizontal padding */
       border: 1px solid #00ffff;
       border-radius: 4px;
       box-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
@@ -161,9 +161,10 @@
       color: #ffffff;
       height: 6px;
       background: rgba(0, 255, 255, 0.2);
-      box-sizing: border-box; /* THIS IS THE FIX */
+      box-sizing: border-box;
     }
     input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
       appearance: none;
       width: 20px;
       height: 20px;
