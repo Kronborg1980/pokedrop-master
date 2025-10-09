@@ -145,6 +145,7 @@
       color: #ffffff;
       box-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
       transition: box-shadow 0.3s ease;
+      box-sizing: border-box; /* ADDED FOR CONSISTENCY */
     }
     input[type="email"]:focus {
       outline: none;
@@ -152,14 +153,15 @@
     }
     input[type="range"] {
       width: 100%;
-      padding: 0; /* Changed */
-      border: 1px solid #00ffff; /* Copied from shared style */
-      border-radius: 4px; /* Copied from shared style */
-      box-shadow: 0 0 5px rgba(0, 255, 255, 0.3); /* Copied from shared style */
-      transition: box-shadow 0.3s ease; /* Copied from shared style */
-      color: #ffffff; /* Copied from shared style */
+      padding: 0;
+      border: 1px solid #00ffff;
+      border-radius: 4px;
+      box-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+      transition: box-shadow 0.3s ease;
+      color: #ffffff;
       height: 6px;
       background: rgba(0, 255, 255, 0.2);
+      box-sizing: border-box; /* THIS IS THE FIX */
     }
     input[type="range"]::-webkit-slider-thumb {
       appearance: none;
