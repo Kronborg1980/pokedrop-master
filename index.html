@@ -136,7 +136,7 @@
       color: #00ffff;
       margin-bottom: 0.5rem;
     }
-    input[type="email"] {
+    input[type="email"], input[type="text"] {
       width: 100%;
       padding: 0.75rem;
       border: 1px solid #00ffff;
@@ -147,7 +147,7 @@
       transition: box-shadow 0.3s ease;
       box-sizing: border-box;
     }
-    input[type="email"]:focus {
+    input[type="email"]:focus, input[type="text"]:focus {
       outline: none;
       box-shadow: 0 0 10px #00ffff;
     }
@@ -257,6 +257,14 @@
     .email-input-group button:hover {
       box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
     }
+    /* Specific style for Discord set button to match purple theme */
+    .email-input-group button.discord-set-btn {
+        background: linear-gradient(45deg, #8b5cf6, #7c3aed);
+    }
+    .email-input-group button.discord-set-btn:hover {
+        box-shadow: 0 0 10px rgba(139, 92, 246, 0.8);
+    }
+
     .submitted-emails-list {
       margin-top: 0.5rem;
     }
@@ -426,10 +434,14 @@
       </div>
       <div id="emailFeedback" class="status-feedback"></div>
     </div>
+    
     <div class="section">
       <label>Discord Alerts:</label>
-      <button id="addWebhookButton" class="add-webhook-button bg-purple-500 text-white">Add Discord Webhook</button>
-      <div id="webhookStatus" class="text-sm mt-1 hidden text-green-500">Webhook added! Ready for alerts.</div>
+      <div class="email-input-group" id="discordInputGroup">
+        <input type="text" id="discordWebhookInput" placeholder="Paste Discord Webhook URL here" class="email-input">
+        <button id="setWebhookButton" class="discord-set-btn bg-purple-500 text-white">Set Webhook</button>
+      </div>
+      <div id="webhookStatus" class="text-sm mt-1 hidden text-green-500">Webhook set! Ready for alerts.</div>
       <div id="webhookFeedback" class="status-feedback"></div>
     </div>
     <div class="section">
@@ -523,7 +535,12 @@
     const emailToggleButton = document.getElementById('emailToggleButton');
     const webhookToggleButton = document.getElementById('webhookToggleButton');
     const webhookStatus = document.getElementById('webhookStatus');
-    const addWebhookButton = document.getElementById('addWebhookButton');
+    
+    // NEW ELEMENTS FOR DISCORD INPUT
+    const discordInputGroup = document.getElementById('discordInputGroup');
+    const discordWebhookInput = document.getElementById('discordWebhookInput');
+    const setWebhookButton = document.getElementById('setWebhookButton');
+
     const beepSound = document.getElementById('beepSound');
     const runTime = document.getElementById('runTime');
     const emailInputsContainer = document.getElementById('emailInputsContainer');
@@ -569,18 +586,28 @@
       showFeedback(emailFeedback, `Email notifications ${emailNotificationsEnabled ? 'enabled' : 'disabled'}.`);
       log(`Email notifications ${emailNotificationsEnabled ? 'enabled' : 'disabled'}.`);
     });
-    addWebhookButton.addEventListener('click', () => {
-      discordWebhook = 'https://discord.com/api/webhooks/1418654823745716436/vuMKu1s095Cq3BfU06OF_Z_mwxG39zHppHJ3c4BX5X38WuJFWPGhIZdopWTEEXlophiN';
-      addWebhookButton.classList.add('hidden');
+
+    // MODIFIED EVENT LISTENER FOR DISCORD WEBHOOK
+    setWebhookButton.addEventListener('click', () => {
+      const inputUrl = discordWebhookInput.value.trim();
+      
+      if (!inputUrl) {
+        alert('Please paste a Discord Webhook URL first.');
+        return;
+      }
+
+      discordWebhook = inputUrl;
+      discordInputGroup.classList.add('hidden'); // Hide the input after setting
       webhookStatus.classList.remove('hidden');
       webhookToggleButton.classList.remove('hidden');
       discordNotificationsEnabled = true;
       webhookToggleButton.textContent = 'Deactivate Discord Alerts';
       webhookToggleButton.classList.remove('inactive');
       webhookToggleButton.classList.add('active');
-      showFeedback(webhookFeedback, 'Discord webhook added!');
-      log('Discord webhook added successfully! Alerts ready.');
+      showFeedback(webhookFeedback, 'Discord webhook set successfully!');
+      log('Discord webhook set manually! Alerts ready.');
     });
+
     webhookToggleButton.addEventListener('click', () => {
       discordNotificationsEnabled = !discordNotificationsEnabled;
       if (discordNotificationsEnabled) {
